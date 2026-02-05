@@ -21,4 +21,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "OzMade"
 include(":app")
- 
+include(":domain")
+include(":data")

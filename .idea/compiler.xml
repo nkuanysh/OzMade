@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <bytecodeTargetLevel target="1.8" />
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="OzMade.data.main" options="-proc:none" />
+      <module name="OzMade.data.test" options="-proc:none" />
+      <module name="OzMade.domain" options="-proc:none" />
+      <module name="OzMade.domain.main" options="-proc:none" />
+      <module name="OzMade.domain.test" options="-proc:none" />
+    </option>
+  </component>
+</project>
