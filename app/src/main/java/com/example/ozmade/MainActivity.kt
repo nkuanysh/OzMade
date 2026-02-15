@@ -5,7 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import com.example.ozmade.auth.AuthNavHost
+import androidx.navigation.compose.rememberNavController
+import com.example.ozmade.navigation.AppNavHost
 import com.example.ozmade.ui.theme.OzMadeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -16,7 +17,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             OzMadeTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
-                    AuthNavHost(onAuthSuccess = { /* TODO: Navigate to main app screen */ })
+                    val navController = rememberNavController()
+                    AppNavHost(navController = navController)
                 }
             }
         }

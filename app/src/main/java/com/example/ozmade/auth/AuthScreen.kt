@@ -1,11 +1,13 @@
 package com.example.ozmade.auth
 
+import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -16,13 +18,10 @@ fun AuthNavHost(
     onAuthSuccess: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var isRegisterMode by remember { mutableStateOf(false) }
+    val activity = LocalContext.current as Activity
 
-    // Observe State changes
     LaunchedEffect(uiState) {
-        if (uiState is AuthUiState.Success) {
-            onAuthSuccess()
-        }
+        if (uiState is AuthUiState.Success) onAuthSuccess()
     }
 
     Column(
@@ -32,31 +31,23 @@ fun AuthNavHost(
     ) {
         when (val state = uiState) {
             is AuthUiState.Loading -> CircularProgressIndicator()
+
             is AuthUiState.OtpRequired -> OtpScreen(
                 phone = state.phone,
-                onVerify = { otp -> viewModel.onVerifyOtp(state.phone, otp) }
+                onVerify = { otp -> viewModel.verifyOtp(state.verificationId, otp) }
             )
-            else -> {
-                if (isRegisterMode) {
-                    RegisterScreen(
-                        onRegisterBuyer = { phone -> viewModel.onRegisterBuyer(phone) },
-                        onSwitchToLogin = { isRegisterMode = false }
-                    )
-                } else {
-                    LoginScreen(
-                        onLogin = { phone, pass -> viewModel.onLogin(phone, pass) },
-                        onGoogleLogin = { viewModel.onGoogleSignIn() },
-                        onSwitchToRegister = { isRegisterMode = true }
-                    )
-                }
-            }
+
+            else -> PhoneScreen(
+                onRequestOtp = { phone -> viewModel.requestOtp(activity, phone) }
+            )
         }
 
         if (uiState is AuthUiState.Error) {
-            Text(text = (uiState as AuthUiState.Error).message, color = MaterialTheme.colorScheme.error)
+            Text((uiState as AuthUiState.Error).message, color = MaterialTheme.colorScheme.error)
         }
     }
 }
+
 
 @Composable
 fun LoginScreen(
@@ -132,4 +123,24 @@ fun OtpScreen(phone: String, onVerify: (String) -> Unit) {
     Button(onClick = { onVerify(otp) }, modifier = Modifier.fillMaxWidth()) {
         Text("Verify & Register")
     }
+}
+@Composable
+fun PhoneScreen(onRequestOtp: (String) -> Unit) {
+    var phone by remember { mutableStateOf("") }
+
+    Text("Введите номер", style = MaterialTheme.typography.headlineMedium)
+    Spacer(Modifier.height(16.dp))
+
+    OutlinedTextField(
+        value = phone,
+        onValueChange = { phone = it },
+        label = { Text("Номер телефона") },
+        placeholder = { Text("+7XXXXXXXXXX") }
+    )
+
+    Spacer(Modifier.height(16.dp))
+    Button(
+        onClick = { onRequestOtp(phone.trim()) },
+        modifier = Modifier.fillMaxWidth()
+    ) { Text("Получить код") }
 }

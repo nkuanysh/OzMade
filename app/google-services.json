@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "281183625562",
+    "project_id": "ozmade-9758e",
+    "storage_bucket": "ozmade-9758e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:281183625562:android:78c24dc8c8b38d2cb11363",
+        "android_client_info": {
+          "package_name": "com.example.ozmade"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSViFK9ZBwP88_tfiz7mnzGjJRZA4Yj7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

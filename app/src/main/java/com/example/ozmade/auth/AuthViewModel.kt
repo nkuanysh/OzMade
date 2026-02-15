@@ -1,7 +1,9 @@
 package com.example.ozmade.auth
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.data.impl.FirebaseAuthRepository
 import com.example.domain.entities.User
 import com.example.domain.repository.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,73 +14,47 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val repo: FirebaseAuthRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
-    fun onLogin(phone: String, pass: String) {
+    fun requestOtp(activity: Activity, phone: String) {
         _uiState.value = AuthUiState.Loading
         viewModelScope.launch {
-            authRepository.login(phone, pass).collect { result ->
+            repo.requestOtp(activity, phone).collect { result ->
                 result.fold(
-                    onSuccess = { _uiState.value = AuthUiState.Success(it) },
-                    onFailure = { _uiState.value = AuthUiState.Error(it.message ?: "Login failed") }
+                    onSuccess = { sess ->
+                        // AUTO значит уже вошёл
+                        if (sess.verificationId == "AUTO") _uiState.value = AuthUiState.Success
+                        else _uiState.value = AuthUiState.OtpRequired(sess.phone, sess.verificationId)
+                    },
+                    onFailure = { _uiState.value = AuthUiState.Error(it.message ?: "OTP request failed") }
                 )
             }
         }
     }
 
-    fun onRegisterBuyer(phone: String) {
+    fun verifyOtp(verificationId: String, code: String) {
         _uiState.value = AuthUiState.Loading
         viewModelScope.launch {
-            authRepository.registerBuyer(phone).collect { result ->
+            repo.verifyOtp(verificationId, code).collect { result ->
                 result.fold(
-                    onSuccess = { _uiState.value = AuthUiState.OtpRequired(phone) },
-                    onFailure = { _uiState.value = AuthUiState.Error(it.message ?: "Registration failed") }
-                )
-            }
-        }
-    }
-
-    fun onVerifyOtp(phone: String, otp: String) {
-        _uiState.value = AuthUiState.Loading
-        viewModelScope.launch {
-            authRepository.verifyOtp(phone, otp).collect { result ->
-                result.fold(
-                    onSuccess = { _uiState.value = AuthUiState.Success(it) },
-                    onFailure = { _uiState.value = AuthUiState.Error(it.message ?: "Invalid OTP") }
-                )
-            }
-        }
-    }
-
-    fun onGoogleSignIn() {
-        _uiState.value = AuthUiState.GoogleSignIn
-    }
-
-    fun onGoogleSignInResult(idToken: String?) {
-        if (idToken == null) {
-            _uiState.value = AuthUiState.Error("Google Sign in failed")
-            return
-        }
-        viewModelScope.launch {
-            authRepository.googleLogin(idToken).collect { result ->
-                result.fold(
-                    onSuccess = { _uiState.value = AuthUiState.Success(it) },
-                    onFailure = { _uiState.value = AuthUiState.Error(it.message ?: "Google Sign in failed") }
+                    onSuccess = { _uiState.value = AuthUiState.Success },
+                    onFailure = { _uiState.value = AuthUiState.Error(it.message ?: "Invalid code") }
                 )
             }
         }
     }
 }
+
 
 sealed class AuthUiState {
     object Idle : AuthUiState()
     object Loading : AuthUiState()
-    object GoogleSignIn : AuthUiState()
-    data class OtpRequired(val phone: String) : AuthUiState()
-    data class Success(val user: User) : AuthUiState()
+    data class OtpRequired(val phone: String, val verificationId: String) : AuthUiState()
+    object Success : AuthUiState()
     data class Error(val message: String) : AuthUiState()
 }
+
