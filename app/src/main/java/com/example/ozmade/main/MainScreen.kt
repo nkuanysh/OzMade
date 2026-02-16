@@ -2,6 +2,7 @@ package com.example.ozmade.main
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 //import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
@@ -20,7 +21,7 @@ private sealed class BottomItem(
 ) {
     object Home : BottomItem("home", "Главная", { Icon(Icons.Default.Home, null) })
     object Favorites : BottomItem("favorites", "Избранное", { Icon(Icons.Default.Favorite, null) })
-    object Chat : BottomItem("chat", "Чат", { Icon(Icons.Default.Favorite, null) })
+    object Chat : BottomItem("chat", "Чат", { Icon(Icons.Default.Email, null) })
     object Profile : BottomItem("profile", "Профиль", { Icon(Icons.Default.Person, null) })
 }
 
