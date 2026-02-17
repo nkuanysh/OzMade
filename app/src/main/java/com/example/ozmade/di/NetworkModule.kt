@@ -2,7 +2,6 @@ package com.example.ozmade.di
 
 import com.example.ozmade.network.api.ProfileApi
 import com.example.ozmade.network.auth.FirebaseAuthInterceptor
-import com.google.firebase.auth.FirebaseAuth
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -12,6 +11,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
+import com.example.ozmade.network.api.HomeApi
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -20,9 +20,6 @@ object NetworkModule {
     // TODO: когда бэкенд будет готов — поставишь сюда реальный URL
     private const val BASE_URL = "https://example.com/"
 
-    @Provides
-    @Singleton
-    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
 
     @Provides
     @Singleton
@@ -53,4 +50,11 @@ object NetworkModule {
     @Singleton
     fun provideProfileApi(retrofit: Retrofit): ProfileApi =
         retrofit.create(ProfileApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideHomeApi(retrofit: Retrofit): HomeApi =
+        retrofit.create(HomeApi::class.java)
+
 }
+

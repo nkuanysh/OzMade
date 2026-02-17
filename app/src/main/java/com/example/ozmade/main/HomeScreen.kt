@@ -30,65 +30,37 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ozmade.main.home.*
 import kotlinx.coroutines.delay
 
-// -------------------- модели для примера --------------------
-
 private enum class AppLang { KAZ, RUS }
-
-private data class CategoryUi(
-    val id: String,
-    val title: String,
-)
-
-private data class ProductUi(
-    val id: String,
-    val title: String,
-    val price: Int,
-    val city: String,
-    val address: String,
-    val rating: Double,
-)
 
 private val LikedIdsSaver: Saver<MutableList<String>, Any> = listSaver(
     save = { it.toList() },
     restore = { restored -> mutableStateListOf<String>().apply { addAll(restored) } }
 )
 
-// -------------------- главный экран --------------------
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onOpenProduct: (String) -> Unit,
+    viewModel: HomeViewModel = hiltViewModel()
+) {
+
     var lang by rememberSaveable { mutableStateOf(AppLang.RUS) }
     var search by rememberSaveable { mutableStateOf("") }
 
-    val ads = remember { listOf("ad_1", "ad_2", "ad_3", "ad_4", "ad_5") }
+    val uiState by viewModel.uiState.collectAsState()
 
-    val categories = remember {
-        listOf(
-            CategoryUi("food", "Еда"),
-            CategoryUi("clothes", "Одежда"),
-            CategoryUi("art", "Искусство"),
-            CategoryUi("craft", "Ремесло"),
-            CategoryUi("gifts", "Подарки"),
-            CategoryUi("holidays", "Праздники"),
-            CategoryUi("home", "Для дома"),
-        )
-    }
+    val likedIds = rememberSaveable(saver = LikedIdsSaver) { mutableStateListOf<String>() }
+    val gridState = rememberLazyGridState()
 
-    val products = remember {
-        listOf(
-            ProductUi("1", "Домашний сыр", 2500, "Алматы", "Алмалинский р-н", 4.8),
-            ProductUi("2", "Тойбастар набор", 5500, "Алматы", "Ауэзовский р-н", 4.6),
-            ProductUi("3", "Кукла ручной работы", 12000, "Шымкент", "Центр", 4.9),
-            ProductUi("4", "Наурыз-көже", 1500, "Тараз", "Мкр. 12", 4.5),
-            ProductUi("5", "Свитшот", 9900, "Астана", "Сарыарка", 4.3),
-            ProductUi("6", "Картина (арт)", 30000, "Алматы", "Бостандык", 4.7),
-            ProductUi("7", "Пельмени домашние", 2800, "Алматы", "Медеуский р-н", 4.4),
-            ProductUi("8", "Букет к 8 марта", 7000, "Алматы", "Жетысу", 4.9),
-        )
-    }
+    // Достаём данные из state
+    val data = uiState as? HomeUiState.Data
+    val ads = data?.ads.orEmpty()
+    val categories = data?.categories.orEmpty()
+    val products = data?.products.orEmpty()
 
     val filteredProducts = remember(search, products) {
         val q = search.trim()
@@ -99,9 +71,12 @@ fun HomeScreen() {
         }
     }
 
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { ads.size })
+    // Pager state должен знать количество страниц
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { maxOf(ads.size, 1) })
 
-    LaunchedEffect(Unit) {
+    // Автопрокрутка рекламы только если баннеров >= 2
+    LaunchedEffect(ads.size) {
+        if (ads.size < 2) return@LaunchedEffect
         while (true) {
             delay(3000)
             val next = (pagerState.currentPage + 1) % ads.size
@@ -109,13 +84,6 @@ fun HomeScreen() {
         }
     }
 
-    val likedIds = rememberSaveable(saver = LikedIdsSaver) {
-        mutableStateListOf<String>()
-    }
-
-    val gridState = rememberLazyGridState()
-
-    // ✅ Поиск закрепляем сверху оверлеем, а весь контент скроллится одним LazyVerticalGrid
     Box(Modifier.fillMaxSize()) {
 
         LazyVerticalGrid(
@@ -126,10 +94,11 @@ fun HomeScreen() {
             contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            // чтобы контент не залезал под закреплённый поиск
+
+            // отступ под закреплённый поиск
             item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(86.dp)) }
 
-            // Языки (2 колонки)
+            // Языки
             item(span = { GridItemSpan(2) }) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -142,7 +111,7 @@ fun HomeScreen() {
                 }
             }
 
-            // Название (2 колонки)
+            // Название
             item(span = { GridItemSpan(2) }) {
                 Text(
                     text = "OzMade",
@@ -153,25 +122,63 @@ fun HomeScreen() {
                 )
             }
 
-            // Реклама (2 колонки)
+            // Реклама
             item(span = { GridItemSpan(2) }) {
-                HorizontalPager(
-                    state = pagerState,
-                    contentPadding = PaddingValues(horizontal = 6.dp),
-                    pageSpacing = 12.dp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(160.dp)
-                        .padding(top = 10.dp)
-                ) { page ->
-                    AdBanner(
-                        title = "Реклама ${page + 1}",
-                        onClick = { /* TODO */ }
-                    )
+                when (uiState) {
+                    is HomeUiState.Loading -> {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(160.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator()
+                            }
+                        }
+                    }
+
+                    is HomeUiState.Error -> {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(160.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            val msg = (uiState as HomeUiState.Error).message
+                            Column(
+                                Modifier.fillMaxSize().padding(16.dp),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(msg, color = MaterialTheme.colorScheme.error)
+                                Spacer(Modifier.height(10.dp))
+                                Button(onClick = { viewModel.load() }) { Text("Повторить") }
+                            }
+                        }
+                    }
+
+                    is HomeUiState.Data -> {
+                        HorizontalPager(
+                            state = pagerState,
+                            contentPadding = PaddingValues(horizontal = 6.dp),
+                            pageSpacing = 12.dp,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(160.dp)
+                                .padding(top = 10.dp)
+                        ) { page ->
+                            val banner = ads.getOrNull(page)
+                            AdBannerCard(
+                                title = banner?.title ?: "Реклама",
+                                onClick = { /* TODO: открыть deeplink banner?.deeplink */ }
+                            )
+                        }
+                    }
                 }
             }
 
-            // Категории (2 колонки)
+            // Категории заголовок
             item(span = { GridItemSpan(2) }) {
                 Text(
                     text = "Категории",
@@ -180,7 +187,7 @@ fun HomeScreen() {
                 )
             }
 
-            // Категории горизонтально (2 колонки)
+            // Категории горизонтально
             item(span = { GridItemSpan(2) }) {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -189,13 +196,13 @@ fun HomeScreen() {
                     items(categories) { cat ->
                         CategoryChip(
                             title = cat.title,
-                            onClick = { /* TODO */ }
+                            onClick = { /* TODO: открыть категорию cat.id */ }
                         )
                     }
                 }
             }
 
-            // Товары (по 2 в ряд)
+            // Товары
             items(filteredProducts, key = { it.id }) { product ->
                 ProductCard(
                     product = product,
@@ -204,12 +211,13 @@ fun HomeScreen() {
                         if (likedIds.contains(product.id)) likedIds.remove(product.id)
                         else likedIds.add(product.id)
                     },
-                    onClick = { /* TODO */ }
+                    onClick = { onOpenProduct(product.id) }
+
                 )
             }
         }
 
-        // ✅ Поиск остаётся сверху
+        // Поиск закреплён сверху
         Surface(
             tonalElevation = 6.dp,
             modifier = Modifier
@@ -234,30 +242,19 @@ fun HomeScreen() {
     }
 }
 
-// -------------------- компоненты --------------------
+// -------------------- компоненты UI --------------------
 
 @Composable
-private fun LangChip(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
+private fun LangChip(text: String, selected: Boolean, onClick: () -> Unit) {
     val colors = AssistChipDefaults.assistChipColors(
         containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
         labelColor = MaterialTheme.colorScheme.onSurface
     )
-    AssistChip(
-        onClick = onClick,
-        label = { Text(text) },
-        colors = colors
-    )
+    AssistChip(onClick = onClick, label = { Text(text) }, colors = colors)
 }
 
 @Composable
-private fun AdBanner(
-    title: String,
-    onClick: () -> Unit
-) {
+private fun AdBannerCard(title: String, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxSize()
@@ -276,10 +273,7 @@ private fun AdBanner(
 }
 
 @Composable
-private fun CategoryChip(
-    title: String,
-    onClick: () -> Unit
-) {
+private fun CategoryChip(title: String, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(14.dp),
         modifier = Modifier.clickable(onClick = onClick)
@@ -302,7 +296,7 @@ private fun CategoryChip(
 
 @Composable
 private fun ProductCard(
-    product: ProductUi,
+    product: Product,
     liked: Boolean,
     onToggleLike: () -> Unit,
     onClick: () -> Unit

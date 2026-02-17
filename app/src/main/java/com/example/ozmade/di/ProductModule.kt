@@ -1,0 +1,21 @@
+package com.example.ozmade.di
+
+import com.example.ozmade.main.home.details.FakeProductRepository
+import com.example.ozmade.main.home.details.ProductRepository
+
+import dagger.Binds
+import dagger.Module
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
+
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class ProductModule {
+
+    @Binds
+    @Singleton
+    abstract fun bindProductRepository(
+        impl: FakeProductRepository
+    ): ProductRepository
+}

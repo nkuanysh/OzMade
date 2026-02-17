@@ -1,0 +1,395 @@
+package com.example.ozmade.main.home.details
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import kotlin.math.max
+
+//data class DeliveryInfoUi(
+//    val pickupEnabled: Boolean = false,
+//    val pickupTime: String? = null, // "12:00-18:00"
+//    val freeDeliveryEnabled: Boolean = false,
+//    val freeDeliveryText: String? = null, // "в этом районе"
+//    val intercityEnabled: Boolean = false,
+//)
+//
+//data class ProductDetailsUi(
+//    val id: String,
+//    val title: String,
+//    val price: Int,
+//    val rating: Double,
+//    val reviewsCount: Int,
+//    val ordersCount: Int,
+//    val images: List<String>, // пока строки (url/идентификаторы)
+//    val description: String,
+//    val specs: List<Pair<String, String>>, // "Материал" -> "..."
+//    val delivery: DeliveryInfoUi
+//)
+
+private enum class DetailsTab { DESCRIPTION, SPECS }
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ProductDetailsScreen(
+    product: ProductDetailsUi,
+    liked: Boolean,
+    onToggleLike: () -> Unit,
+    onShare: () -> Unit,
+    onChat: () -> Unit,
+    onOrder: () -> Unit
+) {
+    var tab by remember { mutableStateOf(DetailsTab.DESCRIPTION) }
+
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        pageCount = { max(product.images.size, 1) }
+    )
+
+    Scaffold(
+        bottomBar = {
+            BottomActionsBar(
+                onChat = onChat,
+                onOrder = onOrder
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // -------- Фото --------
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(320.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
+                    // Пока заглушка фото.
+                    // Когда будет бэкенд: подключим Coil и будем грузить по product.images[page]
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(14.dp)
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(MaterialTheme.colorScheme.tertiaryContainer),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Фото ${page + 1}",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
+
+                // Индикатор страниц
+                if (product.images.size > 1) {
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        repeat(product.images.size) { i ->
+                            val active = pagerState.currentPage == i
+                            Box(
+                                modifier = Modifier
+                                    .height(6.dp)
+                                    .width(if (active) 18.dp else 6.dp)
+                                    .clip(RoundedCornerShape(20.dp))
+                                    .background(
+                                        if (active) MaterialTheme.colorScheme.primary
+                                        else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
+                                    )
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(14.dp))
+
+            // -------- Цена + кнопки справа --------
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "${product.price} ₸",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.weight(1f)
+                )
+
+                IconButton(onClick = onToggleLike) {
+                    Icon(
+                        imageVector = if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = null
+                    )
+                }
+
+                IconButton(onClick = onShare) {
+                    Icon(Icons.Default.Share, contentDescription = null)
+                }
+            }
+
+            Spacer(Modifier.height(10.dp))
+
+            // -------- Название + рейтинг --------
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Text(
+                    text = product.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Spacer(Modifier.width(10.dp))
+
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = "★ ${formatRating(product.rating)}",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = "(${product.reviewsCount} отзывов)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = "Заказов: ${product.ordersCount}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            // -------- Tabs Описание / Характеристики --------
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                TabButton(
+                    text = "Описание",
+                    selected = tab == DetailsTab.DESCRIPTION,
+                    onClick = { tab = DetailsTab.DESCRIPTION },
+                    modifier = Modifier.weight(1f)
+                )
+                TabButton(
+                    text = "Характеристики",
+                    selected = tab == DetailsTab.SPECS,
+                    onClick = { tab = DetailsTab.SPECS },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(Modifier.height(12.dp))
+
+            when (tab) {
+                DetailsTab.DESCRIPTION -> {
+                    Text(
+                        text = product.description,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+
+                DetailsTab.SPECS -> {
+                    SpecsBlock(
+                        specs = product.specs,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(18.dp))
+
+            // -------- Доставка --------
+            DeliveryBlock(
+                delivery = product.delivery,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            Spacer(Modifier.height(90.dp)) // чтобы контент не прятался за bottomBar
+        }
+    }
+}
+
+@Composable
+private fun BottomActionsBar(
+    onChat: () -> Unit,
+    onOrder: () -> Unit
+) {
+    Surface(tonalElevation = 8.dp) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = onChat,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text("Чат")
+            }
+            Button(
+                onClick = onOrder,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Text("Заказать")
+            }
+        }
+    }
+}
+
+@Composable
+private fun TabButton(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val container = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+    val content = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .background(container)
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text, color = content, style = MaterialTheme.typography.titleMedium)
+    }
+}
+
+@Composable
+private fun SpecsBlock(specs: List<Pair<String, String>>, modifier: Modifier = Modifier) {
+    Card(shape = RoundedCornerShape(16.dp), modifier = modifier.fillMaxWidth()) {
+        Column(Modifier.padding(14.dp)) {
+            if (specs.isEmpty()) {
+                Text(
+                    text = "Характеристики пока не указаны",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else {
+                specs.forEachIndexed { index, (k, v) ->
+                    Row(Modifier.fillMaxWidth()) {
+                        Text(
+                            text = k,
+                            modifier = Modifier.weight(1f),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.width(10.dp))
+                        Text(
+                            text = v,
+                            modifier = Modifier.weight(1f),
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                    if (index != specs.lastIndex) {
+                        Spacer(Modifier.height(10.dp))
+                        Divider()
+                        Spacer(Modifier.height(10.dp))
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DeliveryBlock(delivery: DeliveryInfoUi, modifier: Modifier = Modifier) {
+    Card(shape = RoundedCornerShape(16.dp), modifier = modifier.fillMaxWidth()) {
+        Column(Modifier.padding(14.dp)) {
+            Text("Доставка", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(10.dp))
+
+            var any = false
+
+            if (delivery.pickupEnabled) {
+                any = true
+                Text(
+                    text = "Самовывоз: ${delivery.pickupTime ?: "есть"}",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
+            if (delivery.freeDeliveryEnabled) {
+                any = true
+                Text(
+                    text = "Бесплатная доставка ${delivery.freeDeliveryText ?: ""}".trim(),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
+            if (delivery.intercityEnabled) {
+                any = true
+                Text(
+                    text = "Межгород: есть",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(Modifier.height(8.dp))
+            }
+
+            if (!any) {
+                Text(
+                    text = "Условия доставки не указаны",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+private fun formatRating(r: Double): String {
+    // 4.8 -> "4.8", 4.0 -> "4.0"
+    return String.format("%.1f", r)
+}

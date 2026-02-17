@@ -14,6 +14,11 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
 import com.example.ozmade.main.profile.EditProfileScreen
 import com.example.ozmade.main.profile.ProfileScreen
+import androidx.navigation.NavType
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.example.ozmade.main.home.details.ProductDetailsRoute
+
 
 private sealed class BottomItem(
     val route: String,
@@ -69,7 +74,14 @@ fun MainScreen(
             startDestination = BottomItem.Home.route,
             modifier = Modifier.padding(padding)
         ) {
-            composable(BottomItem.Home.route) { HomeScreen() }
+            composable(BottomItem.Home.route) {
+                HomeScreen(
+                    onOpenProduct = { productId ->
+                        navController.navigate("product/$productId")
+                    }
+                )
+            }
+
             composable(BottomItem.Favorites.route) { FavoritesScreen() }
             composable(BottomItem.Chat.route) { ChatScreen() }
 
@@ -85,6 +97,20 @@ fun MainScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
+            composable(
+                route = "product/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val id = backStackEntry.arguments?.getString("id") ?: return@composable
+
+                ProductDetailsRoute(
+                    productId = id,
+                    onBack = { navController.popBackStack() },
+                    onChat = { /* TODO: открыть чат с продавцом */ },
+                    onOrder = { /* TODO: оформить заказ */ }
+                )
+            }
+
         }
 
     }
