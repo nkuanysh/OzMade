@@ -12,7 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
-import com.google.ai.client.generativeai.Chat
+import com.example.ozmade.main.profile.EditProfileScreen
+import com.example.ozmade.main.profile.ProfileScreen
 
 private sealed class BottomItem(
     val route: String,
@@ -71,7 +72,20 @@ fun MainScreen(
             composable(BottomItem.Home.route) { HomeScreen() }
             composable(BottomItem.Favorites.route) { FavoritesScreen() }
             composable(BottomItem.Chat.route) { ChatScreen() }
-            composable(BottomItem.Profile.route) { ProfileScreen(onLogout = onLogout) }
+
+            composable(BottomItem.Profile.route) {
+                ProfileScreen(
+                    onLogout = onLogout,
+                    onEditProfile = { navController.navigate("edit_profile") }
+                )
+            }
+
+            composable("edit_profile") {
+                EditProfileScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
         }
+
     }
 }

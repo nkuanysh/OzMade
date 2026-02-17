@@ -1,4 +1,4 @@
-package com.example.ozmade.main
+package com.example.ozmade.main.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,11 +9,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ozmade.main.profile.data.ProfileUiState
+import com.example.ozmade.main.profile.data.ProfileViewModel
 
 @Composable
 fun ProfileScreen(
@@ -24,10 +30,12 @@ fun ProfileScreen(
     onSupport: () -> Unit = {},
     onAbout: () -> Unit = {},
     onBecomeSeller: () -> Unit = {},
+    viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    // Пока заглушки данных (потом возьмёте из Firebase/Firestore)
-    val name = "Нурсултан"
-    val phone = "+7 777 123 45 67"
+    val uiState by viewModel.uiState.collectAsState()
+    LaunchedEffect(Unit) {
+        viewModel.load()
+    }
 
     Column(
         modifier = Modifier
@@ -36,7 +44,6 @@ fun ProfileScreen(
     ) {
         Spacer(Modifier.height(14.dp))
 
-        // верхняя строка (можно оставить пустой, или потом добавить настройки/уведомления)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End
@@ -48,56 +55,83 @@ fun ProfileScreen(
 
         Spacer(Modifier.height(10.dp))
 
-        // аватар
-        Box(
-            modifier = Modifier
-                .size(90.dp)
-                .align(Alignment.CenterHorizontally)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = null,
-                modifier = Modifier.size(44.dp)
-            )
+        when (val state = uiState) {
+            is ProfileUiState.Loading -> {
+                // Верх профиля в состоянии загрузки
+                Box(
+                    modifier = Modifier
+                        .size(90.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                )
+                Spacer(Modifier.height(12.dp))
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
+
+            is ProfileUiState.Error -> {
+                Text(
+                    text = state.message,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
+            is ProfileUiState.Data -> {
+                val user = state.user
+
+                // ✅ Аватар по центру (пока без картинки: если url есть — позже подключим)
+                Box(
+                    modifier = Modifier
+                        .size(90.dp)
+                        .align(Alignment.CenterHorizontally)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Пока иконка. Когда будете готовы — я покажу Coil AsyncImage по user.avatarUrl
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(44.dp)
+                    )
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                // ✅ Имя + стрелка редактирования (как ты хотел)
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .clickable(onClick = onEditProfile)
+                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = user.name.ifBlank { "Без имени" },
+                        style = MaterialTheme.typography.titleLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Icon(
+                        imageVector = Icons.Default.KeyboardArrowRight,
+                        contentDescription = "Редактировать профиль"
+                    )
+                }
+
+                // ✅ Номер ниже
+                Text(
+                    text = user.phone,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+
+                Spacer(Modifier.height(20.dp))
+            }
         }
 
-        Spacer(Modifier.height(12.dp))
-
-        // имя + стрелка (редактировать)
-        Row(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .clickable(onClick = onEditProfile)
-                .padding(horizontal = 8.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.titleLarge,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(Modifier.width(6.dp))
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowRight,
-                contentDescription = "Редактировать профиль"
-            )
-        }
-
-        // номер
-        Text(
-            text = phone,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-
-        Spacer(Modifier.height(20.dp))
-
-        // Разделы
+        // Разделы (как у тебя)
         ProfileSectionButton(
             icon = Icons.Default.Notifications,
             title = "Уведомления",
@@ -126,9 +160,11 @@ fun ProfileScreen(
 
         Spacer(Modifier.weight(1f))
 
-        // Выйти (внизу)
         Button(
-            onClick = onLogout,
+            onClick = {
+                viewModel.logout()
+                onLogout()
+            },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.errorContainer,
