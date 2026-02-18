@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
@@ -28,7 +29,7 @@ import kotlin.math.max
 
 private enum class DetailsTab { DESCRIPTION, SPECS }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailsScreen(
     product: ProductDetailsUi,
@@ -39,6 +40,7 @@ fun ProductDetailsScreen(
     onOrder: () -> Unit,
     onOpenReviews: (String) -> Unit,
     onOpenSeller: (String) -> Unit,
+    onBack: () -> Unit
 
 
     ) {
@@ -50,6 +52,19 @@ fun ProductDetailsScreen(
     )
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("OzMade") }, // или пусто, как хочешь
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = null
+                        )
+                    }
+                }
+            )
+        },
         bottomBar = {
             BottomActionsBar(
                 onChat = onChat,
@@ -57,6 +72,7 @@ fun ProductDetailsScreen(
             )
         }
     ) { padding ->
+
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -171,7 +187,8 @@ fun ProductDetailsScreen(
                     Text(
                         text = "(${product.reviewsCount} отзывов)",
                         style = MaterialTheme.typography.bodySmall.copy(
-                            textDecoration = TextDecoration.Underline),
+                            textDecoration = TextDecoration.Underline
+                        ),
                         color = Color.Blue,
                         modifier = Modifier.clickable {
                             onOpenReviews(product.id)
@@ -294,7 +311,8 @@ private fun TabButton(
     modifier: Modifier = Modifier
 ) {
     val container = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
-    val content = if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+    val content =
+        if (selected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
 
     Box(
         modifier = modifier
@@ -388,6 +406,7 @@ private fun DeliveryBlock(delivery: DeliveryInfoUi, modifier: Modifier = Modifie
         }
     }
 }
+
 @Composable
 private fun SellerBlock(
     seller: SellerUi,

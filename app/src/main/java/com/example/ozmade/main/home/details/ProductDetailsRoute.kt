@@ -43,6 +43,8 @@ fun ProductDetailsRoute(
                 onOrder = onOrder,
                 onOpenReviews = onOpenReviews,
                 onOpenSeller = onOpenSeller,
+                onBack = onBack,
+
 
                 )
         }

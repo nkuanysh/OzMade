@@ -35,7 +35,9 @@ import kotlin.math.sin
 fun SellerReviewsScreen(
     uiState: SellerReviewsUiState,
     onBack: () -> Unit,
-    onRetry: () -> Unit
+    onRetry: () -> Unit,
+    onOpenProduct: (String) -> Unit
+
 ) {
     Scaffold(
         topBar = {
@@ -100,8 +102,7 @@ fun SellerReviewsScreen(
                     items(uiState.reviews, key = { it.id }) { r ->
                         SellerReviewCard(
                             review = r,
-                            onOpenProduct = { /* потом сделаем переход */ }
-                        )
+                            onOpenProduct = onOpenProduct                        )
                     }
                 }
             }

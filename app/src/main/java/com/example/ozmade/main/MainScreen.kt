@@ -158,7 +158,9 @@ fun MainScreen(
 
                 SellerReviewsRoute(
                     sellerId = sellerId,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onOpenProduct = { productId -> navController.navigate("product/$productId") }
+
                 )
             }
 
