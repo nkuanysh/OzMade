@@ -9,6 +9,7 @@ fun ProductDetailsRoute(
     onBack: () -> Unit,
     onChat: () -> Unit,
     onOrder: () -> Unit,
+    onOpenReviews: (String) -> Unit,
     viewModel: ProductDetailsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -37,7 +38,8 @@ fun ProductDetailsRoute(
                 onToggleLike = { viewModel.toggleLike() },
                 onShare = { /* TODO: share */ },
                 onChat = onChat,
-                onOrder = onOrder
+                onOrder = onOrder,
+                onOpenReviews = onOpenReviews
             )
         }
     }

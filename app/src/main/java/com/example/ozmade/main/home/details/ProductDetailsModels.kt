@@ -7,6 +7,14 @@ data class DeliveryInfoUi(
     val freeDeliveryText: String? = null,
     val intercityEnabled: Boolean = false,
 )
+data class SellerUi(
+    val id: String,
+    val name: String,
+    val avatarUrl: String? = null,
+    val address: String,
+    val rating: Double,
+    val completedOrders: Int
+)
 
 data class ProductDetailsUi(
     val id: String,
@@ -18,7 +26,9 @@ data class ProductDetailsUi(
     val images: List<String>,
     val description: String,
     val specs: List<Pair<String, String>>,
-    val delivery: DeliveryInfoUi
+    val delivery: DeliveryInfoUi,
+    val seller: SellerUi
+
 )
 
 sealed class ProductDetailsUiState {

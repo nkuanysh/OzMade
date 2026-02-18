@@ -12,6 +12,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 import com.example.ozmade.network.api.HomeApi
+import com.example.ozmade.network.api.ProductApi
+import com.example.ozmade.network.api.ReviewsApi
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -55,6 +57,17 @@ object NetworkModule {
     @Singleton
     fun provideHomeApi(retrofit: Retrofit): HomeApi =
         retrofit.create(HomeApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideProductApi(retrofit: Retrofit): ProductApi =
+        retrofit.create(ProductApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideReviewsApi(retrofit: Retrofit): ReviewsApi =
+        retrofit.create(ReviewsApi::class.java)
+
 
 }
 

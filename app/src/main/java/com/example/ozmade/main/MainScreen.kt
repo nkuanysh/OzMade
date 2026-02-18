@@ -18,6 +18,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.ozmade.main.home.details.ProductDetailsRoute
+import com.example.ozmade.main.reviews.ReviewsRoute
 
 
 private sealed class BottomItem(
@@ -107,9 +108,26 @@ fun MainScreen(
                     productId = id,
                     onBack = { navController.popBackStack() },
                     onChat = { /* TODO: открыть чат с продавцом */ },
-                    onOrder = { /* TODO: оформить заказ */ }
+                    onOrder = { /* TODO: оформить заказ */ },
+                    onOpenReviews = { pid: String ->
+                        navController.navigate("reviews/$pid")
+                    }
+
+
                 )
             }
+            composable(
+                route = "reviews/{productId}",
+                arguments = listOf(navArgument("productId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val productId = backStackEntry.arguments?.getString("productId") ?: return@composable
+
+                ReviewsRoute(
+                    productId = productId,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
 
         }
 

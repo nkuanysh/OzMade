@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -24,27 +25,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlin.math.max
 
-//data class DeliveryInfoUi(
-//    val pickupEnabled: Boolean = false,
-//    val pickupTime: String? = null, // "12:00-18:00"
-//    val freeDeliveryEnabled: Boolean = false,
-//    val freeDeliveryText: String? = null, // "в этом районе"
-//    val intercityEnabled: Boolean = false,
-//)
-//
-//data class ProductDetailsUi(
-//    val id: String,
-//    val title: String,
-//    val price: Int,
-//    val rating: Double,
-//    val reviewsCount: Int,
-//    val ordersCount: Int,
-//    val images: List<String>, // пока строки (url/идентификаторы)
-//    val description: String,
-//    val specs: List<Pair<String, String>>, // "Материал" -> "..."
-//    val delivery: DeliveryInfoUi
-//)
-
 private enum class DetailsTab { DESCRIPTION, SPECS }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -55,8 +35,10 @@ fun ProductDetailsScreen(
     onToggleLike: () -> Unit,
     onShare: () -> Unit,
     onChat: () -> Unit,
-    onOrder: () -> Unit
-) {
+    onOrder: () -> Unit,
+    onOpenReviews: (String) -> Unit
+
+    ) {
     var tab by remember { mutableStateOf(DetailsTab.DESCRIPTION) }
 
     val pagerState = rememberPagerState(
@@ -186,8 +168,13 @@ fun ProductDetailsScreen(
                     Text(
                         text = "(${product.reviewsCount} отзывов)",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.clickable {
+                            onOpenReviews(product.id)
+
+                        }
                     )
+
                 }
             }
 
@@ -248,6 +235,12 @@ fun ProductDetailsScreen(
             // -------- Доставка --------
             DeliveryBlock(
                 delivery = product.delivery,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(Modifier.height(14.dp))
+
+            SellerBlock(
+                seller = product.seller,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
 
@@ -388,6 +381,70 @@ private fun DeliveryBlock(delivery: DeliveryInfoUi, modifier: Modifier = Modifie
         }
     }
 }
+@Composable
+private fun SellerBlock(
+    seller: SellerUi,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Аватар (пока заглушка)
+            Box(
+                modifier = Modifier
+                    .size(54.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                // позже можно Coil AsyncImage по seller.avatarUrl
+                Text(
+                    text = seller.name.take(1).uppercase(),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
+            Spacer(Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = seller.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(Modifier.height(2.dp))
+
+                Text(
+                    text = seller.address,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(Modifier.height(6.dp))
+
+                Text(
+                    text = "Рейтинг продавца: ${formatRating(seller.rating)}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                Text(
+                    text = "Выполнено заказов: ${seller.completedOrders}",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
 
 private fun formatRating(r: Double): String {
     // 4.8 -> "4.8", 4.0 -> "4.0"

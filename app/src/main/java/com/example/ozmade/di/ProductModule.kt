@@ -2,6 +2,7 @@ package com.example.ozmade.di
 
 import com.example.ozmade.main.home.details.FakeProductRepository
 import com.example.ozmade.main.home.details.ProductRepository
+import com.example.ozmade.main.home.details.RealProductRepository
 
 import dagger.Binds
 import dagger.Module
@@ -18,4 +19,9 @@ abstract class ProductModule {
     abstract fun bindProductRepository(
         impl: FakeProductRepository
     ): ProductRepository
+
+//    @Binds
+//    abstract fun bindProductRepository(
+//        impl: RealProductRepository
+//    ): ProductRepository
 }

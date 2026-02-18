@@ -24,7 +24,16 @@ class FakeProductRepository @Inject constructor() : ProductRepository {
                 freeDeliveryEnabled = true,
                 freeDeliveryText = "в этом районе",
                 intercityEnabled = true
+            ),
+            seller = SellerUi(
+                id = "seller_1",
+                name = "Айгерим",
+                avatarUrl = null,
+                address = "Алматы, Алмалинский р-н",
+                rating = 4.9,
+                completedOrders = 127
             )
+
         ),
         ProductDetailsUi(
             id = "2",
@@ -41,7 +50,16 @@ class FakeProductRepository @Inject constructor() : ProductRepository {
                 pickupTime = "10:00-19:00",
                 freeDeliveryEnabled = false,
                 intercityEnabled = true
+            ),
+            seller = SellerUi(
+                id = "seller_2",
+                name = "Фараби",
+                avatarUrl = null,
+                address = "Алматы, Алмалинский р-н",
+                rating = 3.3,
+                completedOrders = 1
             )
+
         )
     )
 
@@ -58,8 +76,18 @@ class FakeProductRepository @Inject constructor() : ProductRepository {
                 images = listOf("1"),
                 description = "Описание недоступно.",
                 specs = emptyList(),
-                delivery = DeliveryInfoUi()
+                delivery = DeliveryInfoUi(),
+                seller = SellerUi(
+                    id = "unknown",
+                    name = "Продавец",
+                    avatarUrl = null,
+                    address = "—",
+                    rating = 0.0,
+                    completedOrders = 0
+                )
+
             )
+
     }
 
     override suspend fun isLiked(productId: String): Boolean {
