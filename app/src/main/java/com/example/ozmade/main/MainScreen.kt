@@ -19,6 +19,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.ozmade.main.home.details.ProductDetailsRoute
 import com.example.ozmade.main.reviews.ReviewsRoute
+import com.example.ozmade.main.seller.SellerRoute
+import com.example.ozmade.main.seller.reviews.SellerReviewsRoute
 
 
 private sealed class BottomItem(
@@ -111,7 +113,12 @@ fun MainScreen(
                     onOrder = { /* TODO: оформить заказ */ },
                     onOpenReviews = { pid: String ->
                         navController.navigate("reviews/$pid")
+                    },
+                    onOpenSeller = { sellerId: String ->
+                        navController.navigate("seller/$sellerId")
                     }
+
+
 
 
                 )
@@ -127,6 +134,35 @@ fun MainScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
+            composable(
+                route = "seller/{sellerId}",
+                arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val sellerId = backStackEntry.arguments?.getString("sellerId") ?: return@composable
+
+                SellerRoute(
+                    sellerId = sellerId,
+                    onBack = { navController.popBackStack() },
+                    onOpenProduct = { productId -> navController.navigate("product/$productId") },
+                    onOpenSellerReviews = { sid: String ->
+                        navController.navigate("seller_reviews/$sid")
+                    }
+
+                )
+            }
+            composable(
+                route = "seller_reviews/{sellerId}",
+                arguments = listOf(navArgument("sellerId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val sellerId = backStackEntry.arguments?.getString("sellerId") ?: return@composable
+
+                SellerReviewsRoute(
+                    sellerId = sellerId,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+
 
 
         }

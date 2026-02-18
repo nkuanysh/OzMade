@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlin.math.max
@@ -36,7 +37,9 @@ fun ProductDetailsScreen(
     onShare: () -> Unit,
     onChat: () -> Unit,
     onOrder: () -> Unit,
-    onOpenReviews: (String) -> Unit
+    onOpenReviews: (String) -> Unit,
+    onOpenSeller: (String) -> Unit,
+
 
     ) {
     var tab by remember { mutableStateOf(DetailsTab.DESCRIPTION) }
@@ -167,8 +170,9 @@ fun ProductDetailsScreen(
                     )
                     Text(
                         text = "(${product.reviewsCount} отзывов)",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            textDecoration = TextDecoration.Underline),
+                        color = Color.Blue,
                         modifier = Modifier.clickable {
                             onOpenReviews(product.id)
 
@@ -241,8 +245,11 @@ fun ProductDetailsScreen(
 
             SellerBlock(
                 seller = product.seller,
-                modifier = Modifier.padding(horizontal = 16.dp)
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .clickable { onOpenSeller(product.seller.id) }
             )
+
 
             Spacer(Modifier.height(90.dp)) // чтобы контент не прятался за bottomBar
         }

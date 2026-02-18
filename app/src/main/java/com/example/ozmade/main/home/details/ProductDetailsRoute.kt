@@ -10,8 +10,10 @@ fun ProductDetailsRoute(
     onChat: () -> Unit,
     onOrder: () -> Unit,
     onOpenReviews: (String) -> Unit,
-    viewModel: ProductDetailsViewModel = hiltViewModel()
-) {
+    onOpenSeller: (String) -> Unit,
+    viewModel: ProductDetailsViewModel = hiltViewModel(),
+
+    ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(productId) {
@@ -39,8 +41,10 @@ fun ProductDetailsRoute(
                 onShare = { /* TODO: share */ },
                 onChat = onChat,
                 onOrder = onOrder,
-                onOpenReviews = onOpenReviews
-            )
+                onOpenReviews = onOpenReviews,
+                onOpenSeller = onOpenSeller,
+
+                )
         }
     }
 }

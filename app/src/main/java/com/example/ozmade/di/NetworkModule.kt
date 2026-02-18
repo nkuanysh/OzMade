@@ -14,6 +14,8 @@ import javax.inject.Singleton
 import com.example.ozmade.network.api.HomeApi
 import com.example.ozmade.network.api.ProductApi
 import com.example.ozmade.network.api.ReviewsApi
+import com.example.ozmade.network.api.SellerApi
+import com.example.ozmade.network.api.SellerReviewsApi
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -67,6 +69,18 @@ object NetworkModule {
     @Singleton
     fun provideReviewsApi(retrofit: Retrofit): ReviewsApi =
         retrofit.create(ReviewsApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideSellerApi(retrofit: Retrofit): SellerApi =
+        retrofit.create(SellerApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideSellerReviewsApi(retrofit: Retrofit): SellerReviewsApi =
+        retrofit.create(SellerReviewsApi::class.java)
+
+
 
 
 }
