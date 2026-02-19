@@ -32,6 +32,7 @@ fun ChatThreadRoute(
     productTitle: String,
     productPrice: Int,
     onBack: () -> Unit,
+    onOpenProduct: (String) -> Unit,
     viewModel: ChatThreadViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -49,7 +50,9 @@ fun ChatThreadRoute(
     ChatThreadScreen(
         uiState = uiState,
         onBack = onBack,
-        onSend = { viewModel.send(it) }
+        onSend = { viewModel.send(it) },
+        onOpenProduct = { onOpenProduct(productId) }
+
     )
 }
 
@@ -58,7 +61,8 @@ fun ChatThreadRoute(
 private fun ChatThreadScreen(
     uiState: ChatThreadUiState,
     onBack: () -> Unit,
-    onSend: (String) -> Unit
+    onSend: (String) -> Unit,
+    onOpenProduct: () -> Unit
 ) {
     var input by remember { mutableStateOf("") }
 
@@ -124,7 +128,7 @@ private fun ChatThreadScreen(
                     ProductContextBar(
                         title = uiState.productTitle,
                         price = uiState.productPrice,
-                        onClick = { /* позже: открыть детали товара */ }
+                        onClick = onOpenProduct
                     )
 
                     LazyColumn(

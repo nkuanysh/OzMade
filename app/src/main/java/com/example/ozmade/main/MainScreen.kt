@@ -118,12 +118,17 @@ fun MainScreen(
             composable(BottomItem.Chat.route) {
                 ChatScreen(
                     onOpenSupportChat = { navController.navigate("chat_support") },
-                    onOpenThread = { sellerId, productId ->
-                        // пока без имени/данных — передадим заглушки, позже возьмём из repo
-                        navController.navigate("chat/$sellerId/$productId?sellerName=Продавец&productTitle=Товар&price=0")
+                    onOpenThread = { t ->
+                        val encSellerName = Uri.encode(t.sellerName)
+                        val encProductTitle = Uri.encode(t.productTitle)
+
+                        navController.navigate(
+                            "chat/${t.sellerId}/${t.productId}?sellerName=$encSellerName&productTitle=$encProductTitle&price=${t.productPrice}"
+                        )
                     }
                 )
             }
+
 
 
 
@@ -248,7 +253,8 @@ fun MainScreen(
                     sellerName = sellerName.ifBlank { "Продавец" },
                     productTitle = productTitle.ifBlank { "Товар" },
                     productPrice = price,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onOpenProduct = { pid -> openProductFromDeep(pid) }
                 )
             }
 

@@ -21,7 +21,7 @@ import com.example.ozmade.main.chat.data.ChatThreadUi
 @Composable
 fun ChatScreen(
     onOpenSupportChat: () -> Unit = {},
-    onOpenThread: (sellerId: String, productId: String) -> Unit = { _, _ -> },
+    onOpenThread: (ChatThreadUi) -> Unit = {},
     viewModel: ChatListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -63,7 +63,7 @@ fun ChatScreen(
                         state.threads.forEach { t ->
                             ThreadCard(
                                 thread = t,
-                                onClick = { onOpenThread(t.sellerId, t.productId) }
+                                onClick = { onOpenThread(t) }
                             )
                         }
                     }
