@@ -20,5 +20,6 @@ data class ProductDto(
     val city: String,
     val address: String,
     val rating: Double,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val categoryId: String
 )

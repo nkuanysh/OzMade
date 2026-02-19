@@ -45,6 +45,7 @@ private val LikedIdsSaver: Saver<MutableList<String>, Any> = listSaver(
 @Composable
 fun HomeScreen(
     onOpenProduct: (String) -> Unit,
+    onOpenCategory: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
 
@@ -118,7 +119,8 @@ fun HomeScreen(
                     style = MaterialTheme.typography.headlineSmall,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 6.dp),
+                        .padding(top = 6.dp)
+                        ,
                 )
             }
 
@@ -196,7 +198,7 @@ fun HomeScreen(
                     items(categories) { cat ->
                         CategoryChip(
                             title = cat.title,
-                            onClick = { /* TODO: открыть категорию cat.id */ }
+                            onClick = { onOpenCategory(cat.id) }
                         )
                     }
                 }

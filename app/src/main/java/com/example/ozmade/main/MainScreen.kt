@@ -17,6 +17,7 @@ import com.example.ozmade.main.profile.ProfileScreen
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.ozmade.main.category.CategoryRoute
 import com.example.ozmade.main.home.details.ProductDetailsRoute
 import com.example.ozmade.main.reviews.ReviewsRoute
 import com.example.ozmade.main.seller.SellerRoute
@@ -39,6 +40,14 @@ fun MainScreen(
     onLogout: () -> Unit
 ) {
     val navController = rememberNavController()
+    fun openProductFromDeep(productId: String) {
+        navController.navigate("product/$productId") {
+            // очищаем всё до Home, чтобы Back из details возвращал Home
+            popUpTo(BottomItem.Home.route) { inclusive = false }
+            launchSingleTop = true
+        }
+    }
+
     val items = listOf(
         BottomItem.Home,
         BottomItem.Favorites,
@@ -82,8 +91,25 @@ fun MainScreen(
                     onOpenProduct = { productId ->
                         navController.navigate("product/$productId")
                     }
+                    ,
+                    onOpenCategory = { categoryId ->
+                        navController.navigate("category/$categoryId")
+                    }
                 )
             }
+            composable(
+                route = "category/{id}",
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val categoryId = backStackEntry.arguments?.getString("id") ?: return@composable
+
+                CategoryRoute(
+                    categoryId = categoryId,
+                    onBack = { navController.popBackStack() },
+                    onOpenProduct = { pid -> navController.navigate("product/$pid") }
+                )
+            }
+
 
             composable(BottomItem.Favorites.route) { FavoritesScreen() }
             composable(BottomItem.Chat.route) { ChatScreen() }
@@ -108,7 +134,7 @@ fun MainScreen(
 
                 ProductDetailsRoute(
                     productId = id,
-                    onBack = { navController.popBackStack() },
+                    onBack = { navController.popBackStack(BottomItem.Home.route, false) },
                     onChat = { /* TODO: открыть чат с продавцом */ },
                     onOrder = { /* TODO: оформить заказ */ },
                     onOpenReviews = { pid: String ->
@@ -143,7 +169,7 @@ fun MainScreen(
                 SellerRoute(
                     sellerId = sellerId,
                     onBack = { navController.popBackStack() },
-                    onOpenProduct = { productId -> navController.navigate("product/$productId") },
+                    onOpenProduct = { productId -> openProductFromDeep(productId) },
                     onOpenSellerReviews = { sid: String ->
                         navController.navigate("seller_reviews/$sid")
                     }
@@ -159,7 +185,7 @@ fun MainScreen(
                 SellerReviewsRoute(
                     sellerId = sellerId,
                     onBack = { navController.popBackStack() },
-                    onOpenProduct = { productId -> navController.navigate("product/$productId") }
+                    onOpenProduct = { productId -> openProductFromDeep(productId) },
 
                 )
             }

@@ -20,7 +20,8 @@ data class Product(
     val city: String,
     val address: String,
     val rating: Double,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val categoryId: String
 )
 
 sealed class HomeUiState {

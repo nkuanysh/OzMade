@@ -53,5 +53,6 @@ private fun ProductDto.toDomain(): Product =
         city = city,
         address = address,
         rating = rating,
-        imageUrl = imageUrl
+        imageUrl = imageUrl,
+        categoryId = categoryId
     )
