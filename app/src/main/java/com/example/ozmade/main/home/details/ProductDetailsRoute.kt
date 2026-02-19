@@ -7,13 +7,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun ProductDetailsRoute(
     productId: String,
     onBack: () -> Unit,
-    onChat: () -> Unit,
+    onChat: (sellerId: String, sellerName: String, productId: String, productTitle: String, price: Int) -> Unit,
     onOrder: () -> Unit,
     onOpenReviews: (String) -> Unit,
     onOpenSeller: (String) -> Unit,
     viewModel: ProductDetailsViewModel = hiltViewModel(),
-
-    ) {
+) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(productId) {
@@ -34,19 +33,27 @@ fun ProductDetailsRoute(
         }
 
         is ProductDetailsUiState.Data -> {
+            val p = state.product
+
             ProductDetailsScreen(
-                product = state.product,
+                product = p,
                 liked = state.liked,
                 onToggleLike = { viewModel.toggleLike() },
                 onShare = { /* TODO: share */ },
-                onChat = onChat,
+                onChat = {
+                    onChat(
+                        p.seller.id,
+                        p.seller.name,
+                        p.id,
+                        p.title,
+                        p.price
+                    )
+                },
                 onOrder = onOrder,
                 onOpenReviews = onOpenReviews,
                 onOpenSeller = onOpenSeller,
-                onBack = onBack,
-
-
-                )
+                onBack = onBack
+            )
         }
     }
 }
