@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">OzMade</string>
+    <string name="choose_language_title">Тілді таңдаңыз / Выберите язык</string>
+
+    <string name="lang_kk">Қазақша</string>
+    <string name="lang_ru">Русский</string>
+
+    <string name="auth_title">Вход</string>
+    <string name="enter_phone">Введите номер телефона</string>
+    <string name="sms_info">Отправим СМС с кодом подтверждения</string>
+    <string name="send_code">Отправить код</string>
+
+    <string name="enter_code">Введите код</string>
+    <string name="sent_to">Отправили его на номер %1$s</string>
+
+    <string name="continue_agree">Продолжая, вы соглашаетесь с " "</string>
+    <string name="privacy_policy">Политикой конфиденциальности</string>
+    <string name="and_word">" " и " " </string>
+    <string name="terms">Пользовательским соглашением</string>
+
+    <string name="resend_in">Отправить повторно через: %1$d</string>
+    <string name="resend">Отправить ещё раз</string>
 </resources>

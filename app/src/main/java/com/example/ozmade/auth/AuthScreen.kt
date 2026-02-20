@@ -15,7 +15,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun AuthNavHost(
     viewModel: AuthViewModel = hiltViewModel(),
-    onAuthSuccess: () -> Unit
+    onAuthSuccess: () -> Unit,
+    onOpenPrivacy: () -> Unit = {},
+    onOpenTerms: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val activity = LocalContext.current as Activity
@@ -24,89 +26,38 @@ fun AuthNavHost(
         if (uiState is AuthUiState.Success) onAuthSuccess()
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        when (val state = uiState) {
-            is AuthUiState.Loading -> CircularProgressIndicator()
+    when (val state = uiState) {
+        is AuthUiState.OtpRequired -> OtpCodeScreen(
+            phone = state.phone,
+            isLoading = false,
+            errorText = (uiState as? AuthUiState.Error)?.message,
+            onVerify = { otp -> viewModel.verifyOtp(state.verificationId, otp) },
+            onResend = { viewModel.requestOtp(activity, state.phone) } // повторно отправить
+        )
 
-            is AuthUiState.OtpRequired -> OtpScreen(
-                phone = state.phone,
-                onVerify = { otp -> viewModel.verifyOtp(state.verificationId, otp) }
-            )
+        is AuthUiState.Loading -> PhoneLoginScreen(
+            isLoading = true,
+            errorText = null,
+            onSendCode = { phone -> viewModel.requestOtp(activity, phone) },
+            onOpenPrivacy = onOpenPrivacy,
+            onOpenTerms = onOpenTerms
+        )
 
-            else -> PhoneScreen(
-                onRequestOtp = { phone -> viewModel.requestOtp(activity, phone) }
-            )
-        }
+        is AuthUiState.Error -> PhoneLoginScreen(
+            isLoading = false,
+            errorText = state.message,
+            onSendCode = { phone -> viewModel.requestOtp(activity, phone) },
+            onOpenPrivacy = onOpenPrivacy,
+            onOpenTerms = onOpenTerms
+        )
 
-        if (uiState is AuthUiState.Error) {
-            Text((uiState as AuthUiState.Error).message, color = MaterialTheme.colorScheme.error)
-        }
-    }
-}
-
-
-@Composable
-fun LoginScreen(
-    onLogin: (String, String) -> Unit,
-    onGoogleLogin: () -> Unit,
-    onSwitchToRegister: () -> Unit
-) {
-    var phone by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-
-    Text("Welcome Back", style = MaterialTheme.typography.headlineMedium)
-    Spacer(modifier = Modifier.height(16.dp))
-
-    OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Phone Number") })
-    Spacer(modifier = Modifier.height(8.dp))
-    OutlinedTextField(
-        value = password,
-        onValueChange = { password = it },
-        label = { Text("Password") },
-        visualTransformation = PasswordVisualTransformation()
-    )
-
-    Spacer(modifier = Modifier.height(16.dp))
-    Button(onClick = { onLogin(phone, password) }, modifier = Modifier.fillMaxWidth()) {
-        Text("Login")
-    }
-
-    // Google Sign In Button
-    OutlinedButton(onClick = onGoogleLogin, modifier = Modifier.fillMaxWidth()) {
-        Text("Sign in with Google")
-    }
-
-    TextButton(onClick = onSwitchToRegister) {
-        Text("Don't have an account? Register")
-    }
-}
-
-@Composable
-fun RegisterScreen(
-    onRegisterBuyer: (String) -> Unit,
-    onSwitchToLogin: () -> Unit
-) {
-    var phone by remember { mutableStateOf("") }
-
-    Text("Create Account", style = MaterialTheme.typography.headlineMedium)
-    Spacer(modifier = Modifier.height(16.dp))
-
-    OutlinedTextField(value = phone, onValueChange = { phone = it }, label = { Text("Phone Number") })
-
-    Spacer(modifier = Modifier.height(16.dp))
-    Button(onClick = { onRegisterBuyer(phone) }, modifier = Modifier.fillMaxWidth()) {
-        Text("Request OTP")
-    }
-
-    // Note: Seller Registration usually happens in Profile -> "Become Seller"
-    // or you can add a tab here if you want strict separation at start.
-
-    TextButton(onClick = onSwitchToLogin) {
-        Text("Already have an account? Login")
+        else -> PhoneLoginScreen(
+            isLoading = false,
+            errorText = null,
+            onSendCode = { phone -> viewModel.requestOtp(activity, phone) },
+            onOpenPrivacy = onOpenPrivacy,
+            onOpenTerms = onOpenTerms
+        )
     }
 }
 
