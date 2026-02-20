@@ -25,7 +25,8 @@ import com.example.ozmade.main.seller.reviews.SellerReviewsRoute
 import com.example.ozmade.main.support.SupportScreen
 import com.example.ozmade.main.support.SupportChatScreen
 import android.net.Uri
-
+import androidx.compose.runtime.getValue
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 private sealed class BottomItem(
     val route: String,
@@ -43,6 +44,20 @@ fun MainScreen(
     onLogout: () -> Unit
 ) {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+
+    val showBottomBar = when {
+        currentRoute == null -> true
+
+        // скрываем на экране треда чата (это точное route из NavHost)
+        currentRoute.startsWith("chat/{sellerId}/{productId}") -> false
+
+        // если хочешь, чтобы и саппорт чат тоже был без нижнего бара:
+        currentRoute == "support_chat" -> false
+
+        else -> true
+    }
     fun openProductFromDeep(productId: String) {
         navController.navigate("product/$productId") {
             // очищаем всё до Home, чтобы Back из details возвращал Home
@@ -60,26 +75,28 @@ fun MainScreen(
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+            if (showBottomBar) {
+                NavigationBar {
+                    val currentDestination = navController.currentBackStackEntryAsState().value?.destination
 
-                items.forEach { item ->
-                    val selected = currentDestination?.route == item.route
+                    items.forEach { item ->
+                        val selected = currentDestination?.route == item.route
 
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                        NavigationBarItem(
+                            selected = selected,
+                            onClick = {
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = item.icon,
-                        label = { Text(item.label) }
-                    )
+                            },
+                            icon = item.icon,
+                            label = { Text(item.label) }
+                        )
+                    }
                 }
             }
         }
@@ -117,7 +134,7 @@ fun MainScreen(
             composable(BottomItem.Favorites.route) { FavoritesScreen() }
             composable(BottomItem.Chat.route) {
                 ChatScreen(
-                    onOpenSupportChat = { navController.navigate("chat_support") },
+//                    onOpenSupportChat = { navController.navigate("support_chat") },
                     onOpenThread = { t ->
                         val encSellerName = Uri.encode(t.sellerName)
                         val encProductTitle = Uri.encode(t.productTitle)

@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MoreVert
@@ -22,6 +23,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ozmade.main.chat.data.ChatMessageUi
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,6 +73,11 @@ private fun ChatThreadScreen(
 ) {
     var input by remember { mutableStateOf("") }
 
+    // меню в topbar
+    var menuExpanded by remember { mutableStateOf(false) }
+
+    val focusManager = LocalFocusManager.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -77,34 +89,107 @@ private fun ChatThreadScreen(
                     IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) }
                 },
                 actions = {
-                    IconButton(onClick = { /* TODO menu */ }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = null)
+                    Box {
+                        IconButton(onClick = { menuExpanded = true }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = null)
+                        }
+
+                        DropdownMenu(
+                            expanded = menuExpanded,
+                            onDismissRequest = { menuExpanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Удалить чат") },
+                                onClick = {
+                                    menuExpanded = false
+                                    // TODO: delete chat action
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Заблокировать") },
+                                onClick = {
+                                    menuExpanded = false
+                                    // TODO: block action
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Пожаловаться") },
+                                onClick = {
+                                    menuExpanded = false
+                                    // TODO: report action
+                                }
+                            )
+                        }
                     }
                 }
             )
         },
         bottomBar = {
+            // красивый input bar
             Surface(tonalElevation = 8.dp) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(10.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    OutlinedTextField(
+                    IconButton(onClick = {
+                        // TODO: emoji panel
+                        focusManager.clearFocus()
+                    }) {
+                        Icon(Icons.Default.Face, contentDescription = null)
+                    }
+
+                    // поле ввода
+                    TextField(
                         value = input,
                         onValueChange = { input = it },
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .heightIn(min = 44.dp),
                         placeholder = { Text("Сообщение…") },
                         singleLine = true,
-                        shape = RoundedCornerShape(14.dp)
+                        shape = RoundedCornerShape(18.dp),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent
+                        )
                     )
-                    Spacer(Modifier.width(10.dp))
+
+                    Spacer(Modifier.width(4.dp))
+
                     IconButton(onClick = {
-                        val text = input.trim()
-                        if (text.isNotEmpty()) {
-                            onSend(text)
-                            input = ""
+                        // TODO: attach
+                        focusManager.clearFocus()
+                    }) {
+                        Icon(Icons.Default.Add, contentDescription = null)
+                    }
+
+                    val trimmed = input.trim()
+
+                    // справа: если пусто -> mic, если есть текст -> send
+                    if (trimmed.isEmpty()) {
+                        IconButton(onClick = {
+                            // TODO: audio record
+                            focusManager.clearFocus()
+                        }) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null)
                         }
-                    }) { Icon(Icons.Default.Send, null) }
+                    } else {
+                        FilledIconButton(
+                            onClick = {
+                                onSend(trimmed)
+                                input = ""
+                                focusManager.clearFocus()
+                            },
+                            shape = CircleShape
+                        ) {
+                            Icon(Icons.Default.Send, contentDescription = null)
+                        }
+                    }
                 }
             }
         }
@@ -112,19 +197,22 @@ private fun ChatThreadScreen(
 
         when (uiState) {
             is ChatThreadUiState.Loading -> {
-                Box(Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+                Box(
+                    Modifier.padding(padding).fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) { CircularProgressIndicator() }
             }
+
             is ChatThreadUiState.Error -> {
-                Box(Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(uiState.message, color = MaterialTheme.colorScheme.error)
-                }
+                Box(
+                    Modifier.padding(padding).fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) { Text(uiState.message, color = MaterialTheme.colorScheme.error) }
             }
+
             is ChatThreadUiState.Data -> {
                 Column(Modifier.padding(padding).fillMaxSize()) {
 
-                    // ✅ блок товара “впритык” под topbar
                     ProductContextBar(
                         title = uiState.productTitle,
                         price = uiState.productPrice,

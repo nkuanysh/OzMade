@@ -33,7 +33,7 @@ fun ChatScreen(
         Spacer(Modifier.height(12.dp))
 
         // ✅ Поддержка всегда сверху
-        ChatSupportCard(onClick = onOpenSupportChat)
+//        ChatSupportCard(onClick = onOpenSupportChat)
 
         Spacer(Modifier.height(12.dp))
 
@@ -73,29 +73,29 @@ fun ChatScreen(
     }
 }
 
-@Composable
-private fun ChatSupportCard(onClick: () -> Unit) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
-    ) {
-        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Person, contentDescription = null)
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text("Служба поддержки", style = MaterialTheme.typography.titleMedium)
-                Text(
-                    "Напишите ваш вопрос…",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Text("8:00–22:00", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    }
-}
+//@Composable
+//private fun ChatSupportCard(onClick: () -> Unit) {
+//    Card(
+//        shape = RoundedCornerShape(16.dp),
+//        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
+//    ) {
+//        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+//            Icon(Icons.Default.Person, contentDescription = null)
+//            Spacer(Modifier.width(12.dp))
+//            Column(Modifier.weight(1f)) {
+//                Text("Служба поддержки", style = MaterialTheme.typography.titleMedium)
+//                Text(
+//                    "Напишите ваш вопрос…",
+//                    style = MaterialTheme.typography.bodySmall,
+//                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+//                    maxLines = 1,
+//                    overflow = TextOverflow.Ellipsis
+//                )
+//            }
+//            Text("8:00–22:00", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+//        }
+//    }
+//}
 
 @Composable
 private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit) {
