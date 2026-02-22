@@ -7,9 +7,10 @@ import androidx.navigation.compose.*
 import com.example.ozmade.auth.AuthNavHost
 import com.example.ozmade.auth.LanguageScreen
 import com.example.ozmade.main.MainScreen
-import com.example.ozmade.main.locale.AppLang
-import com.example.ozmade.main.locale.LanguageStore
+import com.example.ozmade.main.user.profile.locale.AppLang
+import com.example.ozmade.main.user.profile.locale.LanguageStore
 import kotlinx.coroutines.launch
+import com.google.firebase.auth.FirebaseAuth
 
 private object Routes {
     const val LANG = "lang"
@@ -27,8 +28,14 @@ fun AppNavHost(navController: NavHostController) {
     var start by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        // если язык уже выбирали — сразу auth
-        start = if (langStore.isLangChosen()) Routes.AUTH else Routes.LANG
+        val langChosen = langStore.isLangChosen()
+        val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
+
+        start = when {
+            !langChosen -> Routes.LANG
+            isLoggedIn -> Routes.HOME
+            else -> Routes.AUTH
+        }
     }
 
     if (start == null) return

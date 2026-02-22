@@ -1,7 +1,7 @@
 package com.example.ozmade.di
 
-import com.example.ozmade.main.profile.data.FakeProfileRepository
-import com.example.ozmade.main.profile.data.ProfileRepository
+import com.example.ozmade.main.user.profile.data.FakeProfileRepository
+import com.example.ozmade.main.user.profile.data.ProfileRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

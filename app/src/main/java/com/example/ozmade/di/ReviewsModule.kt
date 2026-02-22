@@ -1,8 +1,8 @@
 package com.example.ozmade.di
 
-import com.example.ozmade.main.reviews.FakeReviewsRepository
-import com.example.ozmade.main.reviews.RealReviewsRepository
-import com.example.ozmade.main.reviews.ReviewsRepository
+import com.example.ozmade.main.home.reviews.FakeReviewsRepository
+import com.example.ozmade.main.home.reviews.RealReviewsRepository
+import com.example.ozmade.main.home.reviews.ReviewsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn

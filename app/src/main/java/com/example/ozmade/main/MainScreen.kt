@@ -12,21 +12,31 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.*
-import com.example.ozmade.main.profile.EditProfileScreen
-import com.example.ozmade.main.profile.ProfileScreen
+import com.example.ozmade.main.user.profile.EditProfileScreen
+import com.example.ozmade.main.user.profile.ProfileScreen
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.example.ozmade.main.category.CategoryRoute
+import com.example.ozmade.main.home.category.CategoryRoute
 import com.example.ozmade.main.home.details.ProductDetailsRoute
-import com.example.ozmade.main.reviews.ReviewsRoute
-import com.example.ozmade.main.seller.SellerRoute
-import com.example.ozmade.main.seller.reviews.SellerReviewsRoute
-import com.example.ozmade.main.support.SupportScreen
-import com.example.ozmade.main.support.SupportChatScreen
+import com.example.ozmade.main.home.reviews.ReviewsRoute
+import com.example.ozmade.main.home.seller.SellerRoute
+import com.example.ozmade.main.home.seller.reviews.SellerReviewsRoute
+import com.example.ozmade.main.user.profile.support.SupportScreen
+import com.example.ozmade.main.user.profile.support.SupportChatScreen
 import android.net.Uri
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.ozmade.main.user.chat.ChatScreen
+import com.example.ozmade.main.user.favorites.FavoritesScreen
+import com.example.ozmade.main.home.HomeScreen
+import com.example.ozmade.main.seller.SellerMainScreen
+import com.example.ozmade.main.user.chat.ChatThreadRoute
+import com.example.ozmade.main.seller.onboarding.SellerGateRoute
+import com.example.ozmade.main.seller.onboarding.SellerOnboardingScreen
 
 private sealed class BottomItem(
     val route: String,
@@ -55,6 +65,11 @@ fun MainScreen(
 
         // если хочешь, чтобы и саппорт чат тоже был без нижнего бара:
         currentRoute == "support_chat" -> false
+
+        currentRoute == "seller_gate" -> false
+        currentRoute == "seller_onboarding" -> false
+        currentRoute == "seller_registration" -> false
+        currentRoute == "seller_main" -> false
 
         else -> true
     }
@@ -153,7 +168,9 @@ fun MainScreen(
                 ProfileScreen(
                     onLogout = onLogout,
                     onEditProfile = { navController.navigate("edit_profile") },
-                    onSupport = { navController.navigate("support") }
+                    onSupport = { navController.navigate("support") },
+                    onBecomeSeller = { navController.navigate("seller_gate") }
+
 
                 )
             }
@@ -264,7 +281,7 @@ fun MainScreen(
                 val productTitle = backStackEntry.arguments?.getString("productTitle") ?: ""
                 val price = backStackEntry.arguments?.getInt("price") ?: 0
 
-                com.example.ozmade.main.chat.ChatThreadRoute(
+                ChatThreadRoute(
                     sellerId = sellerId,
                     productId = productId,
                     sellerName = sellerName.ifBlank { "Продавец" },
@@ -272,6 +289,64 @@ fun MainScreen(
                     productPrice = price,
                     onBack = { navController.popBackStack() },
                     onOpenProduct = { pid -> openProductFromDeep(pid) }
+                )
+            }
+            composable("seller_gate") {
+                SellerGateRoute(
+                    onOpenSellerHome = { navController.navigate("seller_main") },
+                    onOpenOnboarding = { navController.navigate("seller_onboarding") },
+                    onBack = {
+                        navController.navigate("profile") {
+                            launchSingleTop = true
+                            popUpTo("profile") { inclusive = false }
+                        }
+                    }
+                )
+            }
+
+            composable("seller_onboarding") {
+                SellerOnboardingScreen(
+                    onBack = {
+                        navController.navigate("profile") {
+                            launchSingleTop = true
+                            popUpTo("profile") { inclusive = false }
+                        }
+                    },
+                    onContinue = { navController.navigate("seller_registration") }
+                )
+            }
+
+            composable("seller_main") {
+                com.example.ozmade.main.seller.SellerMainScreen(
+                    onExitSeller = { navController.navigate("profile") }
+                )
+            }
+//            composable("seller_onboarding") {
+//                SellerOnboardingScreen(
+//                    onBack = { navController.popBackStack() },
+//                    onContinue = { navController.navigate("seller_registration") }
+//                )
+//            }
+            composable("seller_registration") {
+                com.example.ozmade.main.seller.registration.SellerRegistrationRoute(
+                    onBack = { navController.popBackStack() },
+                    onOpenSellerTerms = { /* TODO */ },
+                    onOpenPrivacy = { /* TODO */ },
+                    onSuccess = {
+                        navController.navigate("seller_main") {
+                            popUpTo("seller_registration") { inclusive = true }
+                        }
+                    }
+                )
+            }
+            composable("seller_main") {
+                SellerMainScreen(
+                    onExitSeller = {
+                        navController.navigate("profile") {
+                            launchSingleTop = true
+                            popUpTo("profile") { inclusive = false }
+                        }
+                    }
                 )
             }
 

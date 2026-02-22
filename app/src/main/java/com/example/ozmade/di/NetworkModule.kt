@@ -1,5 +1,7 @@
 package com.example.ozmade.di
 
+import com.example.ozmade.main.seller.data.SellerRepository
+import com.example.ozmade.main.seller.data.SellerRepositoryImpl
 import com.example.ozmade.network.api.ProfileApi
 import com.example.ozmade.network.auth.FirebaseAuthInterceptor
 import dagger.Module
