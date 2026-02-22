@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.ui.Alignment
+import com.example.ozmade.main.seller.products.SellerProductsRoute
 
 private sealed class SellerBottomItem(
     val route: String,
@@ -42,10 +42,10 @@ fun SellerMainScreen(
     Scaffold(
         bottomBar = {
             NavigationBar {
-                val current = navController.currentBackStackEntryAsState().value?.destination?.route
+                val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
                 items.forEach { item ->
                     NavigationBarItem(
-                        selected = current == item.route,
+                        selected = currentRoute == item.route,
                         onClick = {
                             navController.navigate(item.route) {
                                 popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -66,24 +66,23 @@ fun SellerMainScreen(
             modifier = Modifier.padding(padding)
         ) {
             composable(SellerBottomItem.Products.route) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Seller Products")
-                }
+                SellerProductsRoute(
+                    onAddProduct = { /* TODO nav to create */ },
+                    onOpenEdit = { productId -> /* TODO nav to edit */ }
+                )
             }
-            composable(SellerBottomItem.Products.route) {
+            composable(SellerBottomItem.Orders.route) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Seller Oreders")
+                    Text("Seller Orders (TODO)")
                 }
             }
             composable(SellerBottomItem.Chat.route) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Seller Chat")
+                    Text("Seller Chat (TODO)")
                 }
             }
             composable(SellerBottomItem.Profile.route) {
-                SellerProfileScreen(
-                    onBecomeBuyer = onExitSeller
-                )
+                SellerProfileScreen(onBecomeBuyer = onExitSeller)
             }
         }
     }

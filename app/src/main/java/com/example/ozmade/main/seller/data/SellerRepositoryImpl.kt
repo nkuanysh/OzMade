@@ -1,5 +1,6 @@
 package com.example.ozmade.main.seller.data
 
+import com.example.ozmade.main.seller.products.SellerProductUi
 import com.example.ozmade.network.dto.SellerRegistrationRequestDto
 import com.example.ozmade.network.dto.SellerRegistrationResponseDto
 import javax.inject.Inject
@@ -20,5 +21,21 @@ class SellerRepositoryImpl @Inject constructor(
             sellerId = "temp",
             status = "pending"
         )
+    }
+
+    override suspend fun getMyProducts(): List<SellerProductUi> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateProductPrice(productId: String, newPrice: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun toggleProductSaleState(productId: String) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteProduct(productId: String) {
+        TODO("Not yet implemented")
     }
 }
