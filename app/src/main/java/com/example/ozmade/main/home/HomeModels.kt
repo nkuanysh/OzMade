@@ -16,7 +16,7 @@ data class Category(
 data class Product(
     val id: String,
     val title: String,
-    val price: Int,
+    val price: Double,
     val city: String,
     val address: String,
     val rating: Double,

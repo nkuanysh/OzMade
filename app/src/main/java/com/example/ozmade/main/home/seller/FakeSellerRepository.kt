@@ -23,10 +23,10 @@ class FakeSellerRepository @Inject constructor() : SellerRepository {
 
         // Заглушка товаров продавца
         val products = listOf(
-            SellerProductUi("1", "Домашний сыр", 2500, "Алматы", "Алмалинский р-н", 4.8),
-            SellerProductUi("2", "Тойбастар набор", 5500, "Алматы", "Ауэзовский р-н", 4.6),
-            SellerProductUi("8", "Букет к 8 марта", 7000, "Алматы", "Жетысу", 4.9),
-            SellerProductUi("7", "Пельмени домашние", 2800, "Алматы", "Медеуский р-н", 4.4),
+            SellerProductUi("1", "Домашний сыр", 2500.0, "Алматы", "Алмалинский р-н", 4.8),
+            SellerProductUi("2", "Тойбастар набор", 5500.0, "Алматы", "Ауэзовский р-н", 4.6),
+            SellerProductUi("8", "Букет к 8 марта", 7000.0, "Алматы", "Жетысу", 4.9),
+            SellerProductUi("7", "Пельмени домашние", 280.0, "Алматы", "Медеуский р-н", 4.4),
         )
 
         return SellerPageResponse(seller, products)

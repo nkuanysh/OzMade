@@ -1,14 +1,16 @@
 package com.example.ozmade.main.home.details
 
-import com.example.ozmade.network.api.ProductApi
+import com.example.ozmade.network.api.OzMadeApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class RealProductRepository @Inject constructor(
-    private val api: ProductApi
+    private val api: OzMadeApi
 ) : ProductRepository {
 
-    suspend fun getProduct(id: String): ProductDetailsUi {
-        val dto = api.getProductDetails(id)
+    override suspend fun getProductDetails(productId: String): ProductDetailsUi {
+        val dto = api.getProductDetailsFull(productId)
 
         return ProductDetailsUi(
             id = dto.id,
@@ -38,15 +40,21 @@ class RealProductRepository @Inject constructor(
         )
     }
 
-    override suspend fun getProductDetails(productId: String): ProductDetailsUi {
-        TODO("Not yet implemented")
+    override suspend fun isLiked(productId: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val response = api.getFavorites()
+            response.body()?.any { it.id.toString() == productId } == true
+        } catch (e: Exception) {
+            false
+        }
     }
 
-    override suspend fun isLiked(productId: String): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun toggleLike(productId: String): Boolean {
-        TODO("Not yet implemented")
+    override suspend fun toggleLike(productId: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val response = api.toggleFavorite(productId.toInt())
+            response.isSuccessful && response.body()?.status == "added"
+        } catch (e: Exception) {
+            false
+        }
     }
 }

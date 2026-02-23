@@ -1,26 +1,32 @@
 package com.example.ozmade.main.home
 
-import com.example.ozmade.network.api.HomeApi
-import com.example.ozmade.network.dto.AdDto
-import com.example.ozmade.network.dto.CategoryDto
-import com.example.ozmade.network.dto.ProductDto
+import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.network.model.AdDto
+import com.example.ozmade.network.model.CategoryDto
+import com.example.ozmade.network.model.ProductDto
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
 
 class RealHomeRepository @Inject constructor(
-    private val api: HomeApi
+    private val api: OzMadeApi
 ) : HomeRepository {
 
     override suspend fun getHome(): HomeResponse = coroutineScope {
-        // Параллельно: быстрее
         val adsDeferred = async { api.getAds() }
         val catsDeferred = async { api.getCategories() }
+        val trendingDeferred = async { api.getTrendingProducts() }
         val productsDeferred = async { api.getProducts() }
 
-        val ads = adsDeferred.await().map { it.toDomain() }
-        val categories = catsDeferred.await().map { it.toDomain() }
-        val products = productsDeferred.await().map { it.toDomain() }
+        val adsResponse = adsDeferred.await()
+        val catsResponse = catsDeferred.await()
+        val trendingResponse = trendingDeferred.await()
+        val productsResponse = productsDeferred.await()
+
+        val ads = adsResponse.body()?.map { it.toDomain() } ?: emptyList()
+        val categories = catsResponse.body()?.map { it.toDomain() } ?: emptyList()
+        val products = productsResponse.body()?.map { it.toDomain() } ?: emptyList()
+        val trendingProducts = trendingResponse.body()?.map { it.toDomain() } ?: emptyList()
 
         HomeResponse(
             ads = ads,
@@ -47,12 +53,12 @@ private fun CategoryDto.toDomain(): Category =
 
 private fun ProductDto.toDomain(): Product =
     Product(
-        id = id,
-        title = title,
-        price = price,
-        city = city,
-        address = address,
-        rating = rating,
-        imageUrl = imageUrl,
-        categoryId = categoryId
+        id = id.toString(),
+        title = title ?: name ?: "Unknown",
+        price = cost ?: price ?: 0.0,
+        city = address?.substringBefore(",") ?: "Unknown",
+        address = address ?: "Unknown",
+        rating = averageRating ?: 0.0,
+        imageUrl = imageUrl ?: imageName ?: "",
+        categoryId = type ?: ""
     )
