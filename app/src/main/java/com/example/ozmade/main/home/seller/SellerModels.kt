@@ -13,7 +13,7 @@ data class SellerHeaderUi(
 data class SellerProductUi(
     val id: String,
     val title: String,
-    val price: Double,
+    val price: Int,
     val city: String,
     val address: String,
     val rating: Double

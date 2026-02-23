@@ -1,10 +1,10 @@
 package com.example.ozmade.main.home.reviews
 
-import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.network.api.ReviewsApi
 import javax.inject.Inject
 
 class RealReviewsRepository @Inject constructor(
-    private val api: OzMadeApi
+    private val api: ReviewsApi
 ) : ReviewsRepository {
 
     override suspend fun getReviews(productId: String): ReviewsResponse {
@@ -22,7 +22,7 @@ class RealReviewsRepository @Inject constructor(
                 id = r.id,
                 userName = r.userName,
                 rating = r.rating,
-                dateText = r.createdAt,
+                dateText = r.createdAt, // пока просто показываем как текст
                 text = r.text
             )
         }

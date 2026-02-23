@@ -1,10 +1,10 @@
 package com.example.ozmade.main.home.seller.reviews
 
-import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.network.api.SellerReviewsApi
 import javax.inject.Inject
 
 class RealSellerReviewsRepository @Inject constructor(
-    private val api: OzMadeApi
+    private val api: SellerReviewsApi
 ) : SellerReviewsRepository {
 
     override suspend fun getSellerReviews(sellerId: String): SellerReviewsResponse {

@@ -1,12 +1,10 @@
 package com.example.ozmade.main.home.seller
 
-import com.example.ozmade.network.api.OzMadeApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.example.ozmade.network.api.SellerApi
 import javax.inject.Inject
 
 class RealSellerRepository @Inject constructor(
-    private val api: OzMadeApi
+    private val api: SellerApi
 ) : SellerRepository {
 
     override suspend fun getSellerPage(sellerId: String): SellerPageResponse {
@@ -36,21 +34,7 @@ class RealSellerRepository @Inject constructor(
         return SellerPageResponse(seller, products)
     }
 
-    override suspend fun toggleLike(productId: String): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val response = api.toggleFavorite(productId.toInt())
-            response.isSuccessful && response.body()?.status == "added"
-        } catch (e: Exception) {
-            false
-        }
-    }
-
-    override suspend fun isLiked(productId: String): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val response = api.getFavorites()
-            response.body()?.any { it.id.toString() == productId } == true
-        } catch (e: Exception) {
-            false
-        }
-    }
+    // лайки позже можно вынести в отдельный FavoritesApi
+    override suspend fun toggleLike(productId: String): Boolean = false
+    override suspend fun isLiked(productId: String): Boolean = false
 }

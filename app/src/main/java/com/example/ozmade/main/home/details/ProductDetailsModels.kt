@@ -19,7 +19,7 @@ data class SellerUi(
 data class ProductDetailsUi(
     val id: String,
     val title: String,
-    val price: Double,
+    val price: Int,
     val rating: Double,
     val reviewsCount: Int,
     val ordersCount: Int,

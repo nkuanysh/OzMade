@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.ozmade.R
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -18,9 +19,28 @@ class HomeViewModel @Inject constructor(
 
     init {
         load()
+
     }
 
+    private fun loadTestData() {
+        val myAds = listOf(
+            AdBanner(id = "1", title = "Супер скидки!", imageRes = R.drawable.banner1),
+            AdBanner(id = "2", title = "Новые товары!", imageRes = R.drawable.banner2),
+            AdBanner(id = "3", title = "Бесплатная доставка!", imageRes = R.drawable.banner3)
+        )
+
+        val categoriesList = listOf<Category>() // твои категории
+        val productsList = listOf<Product>() // твои продукты
+
+        _uiState.value = HomeUiState.Data(
+            ads = myAds,
+            categories = categoriesList,
+            products = productsList
+        )
+
+    }
     fun load() {
+
         _uiState.value = HomeUiState.Loading
         viewModelScope.launch {
             runCatching { repo.getHome() }
@@ -35,5 +55,6 @@ class HomeViewModel @Inject constructor(
                     _uiState.value = HomeUiState.Error(it.message ?: "Ошибка загрузки Home")
                 }
         }
+
     }
 }

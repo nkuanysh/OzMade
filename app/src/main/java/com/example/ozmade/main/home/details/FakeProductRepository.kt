@@ -11,7 +11,7 @@ class FakeProductRepository @Inject constructor() : ProductRepository {
         ProductDetailsUi(
             id = "1",
             title = "Домашний сыр",
-            price = 2500.0,
+            price = 2500,
             rating = 4.8,
             reviewsCount = 12,
             ordersCount = 0,
@@ -38,7 +38,7 @@ class FakeProductRepository @Inject constructor() : ProductRepository {
         ProductDetailsUi(
             id = "2",
             title = "Тойбастар набор",
-            price = 5500.0,
+            price = 5500,
             rating = 4.6,
             reviewsCount = 8,
             ordersCount = 3,
@@ -69,7 +69,7 @@ class FakeProductRepository @Inject constructor() : ProductRepository {
             ?: ProductDetailsUi(
                 id = productId,
                 title = "Товар не найден",
-                price = 0.0,
+                price = 0,
                 rating = 0.0,
                 reviewsCount = 0,
                 ordersCount = 0,

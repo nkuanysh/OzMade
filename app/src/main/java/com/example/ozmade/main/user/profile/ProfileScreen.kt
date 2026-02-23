@@ -1,26 +1,27 @@
 package com.example.ozmade.main.user.profile
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ozmade.main.user.profile.data.ProfileUiState
 import com.example.ozmade.main.user.profile.data.ProfileViewModel
@@ -40,202 +41,298 @@ fun ProfileScreen(
 ) {
     var lang by rememberSaveable { mutableStateOf(AppLang.RUS) }
     val uiState by viewModel.uiState.collectAsState()
+
     LaunchedEffect(Unit) {
         viewModel.load()
     }
 
+    Scaffold(
+        containerColor = Color(0xFFF8F9FA)
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 20.dp)
+        ) {
+            // --- ВЕРХНЯЯ ПАНЕЛЬ (Язык) ---
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                LanguageSelector(selectedLang = lang, onLangSelected = { lang = it })
+            }
+
+            // --- БЛОК ПОЛЬЗОВАТЕЛЯ ---
+            when (val state = uiState) {
+                is ProfileUiState.Loading -> ProfileHeaderLoading()
+                is ProfileUiState.Error -> Text(state.message, color = MaterialTheme.colorScheme.error)
+                is ProfileUiState.Data -> {
+                    ProfileHeader(
+                        name = state.user.name,
+                        phone = state.user.phone,
+                        onEdit = onEditProfile
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(32.dp))
+
+            // --- МЕНЮ РАЗДЕЛОВ ---
+            Text(
+                text = "Личное",
+                style = MaterialTheme.typography.labelLarge,
+                color = Color.Gray,
+                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
+            )
+
+            ProfileSectionCard {
+                ProfileMenuItem(
+                    icon = Icons.Outlined.Notifications,
+                    title = "Уведомления",
+                    iconColor = Color(0xFF5C6BC0),
+                    onClick = onNotifications
+                )
+                MenuDivider()
+                ProfileMenuItem(
+                    icon = Icons.Outlined.History,
+                    title = "История заказов",
+                    iconColor = Color(0xFF66BB6A),
+                    onClick = onOrderHistory
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            Text(
+                text = "Поддержка и инфо",
+                style = MaterialTheme.typography.labelLarge,
+                color = Color.Gray,
+                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
+            )
+
+            ProfileSectionCard {
+                ProfileMenuItem(
+                    icon = Icons.Outlined.SupportAgent,
+                    title = "Служба поддержки",
+                    iconColor = Color(0xFF26A69A),
+                    onClick = onSupport
+                )
+                MenuDivider()
+                ProfileMenuItem(
+                    icon = Icons.Outlined.Info,
+                    title = "О приложении",
+                    iconColor = Color(0xFF78909C),
+                    onClick = onAbout
+                )
+            }
+
+            Spacer(Modifier.height(24.dp))
+
+            // --- СПЕЦИАЛЬНАЯ КНОПКА (СТАТЬ ПРОДАВЦОМ) ---
+            BecomeSellerCard(onClick = onBecomeSeller)
+
+            Spacer(Modifier.weight(1f))
+
+            // --- КНОПКА ВЫХОДА ---
+            TextButton(
+                onClick = {
+                    viewModel.logout()
+                    onLogout()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFE53935))
+            ) {
+                Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Выйти из аккаунта", fontWeight = FontWeight.Bold)
+            }
+            Spacer(Modifier.height(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun ProfileHeader(name: String, phone: String, onEdit: () -> Unit) {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(Modifier.height(14.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
-
-        ) {
-            LangChip("Қаз", lang == AppLang.KAZ) { lang = AppLang.KAZ }
-            Spacer(Modifier.width(8.dp))
-            LangChip("Рус", lang == AppLang.RUS) { lang = AppLang.RUS }
-        }
-
-        Spacer(Modifier.height(10.dp))
-
-        when (val state = uiState) {
-            is ProfileUiState.Loading -> {
-                // Верх профиля в состоянии загрузки
-                Box(
-                    modifier = Modifier
-                        .size(90.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                )
-                Spacer(Modifier.height(12.dp))
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-            }
-
-            is ProfileUiState.Error -> {
-                Text(
-                    text = state.message,
-                    color = MaterialTheme.colorScheme.error
+        Box(contentAlignment = Alignment.BottomEnd) {
+            Surface(
+                modifier = Modifier.size(100.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.padding(24.dp),
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
-
-            is ProfileUiState.Data -> {
-                val user = state.user
-
-                // ✅ Аватар по центру (пока без картинки: если url есть — позже подключим)
-                Box(
-                    modifier = Modifier
-                        .size(90.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // Пока иконка. Когда будете готовы — я покажу Coil AsyncImage по user.avatarUrl
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(44.dp)
-                    )
-                }
-
-                Spacer(Modifier.height(12.dp))
-
-                // ✅ Имя + стрелка редактирования (как ты хотел)
-                Row(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .clickable(onClick = onEditProfile)
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = user.name.ifBlank { "Без имени" },
-                        style = MaterialTheme.typography.titleLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Icon(
-                        imageVector = Icons.Default.KeyboardArrowRight,
-                        contentDescription = "Редактировать профиль"
-                    )
-                }
-
-                // ✅ Номер ниже
-                Text(
-                    text = user.phone,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-
-                Spacer(Modifier.height(20.dp))
+            // Кнопка быстрого редактирования прямо на фото
+            Surface(
+                modifier = Modifier.size(32.dp).offset(x = (-4).dp, y = (-4).dp)
+                    .clickable { onEdit() },
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary,
+                tonalElevation = 4.dp
+            ) {
+                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.padding(8.dp), tint = Color.White)
             }
-        }
-
-        // Разделы (как у тебя)
-        ProfileSectionButton(
-            icon = Icons.Default.Notifications,
-            title = "Уведомления",
-            onClick = onNotifications
-        )
-        ProfileSectionButton(
-            icon = Icons.Default.ShoppingCart,
-            title = "История заказов",
-            onClick = onOrderHistory
-        )
-        ProfileSectionButton(
-            icon = Icons.Default.MailOutline,
-            title = "Служба поддержки",
-            onClick = onSupport
-        )
-        ProfileSectionButton(
-            icon = Icons.Default.Info,
-            title = "О приложении",
-            onClick = onAbout
-        )
-        ProfileSectionButton(
-            icon = Icons.Default.CheckCircle,
-            title = "Стать продавцом",
-            onClick = onBecomeSeller
-        )
-
-        Spacer(Modifier.weight(1f))
-
-        Button(
-            onClick = {
-                viewModel.logout()
-                onLogout()
-            },
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer
-            ),
-            shape = RoundedCornerShape(14.dp)
-        ) {
-            Icon(Icons.Default.ExitToApp, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Выйти")
         }
 
         Spacer(Modifier.height(16.dp))
+
+        Text(
+            text = name.ifBlank { "Ваше имя" },
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = phone,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray
+        )
     }
 }
 
 @Composable
-private fun ProfileSectionButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+private fun ProfileSectionCard(content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
+    ) {
+        Column(content = content)
+    }
+}
+
+@Composable
+private fun ProfileMenuItem(
+    icon: ImageVector,
     title: String,
+    iconColor: Color,
     onClick: () -> Unit
 ) {
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 10.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp)
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            modifier = Modifier.size(40.dp),
+            shape = RoundedCornerShape(12.dp),
+            color = iconColor.copy(alpha = 0.1f)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.padding(10.dp),
+                tint = iconColor
+            )
+        }
+        Spacer(Modifier.width(16.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.LightGray)
+    }
+}
+
+@Composable
+private fun BecomeSellerCard(onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp)) // Сначала обрезаем форму
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(Color(0xFF6A1B9A), Color(0xFF8E24AA))
+                )
+            )
+            .clickable { onClick() }, // Обработка нажатия
+        color = Color.Transparent, // Делаем саму поверхность прозрачной, чтобы был виден фон
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 14.dp),
+            modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(icon, contentDescription = null)
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Стать продавцом",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Text(
+                    "Откройте свой магазин",
+                    color = Color.White.copy(0.8f),
+                    fontSize = 13.sp
+                )
             }
-
-            Spacer(Modifier.width(12.dp))
-
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f)
+            Icon(
+                Icons.Default.Storefront,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(32.dp)
             )
-
-            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
         }
     }
 }
+
 @Composable
-private fun LangChip(text: String, selected: Boolean, onClick: () -> Unit) {
-    val colors = AssistChipDefaults.assistChipColors(
-        containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-        labelColor = MaterialTheme.colorScheme.onSurface
-    )
-    AssistChip(onClick = onClick, label = { Text(text) }, colors = colors)
+private fun LanguageSelector(selectedLang: AppLang, onLangSelected: (AppLang) -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = Color.White,
+        modifier = Modifier.height(36.dp).width(110.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
+    ) {
+        Row {
+            AppLang.values().forEach { lang ->
+                val isSelected = selectedLang == lang
+                val bgColor by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
+                val contentColor by animateColorAsState(if (isSelected) Color.White else Color.Gray)
+
+                Box(
+                    modifier = Modifier.weight(1f).fillMaxHeight()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(bgColor)
+                        .clickable { onLangSelected(lang) },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (lang == AppLang.KAZ) "ҚАЗ" else "РУС",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = contentColor
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MenuDivider() {
+    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color(0xFFF1F1F1))
+}
+
+@Composable
+private fun ProfileHeaderLoading() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        Box(Modifier.size(100.dp).clip(CircleShape).background(Color.LightGray.copy(0.3f)))
+        Spacer(Modifier.height(16.dp))
+        Box(Modifier.width(150.dp).height(24.dp).background(Color.LightGray.copy(0.3f)))
+    }
 }
