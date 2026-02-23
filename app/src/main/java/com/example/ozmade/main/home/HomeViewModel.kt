@@ -25,8 +25,6 @@ class HomeViewModel @Inject constructor(
     private fun loadTestData() {
         val myAds = listOf(
             AdBanner(id = "1", title = "Супер скидки!", imageRes = R.drawable.banner1),
-            AdBanner(id = "2", title = "Новые товары!", imageRes = R.drawable.banner2),
-            AdBanner(id = "3", title = "Бесплатная доставка!", imageRes = R.drawable.banner3)
         )
 
         val categoriesList = listOf<Category>() // твои категории
@@ -40,13 +38,16 @@ class HomeViewModel @Inject constructor(
 
     }
     fun load() {
+        val myAds = listOf(
+            AdBanner(id = "1", title = "Супер скидки!", imageRes = R.drawable.banner1),
+        )
 
         _uiState.value = HomeUiState.Loading
         viewModelScope.launch {
             runCatching { repo.getHome() }
                 .onSuccess { resp ->
                     _uiState.value = HomeUiState.Data(
-                        ads = resp.ads,
+                        ads = myAds,
                         categories = resp.categories,
                         products = resp.products
                     )
