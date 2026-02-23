@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-//import coil.compose.AsyncImage
+import coil.compose.AsyncImage
 
 @Composable
 fun SellerProductsScreen(
@@ -42,11 +42,14 @@ fun SellerProductsScreen(
 
     Scaffold(
         floatingActionButton = {
-            FloatingActionButton(onClick = onAddProduct) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(Modifier.width(6.dp))
-                Text("Добавить товар")
-            }
+            ExtendedFloatingActionButton(
+                modifier = Modifier
+                    .navigationBarsPadding()  // ✅ учитывает системную область
+                    .padding(bottom = 12.dp), // ✅ небольшой зазор над баром
+                onClick = onAddProduct,
+                icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                text = { Text("Добавить товар") }
+            )
         }
     ) { padding ->
 
@@ -120,26 +123,16 @@ fun SellerProductsScreen(
                             SellerProductCard(
                                 product = p,
                                 onOpen = { onOpenEdit(p.id) },
-                                onOpenMenu = { menuFor = p }
+                                onEditPrice = { priceDialogFor = p },
+                                onToggleSale = { onToggleSale(p.id) },
+                                onDelete = { deleteDialogFor = p }
                             )
                         }
 
-                        item { Spacer(Modifier.height(80.dp)) } // чтобы FAB не перекрывал список
+                        item { Spacer(Modifier.height(96.dp)) } // чтобы FAB не перекрывал список
                     }
                 }
             }
-        }
-
-        // Dropdown menu (3 точки)
-        val selected = menuFor
-        if (selected != null) {
-            SellerProductDropdown(
-                product = selected,
-                onDismiss = { menuFor = null },
-                onEditPrice = { priceDialogFor = selected; menuFor = null },
-                onToggleSale = { onToggleSale(selected.id); menuFor = null },
-                onDelete = { deleteDialogFor = selected; menuFor = null }
-            )
         }
 
         // Диалог изменения цены
@@ -180,8 +173,10 @@ fun SellerProductsScreen(
 private fun SellerProductCard(
     product: SellerProductUi,
     onOpen: () -> Unit,
-    onOpenMenu: () -> Unit
-) {
+    onEditPrice: () -> Unit,
+    onToggleSale: () -> Unit,
+    onDelete: () -> Unit
+){
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -194,12 +189,25 @@ private fun SellerProductCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-//            AsyncImage(
-//                model = product.imageUrl,
-//                contentDescription = null,
-//                modifier = Modifier
-//                    .size(64.dp)
-//            )
+            Box(
+                modifier = Modifier.size(64.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                // если пока нет url — рисуем заглушку
+                if (product.imageUrl.isNullOrBlank()) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        shape = RoundedCornerShape(10.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {}
+                } else {
+                    AsyncImage(
+                        model = product.imageUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+            }
 
             Spacer(Modifier.width(12.dp))
 
@@ -225,9 +233,45 @@ private fun SellerProductCard(
                     label = { Text(product.status.title()) }
                 )
             }
+            var menuExpanded by remember { mutableStateOf(false) }
 
-            IconButton(onClick = onOpenMenu) {
-                Icon(Icons.Default.MoreVert, contentDescription = null)
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(Icons.Default.MoreVert, contentDescription = null)
+                }
+
+                val toggleTitle = when (product.status) {
+                    SellerProductStatus.ON_SALE -> "Снять с продажи"
+                    SellerProductStatus.OFF_SALE -> "Выставить на продажу"
+                    SellerProductStatus.PENDING_MODERATION -> "Остановить проверку"
+                }
+
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Изменить цену") },
+                        onClick = {
+                            menuExpanded = false
+                            onEditPrice() // добавим коллбек ниже
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(toggleTitle) },
+                        onClick = {
+                            menuExpanded = false
+                            onToggleSale()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Удалить товар") },
+                        onClick = {
+                            menuExpanded = false
+                            onDelete()
+                        }
+                    )
+                }
             }
         }
     }

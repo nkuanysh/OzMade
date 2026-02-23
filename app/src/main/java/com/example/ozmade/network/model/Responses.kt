@@ -4,35 +4,98 @@ import com.google.gson.annotations.SerializedName
 
 data class ProductDto(
     @SerializedName("ID") val id: Int,
-    @SerializedName("Title") val title: String?,
-    @SerializedName("Name") val name: String?,
-    @SerializedName("Description") val description: String,
-    @SerializedName("Type") val type: String,
-    @SerializedName("Cost") val cost: Double?,
-    @SerializedName("Price") val price: Double?,
-    @SerializedName("Address") val address: String,
-    @SerializedName("WhatsAppLink") val whatsappLink: String?,
-    @SerializedName("ViewCount") val viewCount: Int?,
-    @SerializedName("AverageRating") val averageRating: Double?,
-    @SerializedName("ImageName") val imageName: String?,
-    @SerializedName("ImageURL") val imageUrl: String?,
-    @SerializedName("CreatedAt") val createdAt: String,
-    @SerializedName("Comments") val comments: List<CommentDto>?
+
+    @SerializedName("Title") val title: String? = null,
+    @SerializedName("Name") val name: String? = null,
+
+    @SerializedName("Description") val description: String? = null,
+
+    // старое поле (1 категория)
+    @SerializedName("Type") val type: String? = null,
+
+    // новое поле (много категорий)
+    @SerializedName(value = "Categories", alternate = ["categories"])
+    val categories: List<String>? = null,
+
+    @SerializedName("Price") val price: Double? = null,
+    @SerializedName("Cost") val cost: Double? = null,
+
+    @SerializedName("Address") val address: String? = null,
+
+    // старое (1 картинка)
+    @SerializedName("ImageURL") val imageUrl: String? = null,
+
+    // новое (1..10 картинок)
+    @SerializedName(value = "Images", alternate = ["images"])
+    val images: List<String>? = null,
+
+    // характеристики
+    @SerializedName(value = "Weight", alternate = ["weight"])
+    val weight: String? = null,
+    @SerializedName(value = "HeightCm", alternate = ["height_cm", "heightCm"])
+    val heightCm: String? = null,
+    @SerializedName(value = "WidthCm", alternate = ["width_cm", "widthCm"])
+    val widthCm: String? = null,
+    @SerializedName(value = "DepthCm", alternate = ["depth_cm", "depthCm"])
+    val depthCm: String? = null,
+    @SerializedName(value = "Composition", alternate = ["composition"])
+    val composition: String? = null,
+
+    @SerializedName(value = "YouTubeUrl", alternate = ["youtube_url", "youtubeUrl", "YouTubeURL"])
+    val youtubeUrl: String? = null,
+
+    // остальное как было
+    @SerializedName("WhatsAppLink") val whatsappLink: String? = null,
+    @SerializedName("ViewCount") val viewCount: Int? = null,
+    @SerializedName("AverageRating") val averageRating: Double? = null,
+    @SerializedName("CreatedAt") val createdAt: String? = null,
+    @SerializedName("Comments") val comments: List<CommentDto>? = null
 )
 
 data class ProductDetailsDto(
     @SerializedName("ID") val id: Int,
+
     @SerializedName("Title") val title: String,
     @SerializedName("Description") val description: String,
-    @SerializedName("Type") val type: String,
-    @SerializedName("Cost") val cost: Double,
-    @SerializedName("Address") val address: String,
-    @SerializedName("WhatsAppLink") val whatsappLink: String,
-    @SerializedName("ViewCount") val viewCount: Int,
-    @SerializedName("AverageRating") val averageRating: Double,
-    @SerializedName("ImageName") val imageName: String,
-    @SerializedName("CreatedAt") val createdAt: String,
-    @SerializedName("Comments") val comments: List<CommentDto>
+
+    // старое
+    @SerializedName("Type") val type: String? = null,
+
+    // новое
+    @SerializedName(value = "Categories", alternate = ["categories"])
+    val categories: List<String>? = null,
+
+    @SerializedName(value = "Price", alternate = ["price"])
+    val price: Double? = null,
+
+    @SerializedName(value = "Address", alternate = ["address"])
+    val address: String? = null,
+
+    // старое 1 фото
+    @SerializedName("ImageURL") val imageUrl: String? = null,
+
+    // новое 1..10 фото
+    @SerializedName(value = "Images", alternate = ["images"])
+    val images: List<String>? = null,
+
+    // характеристики
+    @SerializedName(value = "Weight", alternate = ["weight"])
+    val weight: String? = null,
+    @SerializedName(value = "HeightCm", alternate = ["height_cm", "heightCm"])
+    val heightCm: String? = null,
+    @SerializedName(value = "WidthCm", alternate = ["width_cm", "widthCm"])
+    val widthCm: String? = null,
+    @SerializedName(value = "DepthCm", alternate = ["depth_cm", "depthCm"])
+    val depthCm: String? = null,
+    @SerializedName(value = "Composition", alternate = ["composition"])
+    val composition: String? = null,
+
+    @SerializedName(value = "YouTubeUrl", alternate = ["youtube_url", "youtubeUrl", "YouTubeURL"])
+    val youtubeUrl: String? = null,
+
+    // отзывы и рейтинг — остаются, они не “редактируемые”
+    @SerializedName("AverageRating") val averageRating: Double? = null,
+    @SerializedName("Comments") val comments: List<CommentDto>? = null
 )
 
 data class CommentDto(

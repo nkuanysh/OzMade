@@ -59,6 +59,6 @@ private fun ProductDto.toDomain(): Product =
         city = address?.substringBefore(",") ?: "Unknown",
         address = address ?: "Unknown",
         rating = averageRating ?: 0.0,
-        imageUrl = imageUrl ?: imageName ?: "",
+        imageUrl = imageUrl ?:  "",
         categoryId = type ?: ""
     )

@@ -29,21 +29,21 @@ class FakeSellerRepository @Inject constructor(
     private val items = CopyOnWriteArrayList(
         listOf(
             SellerProductUi(
-                id = "p1",
+                id = "1",
                 title = "Домашний мёд 1л",
                 price = 4500,
                 imageUrl = null,
                 status = SellerProductStatus.ON_SALE
             ),
             SellerProductUi(
-                id = "p2",
+                id = "2",
                 title = "Картина акрил 30x40",
                 price = 12000,
                 imageUrl = null,
                 status = SellerProductStatus.PENDING_MODERATION
             ),
             SellerProductUi(
-                id = "p3",
+                id = "3",
                 title = "Свеча ручной работы",
                 price = 2500,
                 imageUrl = null,
