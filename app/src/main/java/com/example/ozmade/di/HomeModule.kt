@@ -1,6 +1,5 @@
 package com.example.ozmade.di
 
-import com.example.ozmade.main.home.FakeHomeRepository
 import com.example.ozmade.main.home.HomeRepository
 import com.example.ozmade.main.home.RealHomeRepository
 import dagger.Binds
@@ -18,10 +17,5 @@ abstract class HomeModule {
     abstract fun bindHomeRepository(
         impl: RealHomeRepository
     ): HomeRepository
-//    @Binds
-//    @Singleton
-//    abstract fun bindHomeRepository(
-//        impl: RealHomeRepository
-//    ): HomeRepository             /// бэк дайын болғанда осыны қою керек
 
 }

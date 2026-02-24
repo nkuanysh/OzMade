@@ -10,6 +10,13 @@ class RealProductRepository @Inject constructor(
 ) : ProductRepository {
 
     override suspend fun getProductDetails(productId: String): ProductDetailsUi {
+        productId.toIntOrNull()?.let { id ->
+            try {
+                api.incrementProductView(id)
+            } catch (e: Exception) {
+                // Ignore background task failure or log it
+            }
+        }
         val dto = api.getProductDetailsFull(productId)
 
         return ProductDetailsUi(
@@ -55,6 +62,26 @@ class RealProductRepository @Inject constructor(
             response.isSuccessful && response.body()?.status == "added"
         } catch (e: Exception) {
             false
+        }
+    }
+
+    override suspend fun postComment(productId: String, rating: Int, text: String): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val resp = api.postComment(productId.toInt(), com.example.ozmade.network.model.CommentRequest(rating, text))
+            if (resp.isSuccessful) Result.success(Unit)
+            else Result.failure(Exception("Error ${resp.code()}"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun reportProduct(productId: String, reason: String): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val resp = api.reportProduct(productId.toInt(), com.example.ozmade.network.model.ReportRequest(reason))
+            if (resp.isSuccessful) Result.success(Unit)
+            else Result.failure(Exception("Error ${resp.code()}"))
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
 }

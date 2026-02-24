@@ -24,7 +24,7 @@ fun SellerRegistrationRoute(
         onBack = onBack,
         onOpenSellerTerms = onOpenSellerTerms,
         onOpenPrivacy = onOpenPrivacy,
-        onSubmit = { req -> viewModel.submit(req) },
+        onSubmit = { viewModel.submit() },
         isLoading = state is SellerRegState.Loading,
         errorText = (state as? SellerRegState.Error)?.message
     )

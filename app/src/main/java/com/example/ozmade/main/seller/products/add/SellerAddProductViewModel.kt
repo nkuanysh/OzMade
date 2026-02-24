@@ -3,6 +3,7 @@ package com.example.ozmade.main.seller.products.add
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ozmade.main.seller.data.SellerRepository
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.model.ProductRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +15,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SellerAddProductViewModel @Inject constructor(
-    private val api: OzMadeApi
+    private val repo: SellerRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddProductState())
@@ -70,16 +71,10 @@ class SellerAddProductViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(loading = true, error = null, success = false) }
 
-            runCatching {
-                // ⚠️ ВАЖНО: фото сейчас Uri. Бэкенду обычно нужны URL (после upload).
-                // Пока отправим строки Uri. Когда будет upload — заменишь на реальные URL.
-                val request = toProductRequest(st)
+            val request = toProductRequest(st)
+            val result = repo.createProduct(request)
 
-                val resp = api.createProduct(request)
-                if (!resp.isSuccessful) {
-                    throw IllegalStateException("Ошибка: ${resp.code()} ${resp.message()}")
-                }
-            }.onSuccess {
+            result.onSuccess {
                 _state.update { it.copy(loading = false, success = true) }
             }.onFailure { e ->
                 _state.update { it.copy(loading = false, error = e.message ?: "Не удалось добавить товар") }

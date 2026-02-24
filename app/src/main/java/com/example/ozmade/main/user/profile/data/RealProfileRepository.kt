@@ -1,16 +1,20 @@
 package com.example.ozmade.main.user.profile.data
 
-import com.example.ozmade.network.api.ProfileApi
-import com.example.ozmade.network.dto.UpdateProfileRequest
+import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.network.model.UpdateProfileRequest
 import javax.inject.Inject
 
 class RealProfileRepository @Inject constructor(
-    private val api: ProfileApi
+    private val api: OzMadeApi
 ) : ProfileRepository {
 
     override suspend fun getMyProfile(): UserProfile {
-        val dto = api.getMyProfile()
-        return dto.toDomain()
+        val response = api.getProfile()
+        if (response.isSuccessful) {
+            return response.body()?.toDomain() ?: throw Exception("Empty body")
+        } else {
+            throw Exception("Error ${response.code()}")
+        }
     }
 
     override suspend fun updateMyProfile(
@@ -18,14 +22,26 @@ class RealProfileRepository @Inject constructor(
         address: String,
         avatarUrl: String?
     ): UserProfile {
-        val dto = api.updateMyProfile(
+        val response = api.updateProfile(
             UpdateProfileRequest(
-                name = name,
-                address = address,
-                avatarUrl = avatarUrl
+                address = address
             )
         )
-        return dto.toDomain()
+        if (response.isSuccessful) {
+            return response.body()?.toDomain() ?: throw Exception("Empty body")
+        } else {
+            throw Exception("Error ${response.code()}")
+        }
+    }
+
+    override suspend fun getMyOrders(): List<com.example.ozmade.network.model.OrderDto> {
+        val resp = api.getOrders()
+        return if (resp.isSuccessful) resp.body().orEmpty() else emptyList()
+    }
+
+    override suspend fun getMyFavorites(): List<com.example.ozmade.network.model.ProductDto> {
+        val resp = api.getFavorites()
+        return if (resp.isSuccessful) resp.body().orEmpty() else emptyList()
     }
 
     override suspend fun logout() {
@@ -36,12 +52,12 @@ class RealProfileRepository @Inject constructor(
 }
 
 // маппер DTO -> Domain
-private fun com.example.ozmade.network.dto.UserProfileDto.toDomain(): UserProfile {
+private fun com.example.ozmade.network.model.ProfileDto.toDomain(): UserProfile {
     return UserProfile(
-        id = id,
-        name = name,
-        phone = phone,
-        avatarUrl = avatarUrl,
+        id = id.toString(),
+        name = email ?: phoneNumber,
+        phone = phoneNumber,
+        avatarUrl = null,
         address = address ?: ""
     )
 }

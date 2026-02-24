@@ -1,33 +1,6 @@
 package com.example.ozmade.network.api
 
-import com.example.ozmade.network.model.AdDto
-import com.example.ozmade.network.model.ProductDetailsDto
-import com.example.ozmade.network.model.ProductDto
-import com.example.ozmade.network.model.AuthSyncResponse
-import com.example.ozmade.network.model.CategoryDto
-import com.example.ozmade.network.model.ChatDto
-import com.example.ozmade.network.model.ChatMessageItemDto
-import com.example.ozmade.network.model.ChatThreadDto
-import com.example.ozmade.network.model.CommentDto
-import com.example.ozmade.network.model.CommentRequest
-import com.example.ozmade.network.model.FavoriteStatusResponse
-import com.example.ozmade.network.model.MessageDto
-import com.example.ozmade.network.model.MessageResponse
-import com.example.ozmade.network.model.OrderDto
-import com.example.ozmade.network.model.ProductDetailsFullDto
-import com.example.ozmade.network.model.ProductRequest
-import com.example.ozmade.network.model.ProductReviewsDto
-import com.example.ozmade.network.model.ProfileDto
-import com.example.ozmade.network.model.ReportRequest
-import com.example.ozmade.network.model.SellerPageDto
-import com.example.ozmade.network.model.SellerProfileDto
-import com.example.ozmade.network.model.SellerReviewsDto
-import com.example.ozmade.network.model.UpdateProfileRequest
-import com.example.ozmade.network.model.UpdateSellerProfileRequest
-import com.example.ozmade.network.model.UploadUrlResponse
-import com.example.ozmade.network.model.EnsureThreadRequest
-import com.example.ozmade.network.model.EnsureThreadResponse
-import com.example.ozmade.network.model.SendMessageRequest
+import com.example.ozmade.network.model.*
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -84,9 +57,11 @@ interface OzMadeApi {
     @GET("profile/favorites")
     suspend fun getFavorites(): Response<List<ProductDto>>
 
+    @GET("profile/favorites")
+    suspend fun getFavoritesResponse(): Response<List<ProductDto>>
+
     @GET("profile/orders")
     suspend fun getOrders(): Response<List<OrderDto>>
-
     @POST("seller/register")
     suspend fun registerSeller(): Response<MessageResponse>
 

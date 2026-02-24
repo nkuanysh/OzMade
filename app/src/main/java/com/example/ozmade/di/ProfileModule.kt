@@ -1,7 +1,7 @@
 package com.example.ozmade.di
 
-import com.example.ozmade.main.user.profile.data.FakeProfileRepository
 import com.example.ozmade.main.user.profile.data.ProfileRepository
+import com.example.ozmade.main.user.profile.data.RealProfileRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -15,8 +15,7 @@ abstract class ProfileModule {
     @Binds
     @Singleton
     abstract fun bindProfileRepository(
-        impl: FakeProfileRepository
+        impl: RealProfileRepository
     ): ProfileRepository
-//    abstract fun bindProfileRepository(impl: RealProfileRepository): ProfileRepository //осыған ауыстыру керек бэк дайын болғанда
 
 }

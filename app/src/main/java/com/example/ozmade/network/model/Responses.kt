@@ -22,8 +22,8 @@ data class ProductDto(
 
     @SerializedName("Address") val address: String? = null,
 
-    // старое (1 картинка)
-    @SerializedName("ImageURL") val imageUrl: String? = null,
+    @SerializedName(value = "ImageURL", alternate = ["ImageName", "image_url"])
+    val imageUrl: String? = null,
 
     // новое (1..10 картинок)
     @SerializedName(value = "Images", alternate = ["images"])
@@ -71,8 +71,17 @@ data class ProductDetailsDto(
     @SerializedName(value = "Address", alternate = ["address"])
     val address: String? = null,
 
-    // старое 1 фото
-    @SerializedName("ImageURL") val imageUrl: String? = null,
+    @SerializedName(value = "WhatsAppLink", alternate = ["whatsapp_link", "whatsappLink"])
+    val whatsappLink: String? = null,
+
+    @SerializedName(value = "ViewCount", alternate = ["view_count", "viewCount"])
+    val viewCount: Int? = null,
+
+    @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"])
+    val createdAt: String? = null,
+
+    @SerializedName(value = "ImageURL", alternate = ["ImageName", "image_url"])
+    val imageUrl: String? = null,
 
     // новое 1..10 фото
     @SerializedName(value = "Images", alternate = ["images"])
@@ -214,11 +223,6 @@ data class ChatMessageItemDto(
     @SerializedName("is_mine") val isMine: Boolean,
     @SerializedName("time_text") val timeText: String
 )
-
-data class SellerRegistrationRequestDto(
-    @SerializedName("id_card_url") val idCardUrl: String? = null
-)
-
 data class SellerRegistrationResponseDto(
     @SerializedName("seller_id") val sellerId: String,
     @SerializedName("status") val status: String

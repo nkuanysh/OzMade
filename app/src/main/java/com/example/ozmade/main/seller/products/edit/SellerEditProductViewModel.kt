@@ -3,6 +3,7 @@ package com.example.ozmade.main.seller.products.edit
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ozmade.main.seller.data.SellerRepository
 import com.example.ozmade.main.seller.products.add.AddProductState
 import com.example.ozmade.main.seller.products.add.SellerCategory
 import com.example.ozmade.network.api.OzMadeApi
@@ -16,7 +17,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SellerEditProductViewModel @Inject constructor(
-    private val api: OzMadeApi
+    private val repo: SellerRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddProductState())
@@ -32,26 +33,17 @@ class SellerEditProductViewModel @Inject constructor(
             _state.update { it.copy(loading = true, error = null) }
 
             runCatching {
-                // 1) получить данные товара
-                val resp = api.getProductDetails(productId)
-                if (!resp.isSuccessful) error("Не удалось загрузить товар (${resp.code()})")
-                val dto = resp.body() ?: error("Пустой ответ")
+                val dto = repo.getProductDetails(productId)
 
-                // 2) заполнить state (ниже пример — подгони под свой dto)
                 _state.update { st ->
                     st.copy(
                         loading = false,
                         error = null,
                         success = false,
-
-                        title = dto.title ?: "",                 // если у тебя другое поле — поменяй
+                        title = dto.title ?: "",
                         description = dto.description ?: "",
                         priceText = (dto.price ?: 0.0).toString(),
-
-                        // фото: если у dto одно фото, просто добавим одно
                         photos = listOfNotNull(dto.imageUrl?.let { Uri.parse(it) }),
-
-                        // категории: если у dto одна категория, подберём enum по title
                         selectedCategories = SellerCategory.entries
                             .filter { it.title == (dto.type ?: "") }
                             .toSet()
@@ -114,14 +106,10 @@ class SellerEditProductViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(loading = true, error = null, success = false) }
 
-            runCatching {
-                val req = toProductRequest(st)
-                val resp = api.updateProduct(productId, req)
-                if (!resp.isSuccessful) {
-                    val body = resp.errorBody()?.string()
-                    error("Не удалось сохранить (${resp.code()})\n${body ?: resp.message()}")
-                }
-            }.onSuccess {
+            val req = toProductRequest(st)
+            val result = repo.updateProduct(productId, req)
+
+            result.onSuccess {
                 _state.update { it.copy(loading = false, success = true) }
             }.onFailure { e ->
                 _state.update { it.copy(loading = false, error = e.message ?: "Ошибка сохранения") }

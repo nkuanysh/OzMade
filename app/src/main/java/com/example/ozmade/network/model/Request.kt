@@ -25,18 +25,21 @@ data class ProductRequest(
 
     @SerializedName(value = "Price", alternate = ["price"])
     val price: Double,
-
+    @SerializedName(value = "Type", alternate = ["type"])
+    val type: String? = null,
     // несколько категорий
     @SerializedName(value = "Categories", alternate = ["categories"])
-    val categories: List<String>,
+    val categories: List<String>? = null,
 
     // адрес (может не меняться при редактировании)
     @SerializedName(value = "Address", alternate = ["address"])
     val address: String? = null,
 
-    // 1..10 фото
+    @SerializedName(value = "ImageURL", alternate = ["image_url", "ImageName"])
+    val imageUrl: String? = null,
+
     @SerializedName(value = "Images", alternate = ["images"])
-    val images: List<String>,
+    val images: List<String>? = null,
 
     // характеристики
     @SerializedName(value = "Weight", alternate = ["weight"])
@@ -59,4 +62,15 @@ data class ProductRequest(
 )
 data class UpdateSellerProfileRequest(
     val profile_picture: String
+)
+
+data class SellerRegistrationRequestDto(
+    @SerializedName("first_name") val firstName: String,
+    @SerializedName("last_name") val lastName: String,
+    @SerializedName("display_name") val displayName: String,
+    @SerializedName("city") val city: String,
+    @SerializedName("address") val address: String,
+    @SerializedName("categories") val categories: List<String>,
+    @SerializedName("about") val about: String? = null,
+    @SerializedName("id_card_url") val idCardUrl: String? = null
 )

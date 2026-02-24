@@ -1,6 +1,5 @@
 package com.example.ozmade.di
 
-import com.example.ozmade.main.home.details.FakeProductRepository
 import com.example.ozmade.main.home.details.ProductRepository
 import com.example.ozmade.main.home.details.RealProductRepository
 
@@ -17,11 +16,8 @@ abstract class ProductModule {
     @Binds
     @Singleton
     abstract fun bindProductRepository(
-        impl: FakeProductRepository
+        impl: RealProductRepository
     ): ProductRepository
 
-//    @Binds
-//    abstract fun bindProductRepository(
-//        impl: RealProductRepository
-//    ): ProductRepository
+
 }
