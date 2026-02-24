@@ -35,6 +35,7 @@ private object SellerRoutes {
     const val ADD_PRODUCT = "seller_add_product"
     const val EDIT_PRODUCT = "seller_edit_product"
     const val CHAT_THREAD = "seller_chat_thread"
+    const val QUALITY = "seller_quality"
 
 
 }
@@ -132,8 +133,24 @@ fun SellerMainScreen(
                 )
             }
             composable(SellerBottomItem.Profile.route) {
-                SellerProfileScreen(onBecomeBuyer = onExitSeller)
+                SellerProfileScreen(
+                    onBecomeBuyer = onExitSeller,
+                    onArchive = { /* TODO навигация */ },
+                    onQuality = { navController.navigate(SellerRoutes.QUALITY) },
+                    onDelivery = { /* TODO */ },
+                    onLogout = { onExitSeller() } // или отдельный logout, если есть
+                )
             }
+            composable(SellerRoutes.QUALITY) {
+                com.example.ozmade.main.seller.quality.SellerQualityRoute(
+                    onBack = { navController.popBackStack() },
+                    onOpenProduct = { productId ->
+                        // если у продавца есть экран товара — сюда навигацию
+                        // иначе можно открыть user details, как у тебя сделано в другом месте
+                    }
+                )
+            }
+
             composable("${SellerRoutes.EDIT_PRODUCT}/{id}") { backStackEntry ->
                 val id = backStackEntry.arguments?.getString("id")?.toIntOrNull() ?: return@composable
 

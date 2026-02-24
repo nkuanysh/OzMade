@@ -1,8 +1,7 @@
 package com.example.ozmade.di
 
-import com.example.ozmade.main.home.details.FakeProductRepository
-import com.example.ozmade.main.home.details.ProductRepository
-import com.example.ozmade.main.home.details.RealProductRepository
+import com.example.ozmade.main.userHome.details.FakeProductRepository
+import com.example.ozmade.main.userHome.details.ProductRepository
 
 import dagger.Binds
 import dagger.Module

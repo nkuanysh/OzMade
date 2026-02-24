@@ -336,3 +336,15 @@ data class SellerReviewItemDto(
     @SerializedName("created_at") val createdAt: String,
     @SerializedName("text") val text: String
 )
+
+data class SellerQualityDto(
+    @SerializedName("seller_name") val sellerName: String,
+    @SerializedName("orders_count") val ordersCount: Int,
+    @SerializedName("days_with_ozmade") val daysWithOzMade: Int,
+
+    @SerializedName("average_rating") val averageRating: Double,
+    @SerializedName("ratings_count") val ratingsCount: Int,
+
+    @SerializedName("reviews_count") val reviewsCount: Int,
+    @SerializedName("reviews") val reviews: List<SellerReviewItemDto>
+)
