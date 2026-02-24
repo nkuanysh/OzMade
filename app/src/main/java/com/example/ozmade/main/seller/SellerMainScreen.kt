@@ -34,6 +34,8 @@ private sealed class SellerBottomItem(
 private object SellerRoutes {
     const val ADD_PRODUCT = "seller_add_product"
     const val EDIT_PRODUCT = "seller_edit_product"
+    const val CHAT_THREAD = "seller_chat_thread"
+
 
 }
 @Composable
@@ -113,9 +115,21 @@ fun SellerMainScreen(
                 }
             }
             composable(SellerBottomItem.Chat.route) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Seller Chat (TODO)")
-                }
+                com.example.ozmade.main.seller.chat.SellerChatScreen(
+                    onOpenChat = { thread ->
+                        navController.navigate("seller_chat_thread/${thread.chatId}/${thread.buyerName}")
+                    }
+                )
+            }
+            composable("${SellerRoutes.CHAT_THREAD}/{chatId}/{buyerName}") { backStack ->
+                val chatId = backStack.arguments?.getString("chatId")?.toIntOrNull() ?: return@composable
+                val buyerName = backStack.arguments?.getString("buyerName") ?: "Покупатель"
+
+                com.example.ozmade.main.seller.chat.SellerChatThreadRoute(
+                    chatId = chatId,
+                    buyerName = buyerName,
+                    onBack = { navController.popBackStack() }
+                )
             }
             composable(SellerBottomItem.Profile.route) {
                 SellerProfileScreen(onBecomeBuyer = onExitSeller)

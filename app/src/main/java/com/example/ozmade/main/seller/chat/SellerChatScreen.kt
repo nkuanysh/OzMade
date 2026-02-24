@@ -1,4 +1,4 @@
-package com.example.ozmade.main.user.chat
+package com.example.ozmade.main.seller.chat
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,12 +14,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.ozmade.main.user.chat.data.ChatThreadUi
+import com.example.ozmade.main.seller.chat.data.SellerChatThreadUi
 
 @Composable
-fun ChatScreen(
-    onOpenThread: (ChatThreadUi) -> Unit = {},
-    viewModel: ChatListViewModel = hiltViewModel()
+fun SellerChatScreen(
+    onOpenChat: (SellerChatThreadUi) -> Unit,
+    viewModel: SellerChatListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -29,36 +29,29 @@ fun ChatScreen(
         Text("Чаты", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(12.dp))
 
-        Spacer(Modifier.height(12.dp))
-
         when (val state = uiState) {
-            is ChatListUiState.Loading -> {
+            is SellerChatListUiState.Loading -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
-
-            is ChatListUiState.Error -> {
+            is SellerChatListUiState.Error -> {
                 Text(state.message, color = MaterialTheme.colorScheme.error)
                 Spacer(Modifier.height(12.dp))
                 Button(onClick = { viewModel.load() }, modifier = Modifier.fillMaxWidth()) {
                     Text("Повторить")
                 }
             }
-
-            is ChatListUiState.Data -> {
+            is SellerChatListUiState.Data -> {
                 if (state.threads.isEmpty()) {
                     Text(
-                        "Пока нет чатов с продавцами. Напиши продавцу из карточки товара 🙂",
+                        "Пока нет чатов с покупателями 🙂",
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         state.threads.forEach { t ->
-                            ThreadCard(
-                                thread = t,
-                                onClick = { onOpenThread(t) }
-                            )
+                            SellerThreadCard(thread = t, onClick = { onOpenChat(t) })
                         }
                     }
                 }
@@ -68,18 +61,15 @@ fun ChatScreen(
 }
 
 @Composable
-private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit) {
+private fun SellerThreadCard(thread: SellerChatThreadUi, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
     ) {
         Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
 
-            // аватар товара (пока заглушка)
             Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape),
+                modifier = Modifier.size(44.dp).clip(CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(Icons.Default.Person, contentDescription = null)
@@ -88,7 +78,7 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit) {
             Spacer(Modifier.width(12.dp))
 
             Column(Modifier.weight(1f)) {
-                Text(thread.sellerName, style = MaterialTheme.typography.titleMedium)
+                Text(thread.buyerName, style = MaterialTheme.typography.titleMedium)
                 Text(
                     thread.lastMessage,
                     style = MaterialTheme.typography.bodySmall,

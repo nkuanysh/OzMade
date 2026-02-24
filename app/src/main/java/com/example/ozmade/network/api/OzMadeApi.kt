@@ -164,6 +164,12 @@ interface OzMadeApi {
         @Path("chat_id") chatId: Int
     ): Response<List<MessageDto>>
 
+    @POST("seller/chats/{chat_id}/messages")
+    suspend fun sendSellerChatMessage(
+        @Path("chat_id") chatId: Int,
+        @Body request: SendMessageRequest
+    ): Response<Unit>
+
     @GET("sellers/{id}")
     suspend fun getSellerPage(@Path("id") sellerId: String): SellerPageDto
 
