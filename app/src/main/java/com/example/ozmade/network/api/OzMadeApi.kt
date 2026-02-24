@@ -27,8 +27,10 @@ import com.example.ozmade.network.model.UpdateSellerProfileRequest
 import com.example.ozmade.network.model.UploadUrlResponse
 import com.example.ozmade.network.model.EnsureThreadRequest
 import com.example.ozmade.network.model.EnsureThreadResponse
+import com.example.ozmade.network.model.SellerDeliveryDto
 import com.example.ozmade.network.model.SellerQualityDto
 import com.example.ozmade.network.model.SendMessageRequest
+import com.example.ozmade.network.model.UpdateSellerDeliveryRequest
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -179,4 +181,12 @@ interface OzMadeApi {
 
     @GET("seller/quality")
     suspend fun getSellerQuality(): Response<SellerQualityDto>
+
+    @GET("seller/delivery")
+    suspend fun getSellerDelivery(): Response<SellerDeliveryDto>
+
+    @PATCH("seller/delivery")
+    suspend fun updateSellerDelivery(
+        @Body request: UpdateSellerDeliveryRequest
+    ): Response<Unit>
 }

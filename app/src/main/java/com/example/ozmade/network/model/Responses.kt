@@ -348,3 +348,29 @@ data class SellerQualityDto(
     @SerializedName("reviews_count") val reviewsCount: Int,
     @SerializedName("reviews") val reviews: List<SellerReviewItemDto>
 )
+data class SellerDeliveryDto(
+    @SerializedName("pickup_enabled") val pickupEnabled: Boolean,
+    @SerializedName("pickup_address") val pickupAddress: String?,
+    @SerializedName("pickup_time") val pickupTime: String?, // "10:00 - 18:00"
+
+    @SerializedName("free_delivery_enabled") val myDeliveryEnabled: Boolean,
+    @SerializedName("delivery_center_lat") val centerLat: Double?,
+    @SerializedName("delivery_center_lng") val centerLng: Double?,
+    @SerializedName("delivery_radius_km") val radiusKm: Int?,
+    @SerializedName("delivery_center_address") val centerAddress: String?,
+
+    @SerializedName("intercity_enabled") val intercityEnabled: Boolean
+)
+data class UpdateSellerDeliveryRequest(
+    @SerializedName("pickup_enabled") val pickupEnabled: Boolean? = null,
+    @SerializedName("pickup_address") val pickupAddress: String? = null,
+    @SerializedName("pickup_time") val pickupTime: String? = null,
+
+    @SerializedName("free_delivery_enabled") val myDeliveryEnabled: Boolean? = null,
+    @SerializedName("delivery_center_lat") val centerLat: Double? = null,
+    @SerializedName("delivery_center_lng") val centerLng: Double? = null,
+    @SerializedName("delivery_radius_km") val radiusKm: Int? = null,
+    @SerializedName("delivery_center_address") val centerAddress: String? = null,
+
+    @SerializedName("intercity_enabled") val intercityEnabled: Boolean? = null
+)

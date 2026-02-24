@@ -36,6 +36,7 @@ private object SellerRoutes {
     const val EDIT_PRODUCT = "seller_edit_product"
     const val CHAT_THREAD = "seller_chat_thread"
     const val QUALITY = "seller_quality"
+    const val DELIVERY = "seller_delivery"
 
 
 }
@@ -137,7 +138,7 @@ fun SellerMainScreen(
                     onBecomeBuyer = onExitSeller,
                     onArchive = { /* TODO навигация */ },
                     onQuality = { navController.navigate(SellerRoutes.QUALITY) },
-                    onDelivery = { /* TODO */ },
+                    onDelivery = { navController.navigate(SellerRoutes.DELIVERY) },
                     onLogout = { onExitSeller() } // или отдельный logout, если есть
                 )
             }
@@ -148,6 +149,11 @@ fun SellerMainScreen(
                         // если у продавца есть экран товара — сюда навигацию
                         // иначе можно открыть user details, как у тебя сделано в другом месте
                     }
+                )
+            }
+            composable(SellerRoutes.DELIVERY) {
+                com.example.ozmade.main.seller.delivery.SellerDeliveryRoute(
+                    onBack = { navController.popBackStack() }
                 )
             }
 
