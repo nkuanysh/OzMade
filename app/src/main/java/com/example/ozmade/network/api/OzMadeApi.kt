@@ -62,6 +62,7 @@ interface OzMadeApi {
 
     @GET("profile/orders")
     suspend fun getOrders(): Response<List<OrderDto>>
+
     @POST("seller/register")
     suspend fun registerSeller(): Response<MessageResponse>
 
@@ -150,4 +151,15 @@ interface OzMadeApi {
 
     @GET("sellers/{id}/reviews")
     suspend fun getSellerReviews(@Path("id") sellerId: String): SellerReviewsDto
+
+    @GET("seller/quality")
+    suspend fun getSellerQuality(): Response<SellerQualityDto>
+
+    @GET("seller/delivery")
+    suspend fun getSellerDelivery(): Response<SellerDeliveryDto>
+
+    @PATCH("seller/delivery")
+    suspend fun updateSellerDelivery(
+        @Body request: UpdateSellerDeliveryRequest
+    ): Response<Unit>
 }
