@@ -27,13 +27,14 @@ fun SellerProductsScreen(
     onFilterChange: (SellerProductsFilter) -> Unit,
 
     onAddProduct: () -> Unit,
-    onOpenEdit: (String) -> Unit,
+    onOpenEdit: (Int) -> Unit,
 
-    onUpdatePrice: (String, Int) -> Unit,
-    onToggleSale: (String) -> Unit,
-    onDelete: (String) -> Unit,
+    onUpdatePrice: (Int, Int) -> Unit,
+    onToggleSale: (Int) -> Unit,
+    onDelete: (Int) -> Unit,
 
-    onDismissError: () -> Unit
+    onDismissError: () -> Unit,
+    snackbarHostState: SnackbarHostState,
 ) {
     var menuFor by remember { mutableStateOf<SellerProductUi?>(null) }
 
@@ -41,6 +42,7 @@ fun SellerProductsScreen(
     var deleteDialogFor by remember { mutableStateOf<SellerProductUi?>(null) }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 modifier = Modifier
@@ -275,45 +277,6 @@ private fun SellerProductCard(
             }
         }
     }
-}
-
-@Composable
-private fun SellerProductDropdown(
-    product: SellerProductUi,
-    onDismiss: () -> Unit,
-    onEditPrice: () -> Unit,
-    onToggleSale: () -> Unit,
-    onDelete: () -> Unit
-) {
-    // DropdownMenu нужен anchor. Самый простой вариант — показывать как “плавающее меню” нельзя.
-    // Поэтому делаем через Dialog-like dropdown: используем AlertDialog с кнопками (визуально то же меню).
-    val toggleTitle = when (product.status) {
-        SellerProductStatus.ON_SALE -> "Снять с продажи"
-        SellerProductStatus.OFF_SALE -> "Выставить на продажу"
-        SellerProductStatus.PENDING_MODERATION -> "Остановить проверку"
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(product.title) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = onEditPrice, modifier = Modifier.fillMaxWidth()) {
-                    Text("Изменить цену")
-                }
-                TextButton(onClick = onToggleSale, modifier = Modifier.fillMaxWidth()) {
-                    Text(toggleTitle)
-                }
-                TextButton(onClick = onDelete, modifier = Modifier.fillMaxWidth()) {
-                    Text("Удалить товар")
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Закрыть") }
-        }
-    )
 }
 
 @Composable

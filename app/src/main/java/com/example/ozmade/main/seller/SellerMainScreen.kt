@@ -52,7 +52,7 @@ fun SellerMainScreen(
 
     val showBottomBar = when (currentRoute) {
         SellerRoutes.ADD_PRODUCT -> false
-        (currentRoute?.startsWith(SellerRoutes.EDIT_PRODUCT) == true).toString() -> false
+        SellerRoutes.EDIT_PRODUCT -> false
 
         else -> true
     }

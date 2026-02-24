@@ -27,15 +27,15 @@ class SellerRepositoryImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun updateProductPrice(productId: String, newPrice: Int) {
+    override suspend fun updateProductPrice(productId: Int, newPrice: Int) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun toggleProductSaleState(productId: String) {
+    override suspend fun toggleProductSaleState(productId: Int) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun deleteProduct(productId: String) {
+    override suspend fun deleteProduct(productId: Int) {
         TODO("Not yet implemented")
     }
 }

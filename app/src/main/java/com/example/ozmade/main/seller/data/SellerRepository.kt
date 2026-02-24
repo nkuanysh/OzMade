@@ -11,7 +11,7 @@ interface SellerRepository {
 
     suspend fun getMyProducts(): List<SellerProductUi>
 
-    suspend fun updateProductPrice(productId: String, newPrice: Int)
+    suspend fun updateProductPrice(productId: Int, newPrice: Int)
 
     /**
      * Универсально:
@@ -19,7 +19,7 @@ interface SellerRepository {
      * - если товар OFF_SALE -> ON_SALE
      * - если товар ON_SALE -> OFF_SALE
      */
-    suspend fun toggleProductSaleState(productId: String)
+    suspend fun toggleProductSaleState(productId: Int)
 
-    suspend fun deleteProduct(productId: String)
+    suspend fun deleteProduct(productId: Int)
 }

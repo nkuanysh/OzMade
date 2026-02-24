@@ -29,21 +29,21 @@ class FakeSellerRepository @Inject constructor(
     private val items = CopyOnWriteArrayList(
         listOf(
             SellerProductUi(
-                id = "1",
+                id = 1,
                 title = "Домашний мёд 1л",
                 price = 4500,
                 imageUrl = null,
                 status = SellerProductStatus.ON_SALE
             ),
             SellerProductUi(
-                id = "2",
+                id = 2,
                 title = "Картина акрил 30x40",
                 price = 12000,
                 imageUrl = null,
                 status = SellerProductStatus.PENDING_MODERATION
             ),
             SellerProductUi(
-                id = "3",
+                id = 3,
                 title = "Свеча ручной работы",
                 price = 2500,
                 imageUrl = null,
@@ -57,13 +57,13 @@ class FakeSellerRepository @Inject constructor(
         return items.toList()
     }
 
-    override suspend fun updateProductPrice(productId: String, newPrice: Int) {
+    override suspend fun updateProductPrice(productId: Int, newPrice: Int) {
         delay(150)
         val idx = items.indexOfFirst { it.id == productId }
         if (idx >= 0) items[idx] = items[idx].copy(price = newPrice)
     }
 
-    override suspend fun toggleProductSaleState(productId: String) {
+    override suspend fun toggleProductSaleState(productId: Int) {
         delay(150)
         val idx = items.indexOfFirst { it.id == productId }
         if (idx < 0) return
@@ -77,7 +77,7 @@ class FakeSellerRepository @Inject constructor(
         items[idx] = current.copy(status = next)
     }
 
-    override suspend fun deleteProduct(productId: String) {
+    override suspend fun deleteProduct(productId: Int) {
         delay(150)
         items.removeIf { it.id == productId }
     }

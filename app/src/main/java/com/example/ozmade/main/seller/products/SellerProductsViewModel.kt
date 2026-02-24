@@ -3,6 +3,7 @@ package com.example.ozmade.main.seller.products
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.seller.data.SellerRepository
+import com.example.ozmade.network.api.OzMadeApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,6 +14,8 @@ import javax.inject.Inject
 data class SellerProductsState(
     val loading: Boolean = false,
     val error: String? = null,
+    val message: String? = null,
+
 
     val query: String = "",
     val filter: SellerProductsFilter = SellerProductsFilter.ALL,
@@ -29,7 +32,9 @@ data class SellerProductsState(
 
 @HiltViewModel
 class SellerProductsViewModel @Inject constructor(
-    private val repo: SellerRepository
+    private val repo: SellerRepository,
+    private val api: OzMadeApi
+
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SellerProductsState())
@@ -56,7 +61,7 @@ class SellerProductsViewModel @Inject constructor(
         _state.update { it.copy(filter = v) }
     }
 
-    fun updatePrice(productId: String, newPrice: Int) {
+    fun updatePrice(productId: Int, newPrice: Int) {
         viewModelScope.launch {
             runCatching { repo.updateProductPrice(productId, newPrice) }
                 .onSuccess { load() }
@@ -64,7 +69,7 @@ class SellerProductsViewModel @Inject constructor(
         }
     }
 
-    fun toggleSale(productId: String) {
+    fun toggleSale(productId: Int) {
         viewModelScope.launch {
             runCatching { repo.toggleProductSaleState(productId) }
                 .onSuccess { load() }
@@ -72,11 +77,26 @@ class SellerProductsViewModel @Inject constructor(
         }
     }
 
-    fun delete(productId: String) {
+    fun delete(productId: Int) {
         viewModelScope.launch {
-            runCatching { repo.deleteProduct(productId) }
-                .onSuccess { load() }
-                .onFailure { e -> _state.update { it.copy(error = e.message ?: "Не удалось удалить товар") } }
+            runCatching {
+                val resp = api.deleteProduct(productId)
+                if (!resp.isSuccessful) error("Ошибка: ${resp.code()} ${resp.message()}")}
+                .onSuccess {
+                    _state.update { it.copy(message = "Товар удалён") }  // ✅
+                    load()
+                }
+                .onFailure { e ->
+                    _state.update { it.copy(error = e.message ?: "Не удалось удалить товар") }
+                }
         }
+    }
+
+    fun consumeMessage() {
+        _state.update { it.copy(message = null) }
+    }
+
+    fun clearError() {
+        _state.update { it.copy(error = null) }
     }
 }
