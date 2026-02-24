@@ -1,7 +1,7 @@
 package com.example.ozmade.di
 
-import com.example.ozmade.main.home.HomeRepository
-import com.example.ozmade.main.home.RealHomeRepository
+import com.example.ozmade.main.userHome.HomeRepository
+import com.example.ozmade.main.userHome.RealHomeRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
