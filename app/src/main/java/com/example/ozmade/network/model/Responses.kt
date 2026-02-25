@@ -7,29 +7,17 @@ data class ProductDto(
 
     @SerializedName("Title") val title: String? = null,
     @SerializedName("Name") val name: String? = null,
-
     @SerializedName("Description") val description: String? = null,
-
-    // старое поле (1 категория)
     @SerializedName("Type") val type: String? = null,
-
-    // новое поле (много категорий)
     @SerializedName(value = "Categories", alternate = ["categories"])
     val categories: List<String>? = null,
-
     @SerializedName("Price") val price: Double? = null,
     @SerializedName("Cost") val cost: Double? = null,
-
     @SerializedName("Address") val address: String? = null,
-
     @SerializedName(value = "ImageURL", alternate = ["ImageName", "image_url"])
     val imageUrl: String? = null,
-
-    // новое (1..10 картинок)
     @SerializedName(value = "Images", alternate = ["images"])
     val images: List<String>? = null,
-
-    // характеристики
     @SerializedName(value = "Weight", alternate = ["weight"])
     val weight: String? = null,
     @SerializedName(value = "HeightCm", alternate = ["height_cm", "heightCm"])
@@ -44,7 +32,6 @@ data class ProductDto(
     @SerializedName(value = "YouTubeUrl", alternate = ["youtube_url", "youtubeUrl", "YouTubeURL"])
     val youtubeUrl: String? = null,
 
-    // остальное как было
     @SerializedName("WhatsAppLink") val whatsappLink: String? = null,
     @SerializedName("ViewCount") val viewCount: Int? = null,
     @SerializedName("AverageRating") val averageRating: Double? = null,
@@ -65,7 +52,7 @@ data class ProductDetailsDto(
     @SerializedName(value = "Categories", alternate = ["categories"])
     val categories: List<String>? = null,
 
-    @SerializedName(value = "Price", alternate = ["price"])
+    @SerializedName(value = "Cost", alternate = ["Price", "price", "cost"])
     val price: Double? = null,
 
     @SerializedName(value = "Address", alternate = ["address"])
@@ -106,7 +93,19 @@ data class ProductDetailsDto(
     @SerializedName("AverageRating") val averageRating: Double? = null,
     @SerializedName("Comments") val comments: List<CommentDto>? = null
 )
-
+data class ProductDetailsFullDto(
+    @SerializedName("id") val id: String,
+    @SerializedName("title") val title: String,
+    @SerializedName("price") val price: Double,
+    @SerializedName("images") val images: List<String>,
+    @SerializedName("description") val description: String,
+    @SerializedName("specs") val specs: List<SpecDto>,
+    @SerializedName("rating") val rating: Double,
+    @SerializedName("reviews_count") val reviewsCount: Int,
+    @SerializedName("orders_count") val ordersCount: Int,
+    @SerializedName("delivery") val delivery: DeliveryInfoDto,
+    @SerializedName("seller") val seller: SellerInfoDto
+)
 data class CommentDto(
     @SerializedName("ID") val id: Int,
     @SerializedName("UserID") val userId: Int,
@@ -136,22 +135,13 @@ data class FavoriteStatusResponse(
     @SerializedName("status") val status: String
 )
 
-data class OrderDto(
-    @SerializedName("ID") val id: Int,
-    @SerializedName("UserID") val userId: Int,
-    @SerializedName("ProductID") val productId: Int,
-    @SerializedName("Quantity") val quantity: Int,
-    @SerializedName("TotalCost") val totalCost: Double,
-    @SerializedName("Status") val status: String,
-    @SerializedName("CreatedAt") val createdAt: String
-)
-
 data class MessageResponse(
     @SerializedName("message") val message: String
 )
 
 data class UploadUrlResponse(
-    @SerializedName("upload_url") val uploadUrl: String
+    @SerializedName("upload_url") val uploadUrl: String,
+    @SerializedName("file_url") val fileUrl: String? = null
 )
 
 data class SellerProfileDto(
@@ -249,19 +239,7 @@ data class SendMessageRequest(
     @SerializedName("text") val text: String
 )
 
-data class ProductDetailsFullDto(
-    @SerializedName("id") val id: String,
-    @SerializedName("title") val title: String,
-    @SerializedName("price") val price: Double,
-    @SerializedName("images") val images: List<String>,
-    @SerializedName("description") val description: String,
-    @SerializedName("specs") val specs: List<SpecDto>,
-    @SerializedName("rating") val rating: Double,
-    @SerializedName("reviews_count") val reviewsCount: Int,
-    @SerializedName("orders_count") val ordersCount: Int,
-    @SerializedName("delivery") val delivery: DeliveryInfoDto,
-    @SerializedName("seller") val seller: SellerInfoDto
-)
+
 
 data class SpecDto(
     @SerializedName("key") val key: String,
@@ -377,4 +355,39 @@ data class UpdateSellerDeliveryRequest(
     @SerializedName("delivery_center_address") val centerAddress: String? = null,
 
     @SerializedName("intercity_enabled") val intercityEnabled: Boolean? = null
+)
+
+data class OrderDto(
+    @SerializedName("ID") val id: Int,
+
+    @SerializedName("Status") val status: String,
+    @SerializedName("CreatedAt") val createdAt: String,
+
+    @SerializedName("ProductID") val productId: Int,
+    @SerializedName("ProductTitle") val productTitle: String? = null,
+    @SerializedName("ProductImageUrl") val productImageUrl: String? = null,
+
+    @SerializedName("Price") val price: Double? = null, // цена за 1
+    @SerializedName("Quantity") val quantity: Int,
+    @SerializedName("TotalCost") val totalCost: Double,
+
+    @SerializedName("SellerID") val sellerId: Int? = null,
+    @SerializedName("SellerName") val sellerName: String? = null,
+
+    // доставка
+    @SerializedName("DeliveryType") val deliveryType: String, // PICKUP/MY_DELIVERY/INTERCITY
+
+    @SerializedName("PickupAddress") val pickupAddress: String? = null,
+    @SerializedName("PickupTime") val pickupTime: String? = null,
+
+    @SerializedName("ZoneCenterLat") val zoneCenterLat: Double? = null,
+    @SerializedName("ZoneCenterLng") val zoneCenterLng: Double? = null,
+    @SerializedName("ZoneRadiusKm") val zoneRadiusKm: Int? = null,
+    @SerializedName("ZoneCenterAddress") val zoneCenterAddress: String? = null,
+
+    @SerializedName("ShippingAddressText") val shippingAddressText: String? = null,
+    @SerializedName("ShippingComment") val shippingComment: String? = null,
+
+    // код (показывать покупателю можно, но в UI мы не будем требовать от него ввод)
+    @SerializedName("ConfirmCode") val confirmCode: String? = null
 )

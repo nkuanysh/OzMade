@@ -64,6 +64,21 @@ data class UpdateSellerProfileRequest(
     val profile_picture: String
 )
 
+data class CreateOrderRequest(
+    @SerializedName("product_id") val productId: Int,
+    @SerializedName("quantity") val quantity: Int,
+    @SerializedName("delivery_type") val deliveryType: String, // PICKUP/MY_DELIVERY/INTERCITY
+    @SerializedName("shipping_address_text") val shippingAddressText: String? = null
+)
+
+data class CompleteOrderRequest(
+    @SerializedName("code") val code: String
+)
+
+data class ReadyOrShippedRequest(
+    @SerializedName("comment") val comment: String? = null
+)
+
 data class SellerRegistrationRequestDto(
     @SerializedName("first_name") val firstName: String,
     @SerializedName("last_name") val lastName: String,

@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.ozmade.main.user.orderflow.ui.OrderBottomSheet
 import kotlin.math.max
 
 private enum class DetailsTab { DESCRIPTION, SPECS }
@@ -37,7 +38,7 @@ fun ProductDetailsScreen(
     onToggleLike: () -> Unit,
     onShare: () -> Unit,
     onChat: () -> Unit,
-    onOrder: () -> Unit,
+    onOrder: (Int) -> Unit,
     onOpenReviews: (String) -> Unit,
     onOpenSeller: (String) -> Unit,
     onBack: () -> Unit
@@ -55,11 +56,14 @@ fun ProductDetailsScreen(
         derivedStateOf { scrollState.value > 500 } // можешь подогнать
     }
 
+    var showOrderSheet by remember { mutableStateOf(false) }
+    var qty by remember { mutableStateOf(1) }
+
     Scaffold(
         bottomBar = {
             BottomActionsBar(
                 onChat = onChat,
-                onOrder = onOrder
+                onOrder = { showOrderSheet = true }
             )
         }
     ) { padding ->
@@ -96,10 +100,18 @@ fun ProductDetailsScreen(
                                 .background(MaterialTheme.colorScheme.tertiaryContainer),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = "Фото ${page + 1}",
-                                style = MaterialTheme.typography.titleMedium
-                            )
+                            val images = product.images.ifEmpty { listOf("") }
+                            val url = images[page]
+
+                            if (url.isBlank()) {
+                                Text("Фото нет")
+                            } else {
+                                coil.compose.AsyncImage(
+                                    model = url,
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
                         }
                     }
 
@@ -142,6 +154,20 @@ fun ProductDetailsScreen(
                                 )
                             }
                         }
+                    }
+                    if (showOrderSheet) {
+                        OrderBottomSheet(
+                            title = product.title,
+                            price = product.price,
+                            quantity = qty,
+                            onMinus = { qty = (qty - 1).coerceAtLeast(1) },
+                            onPlus = { qty += 1 },
+                            onClose = { showOrderSheet = false },
+                            onChooseDelivery = {
+                                showOrderSheet = false
+                                onOrder(qty) // тут ты переходишь на экран выбора доставки и передаёшь qty
+                            }
+                        )
                     }
                 }
 

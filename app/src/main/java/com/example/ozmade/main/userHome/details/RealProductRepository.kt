@@ -10,39 +10,56 @@ class RealProductRepository @Inject constructor(
 ) : ProductRepository {
 
     override suspend fun getProductDetails(productId: String): ProductDetailsUi {
-        productId.toIntOrNull()?.let { id ->
-            try {
-                api.incrementProductView(id)
-            } catch (e: Exception) {
-                // Ignore background task failure or log it
-            }
-        }
-        val dto = api.getProductDetailsFull(productId)
+        val id = productId.toIntOrNull() ?: error("Некорректный productId: $productId")
 
+        // 1) увеличить просмотры (не критично если упадёт)
+        runCatching { api.incrementProductView(id) }
+
+        // 2) получить детали
+        val resp = api.getProductDetails(id)
+        if (!resp.isSuccessful) error("Не удалось загрузить товар (${resp.code()})")
+        val dto = resp.body() ?: error("Пустой ответ от сервера")
+
+        // 3) собрать images (у сервера сейчас часто приходит ImageName, а Images может быть null)
+        val images: List<String> =
+            dto.images?.takeIf { it.isNotEmpty() }
+                ?: listOfNotNull(dto.imageUrl)
+
+        // 4) собрать specs из полей (у тебя они есть в dto)
+        val specs = buildList<Pair<String, String>> {
+            dto.weight?.takeIf { it.isNotBlank() }?.let { add("Вес" to it) }
+            dto.heightCm?.takeIf { it.isNotBlank() }?.let { add("Высота" to it) }
+            dto.widthCm?.takeIf { it.isNotBlank() }?.let { add("Ширина" to it) }
+            dto.depthCm?.takeIf { it.isNotBlank() }?.let { add("Глубина" to it) }
+            dto.composition?.takeIf { it.isNotBlank() }?.let { add("Материал" to it) }
+            dto.youtubeUrl?.takeIf { it.isNotBlank() }?.let { add("YouTube" to it) }
+        }
+
+        // 5) собрать UI (ставим безопасные дефолты)
         return ProductDetailsUi(
-            id = dto.id,
+            id = dto.id.toString(),
             title = dto.title,
-            price = dto.price,
-            images = dto.images,
+            price = dto.price ?: 0.0,                 // важно: без !!
+            rating = dto.averageRating ?: 0.0,
+            reviewsCount = dto.comments?.size ?: 0,
+            ordersCount = 0,                          // сервер пока не отдаёт — ставим 0
+            images = images,
             description = dto.description,
-            specs = dto.specs.map { it.key to it.value },
-            rating = dto.rating,
-            reviewsCount = dto.reviewsCount,
-            ordersCount = dto.ordersCount,
+            specs = specs,
             delivery = DeliveryInfoUi(
-                pickupEnabled = dto.delivery.pickupEnabled,
-                pickupTime = dto.delivery.pickupTime,
-                freeDeliveryEnabled = dto.delivery.freeDeliveryEnabled,
-                freeDeliveryText = dto.delivery.freeDeliveryText,
-                intercityEnabled = dto.delivery.intercityEnabled
+                pickupEnabled = false,
+                pickupTime = null,
+                freeDeliveryEnabled = false,
+                freeDeliveryText = null,
+                intercityEnabled = false
             ),
             seller = SellerUi(
-                id = dto.seller.id,
-                name = dto.seller.name,
-                avatarUrl = dto.seller.avatarUrl,
-                address = dto.seller.address,
-                rating = dto.seller.rating,
-                completedOrders = dto.seller.completedOrders
+                id = "0",                              // сервер сейчас отдаёт SellerID, но в dto его нет
+                name = "Продавец",
+                avatarUrl = null,
+                address = dto.address ?: "",
+                rating = 0.0,
+                completedOrders = 0
             )
         )
     }

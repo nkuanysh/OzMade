@@ -22,4 +22,7 @@ interface SellerRepository {
     suspend fun getProductDetails(productId: Int): ProductDetailsDto
     suspend fun getSellerProfile(): com.example.ozmade.network.model.SellerProfileDto?
     suspend fun updateSellerProfile(profilePictureUrl: String): Result<Unit>
+
+    suspend fun getUploadUrl(): Result<com.example.ozmade.network.model.UploadUrlResponse>
+    suspend fun uploadImageToUrl(uploadUrl: String, file: java.io.File, mimeType: String): Result<Unit>
 }

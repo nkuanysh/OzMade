@@ -6,10 +6,16 @@ import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.model.ProductDetailsDto
 import com.example.ozmade.network.model.ProductRequest
 import javax.inject.Inject
-
+import android.content.Context
+import android.net.Uri
+import androidx.documentfile.provider.DocumentFile
+import com.example.ozmade.network.model.UploadUrlResponse
+import com.example.ozmade.network.upload.UploadService
+import java.io.File
 class SellerRepositoryImpl @Inject constructor(
     private val api: OzMadeApi
 ) : SellerRepository {
+    private val uploadService = UploadService()
 
     override suspend fun sellerProfileExists(): Boolean {
         return try {
@@ -97,5 +103,21 @@ class SellerRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+    override suspend fun getUploadUrl(): Result<UploadUrlResponse> {
+        return try {
+            val resp = api.getUploadIdUrl()
+            if (resp.isSuccessful) {
+                Result.success(resp.body() ?: return Result.failure(Exception("Empty body")))
+            } else {
+                Result.failure(Exception("Error ${resp.code()}: ${resp.message()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun uploadImageToUrl(uploadUrl: String, file: File, mimeType: String): Result<Unit> {
+        return uploadService.putFile(uploadUrl, file, mimeType)
     }
 }

@@ -112,9 +112,17 @@ fun SellerMainScreen(
                 )
             }
             composable(SellerBottomItem.Orders.route) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Seller Orders (TODO)")
-                }
+                com.example.ozmade.main.seller.orders.SellerOrdersRoute(
+                    onOpenOrder = { id -> navController.navigate("seller_order_details/$id") }
+                )
+            }
+
+            composable("seller_order_details/{id}") { back ->
+                val id = back.arguments?.getString("id")?.toIntOrNull() ?: return@composable
+                com.example.ozmade.main.seller.orders.SellerOrderDetailsRoute(
+                    orderId = id,
+                    onBack = { navController.popBackStack() }
+                )
             }
             composable(SellerBottomItem.Chat.route) {
                 com.example.ozmade.main.seller.chat.SellerChatScreen(

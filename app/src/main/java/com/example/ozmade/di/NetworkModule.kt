@@ -2,6 +2,7 @@
 package com.example.ozmade.di
 
 import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.network.auth.FirebaseAuthInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,26 +17,34 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://example.com/" // TODO: Replace with actual base URL
+    private const val BASE_URL = "http://34.6.177.148:8080/"
 
     @Provides
     @Singleton
-    fun provideHttpClient(): OkHttpClient {
-        val logging = HttpLoggingInterceptor()
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY)
+
+    fun provideOkHttpClient(
+        authInterceptor: FirebaseAuthInterceptor
+    ): OkHttpClient {
+        val logging = HttpLoggingInterceptor().apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }
+
         return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
             .addInterceptor(logging)
             .build()
     }
 
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit =
-        Retrofit.Builder()
+
+    fun provideRetrofit(client: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(okHttpClient)
+            .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
 
     @Provides
     @Singleton
