@@ -4,8 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.seller.data.SellerRepository
-import com.example.ozmade.network.api.OzMadeApi
-import com.example.ozmade.network.model.ProductRequest
+import com.example.ozmade.network.model.ProductCreateRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -71,7 +70,7 @@ class SellerAddProductViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(loading = true, error = null, success = false) }
 
-            val request = toProductRequest(st)
+            val request = toCreateRequest(st)
             val result = repo.createProduct(request)
 
             result.onSuccess {
@@ -82,23 +81,30 @@ class SellerAddProductViewModel @Inject constructor(
         }
     }
 
-    private fun toProductRequest(st: AddProductState): ProductRequest {
+    private fun toCreateRequest(st: AddProductState): ProductCreateRequest {
         val price = st.priceValue ?: 0.0
 
-        return ProductRequest(
+        // пока нет загрузки на сервер — url неоткуда взять
+        val imageUrl: String? = null
+        val images: List<String>? = null
+
+        return ProductCreateRequest(
             name = st.title.trim(),
             description = st.description.trim(),
             price = price,
 
+            type = st.type.trim(),
+            address = st.address.trim(),
+
+            imageUrl = imageUrl,
             categories = st.selectedCategories.map { it.title },
-            images = st.photos.map(Uri::toString),
+            images = images,
 
             weight = st.weightText.trim().ifBlank { null },
             heightCm = st.heightText.trim().ifBlank { null },
             widthCm = st.widthText.trim().ifBlank { null },
             depthCm = st.depthText.trim().ifBlank { null },
             composition = st.composition.trim().ifBlank { null },
-
             youtubeUrl = st.youtubeUrl.trim().ifBlank { null }
         )
     }

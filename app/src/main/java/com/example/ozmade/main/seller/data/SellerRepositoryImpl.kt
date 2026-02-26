@@ -6,9 +6,8 @@ import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.model.ProductDetailsDto
 import com.example.ozmade.network.model.ProductRequest
 import javax.inject.Inject
-import android.content.Context
-import android.net.Uri
-import androidx.documentfile.provider.DocumentFile
+import com.example.ozmade.network.model.ProductCreateRequest
+import com.example.ozmade.network.model.ProductDto
 import com.example.ozmade.network.model.UploadUrlResponse
 import com.example.ozmade.network.upload.UploadService
 import java.io.File
@@ -64,14 +63,10 @@ class SellerRepositoryImpl @Inject constructor(
         api.deleteProduct(productId)
     }
 
-    override suspend fun createProduct(request: ProductRequest): Result<Unit> {
-        return try {
-            val resp = api.createProduct(request)
-            if (resp.isSuccessful) Result.success(Unit)
-            else Result.failure(Exception("Error ${'$'}{resp.code()}"))
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    override suspend fun createProduct(request: ProductCreateRequest): Result<ProductDto> = runCatching {
+        val resp = api.createProduct(request)
+        if (!resp.isSuccessful) error("Ошибка: ${resp.code()} ${resp.message()}")
+        resp.body() ?: error("Пустой ответ")
     }
 
     override suspend fun updateProduct(productId: Int, request: ProductRequest): Result<Unit> {

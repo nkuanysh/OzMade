@@ -46,7 +46,7 @@ fun ProductDetailsRoute(
                         p.seller.name,
                         p.id,
                         p.title,
-                        p.price
+                        p.price.toDouble()
                     )
                 },
                 onOrder = { qty ->

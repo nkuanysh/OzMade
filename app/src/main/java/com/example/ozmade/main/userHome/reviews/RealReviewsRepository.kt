@@ -22,7 +22,7 @@ class RealReviewsRepository @Inject constructor(
                 id = r.id,
                 userName = r.userName,
                 rating = r.rating,
-                dateText = r.createdAt,
+                dateText = r.createdAt, // пока просто показываем как текст
                 text = r.text
             )
         }

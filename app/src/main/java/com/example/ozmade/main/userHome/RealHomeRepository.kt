@@ -1,5 +1,6 @@
 package com.example.ozmade.main.userHome
 
+import android.util.Log
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.model.AdDto
 import com.example.ozmade.network.model.CategoryDto
@@ -13,20 +14,30 @@ class RealHomeRepository @Inject constructor(
 ) : HomeRepository {
 
     override suspend fun getHome(): HomeResponse = coroutineScope {
-        val adsDeferred = async { api.getAds() }
-        val catsDeferred = async { api.getCategories() }
-        val trendingDeferred = async { api.getTrendingProducts() }
         val productsDeferred = async { api.getProducts() }
+        val adsDeferred = async { runCatching { api.getAds() }.getOrNull() }
+        val catsDeferred = async { runCatching { api.getCategories() }.getOrNull() }
 
-        val adsResponse = adsDeferred.await()
-        val catsResponse = catsDeferred.await()
-        val trendingResponse = trendingDeferred.await()
-        val productsResponse = productsDeferred.await()
+        val productsResp = productsDeferred.await()
+        val products = productsResp.body()?.map { it.toDomain() } ?: emptyList()
 
-        val ads = adsResponse.body()?.map { it.toDomain() } ?: emptyList()
-        val categories = catsResponse.body()?.map { it.toDomain() } ?: emptyList()
-        val products = productsResponse.body()?.map { it.toDomain() } ?: emptyList()
-        val trendingProducts = trendingResponse.body()?.map { it.toDomain() } ?: emptyList()
+        val adsFromApi = adsDeferred.await()?.body()?.map { it.toDomain() }.orEmpty()
+        val catsFromApi = catsDeferred.await()?.body()?.map { it.toDomain() }.orEmpty()
+
+        val ads = if (adsFromApi.isNotEmpty()) adsFromApi else fallbackAds()
+
+        val categories = when {
+            catsFromApi.isNotEmpty() -> catsFromApi
+
+            // если нет /categories — берём фиксированный список (как ты и хотел)
+            fallbackCategories.isNotEmpty() -> fallbackCategories
+
+            // (на всякий) если вообще не хочешь фикс, можно строить из типов продуктов
+            else -> products.map { it.categoryId }
+                .filter { it.isNotBlank() }
+                .distinct()
+                .map { type -> Category(id = type, title = type.replaceFirstChar { c -> c.uppercase() }) }
+        }
 
         HomeResponse(
             ads = ads,
@@ -62,3 +73,16 @@ private fun ProductDto.toDomain(): Product =
         imageUrl = imageUrl ?:  "",
         categoryId = type ?: ""
     )
+private val fallbackCategories = listOf(
+    Category("food", "Еда"),
+    Category("clothes", "Одежда"),
+    Category("art", "Искусство"),
+    Category("craft", "Ремесло"),
+    Category("gifts", "Подарки"),
+    Category("holiday", "Праздники"),
+    Category("home", "Для дома")
+)
+
+private fun fallbackAds() = listOf(
+    AdBanner(id = "local-1", title = "Супер скидки!", imageRes = com.example.ozmade.R.drawable.banner1),
+)

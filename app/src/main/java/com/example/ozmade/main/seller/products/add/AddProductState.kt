@@ -9,7 +9,8 @@ data class AddProductState(
     val title: String = "",
     val priceText: String = "",
     val selectedCategories: Set<SellerCategory> = emptySet(),
-
+    val type: String = "",
+    val address: String = "",
     val weightText: String = "",
     val heightText: String = "",
     val widthText: String = "",
@@ -31,8 +32,7 @@ data class AddProductState(
                 title.isNotBlank() &&
                 (priceValue != null && priceValue > 0.0) &&
                 selectedCategories.isNotEmpty() &&
-                description.isNotBlank()
-}
+                description.isNotBlank()}
 
 enum class SellerCategory(val title: String) {
     FOOD("Еда"),

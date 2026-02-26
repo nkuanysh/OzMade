@@ -144,10 +144,10 @@ fun SellerMainScreen(
             composable(SellerBottomItem.Profile.route) {
                 SellerProfileScreen(
                     onBecomeBuyer = onExitSeller,
-                    onArchive = { /* TODO навигация */ },
-                    onQuality = { navController.navigate(SellerRoutes.QUALITY) },
-                    onDelivery = { navController.navigate(SellerRoutes.DELIVERY) },
-                    onLogout = { onExitSeller() } // или отдельный logout, если есть
+//                    onArchive = { /* TODO навигация */ },
+//                    onQuality = { navController.navigate(SellerRoutes.QUALITY) },
+//                    onDelivery = { navController.navigate(SellerRoutes.DELIVERY) },
+//                    onLogout = { onExitSeller() } // или отдельный logout, если есть
                 )
             }
             composable(SellerRoutes.QUALITY) {

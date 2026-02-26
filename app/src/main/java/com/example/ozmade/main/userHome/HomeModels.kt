@@ -3,8 +3,9 @@ package com.example.ozmade.main.userHome
 data class AdBanner(
     val id: String,
     val imageUrl: String? = null,
-    val title: String? = null,
-    val deeplink: String? = null
+    val title: String,
+    val deeplink: String? = null,
+    val imageRes: Int? = null  // ресурс картинки, например R.drawable.banner1
 )
 
 data class Category(
@@ -13,6 +14,15 @@ data class Category(
     val iconUrl: String? = null
 )
 
+val categories = listOf(
+    Category("food", "Еда"),
+    Category("clothes", "Одежда"),
+    Category("art", "Искусство"),
+    Category("craft", "Ремесло"),
+    Category("gifts", "Подарки"),
+    Category("holiday", "Праздники"),
+    Category("home", "Для дома")
+)
 data class Product(
     val id: String,
     val title: String,
@@ -20,14 +30,14 @@ data class Product(
     val city: String,
     val address: String,
     val rating: Double,
-    val imageUrl: String? = null,
-    val categoryId: String
+    val categoryId: String,
+    val imageUrl: String? = null
 )
 
 sealed class HomeUiState {
     data object Loading : HomeUiState()
     data class Data(
-        val ads: List<AdBanner>,
+        val ads: List<AdBanner> = emptyList(),
         val categories: List<Category>,
         val products: List<Product>
     ) : HomeUiState()

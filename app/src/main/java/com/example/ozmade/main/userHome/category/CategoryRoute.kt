@@ -2,6 +2,7 @@ package com.example.ozmade.main.userHome.category
 
 import androidx.compose.runtime.*
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ozmade.main.home.category.CategoryScreen
 
 @Composable
 fun CategoryRoute(

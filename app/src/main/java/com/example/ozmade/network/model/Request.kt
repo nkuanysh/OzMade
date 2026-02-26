@@ -17,49 +17,44 @@ data class UpdateProfileRequest(
 )
 
 data class ProductRequest(
-    @SerializedName(value = "Name", alternate = ["name"])
-    val name: String,
-
-    @SerializedName(value = "Description", alternate = ["description"])
-    val description: String,
-
-    @SerializedName(value = "Price", alternate = ["price"])
-    val price: Double,
-    @SerializedName(value = "Type", alternate = ["type"])
-    val type: String? = null,
+    @SerializedName(value = "Name", alternate = ["name"]) val name: String,
+    @SerializedName(value = "Description", alternate = ["description"]) val description: String,
+    @SerializedName(value = "Price", alternate = ["price"]) val price: Double,
+    @SerializedName(value = "Type", alternate = ["type"]) val type: String? = null,
     // несколько категорий
-    @SerializedName(value = "Categories", alternate = ["categories"])
-    val categories: List<String>? = null,
-
+    @SerializedName(value = "Categories", alternate = ["categories"]) val categories: List<String>? = null,
     // адрес (может не меняться при редактировании)
-    @SerializedName(value = "Address", alternate = ["address"])
-    val address: String? = null,
-
-    @SerializedName(value = "ImageURL", alternate = ["image_url", "ImageName"])
-    val imageUrl: String? = null,
-
-    @SerializedName(value = "Images", alternate = ["images"])
-    val images: List<String>? = null,
-
+    @SerializedName(value = "Address", alternate = ["address"]) val address: String? = null,
+    @SerializedName(value = "ImageURL", alternate = ["image_url", "ImageName"]) val imageUrl: String? = null,
+    @SerializedName(value = "Images", alternate = ["images"]) val images: List<String>? = null,
     // характеристики
-    @SerializedName(value = "Weight", alternate = ["weight"])
-    val weight: String? = null,
-
-    @SerializedName(value = "HeightCm", alternate = ["height_cm", "heightCm"])
-    val heightCm: String? = null,
-
-    @SerializedName(value = "WidthCm", alternate = ["width_cm", "widthCm"])
-    val widthCm: String? = null,
-
-    @SerializedName(value = "DepthCm", alternate = ["depth_cm", "depthCm"])
-    val depthCm: String? = null,
-
-    @SerializedName(value = "Composition", alternate = ["composition"])
-    val composition: String? = null,
-
-    @SerializedName(value = "YouTubeUrl", alternate = ["youtube_url", "youtubeUrl", "YouTubeURL"])
-    val youtubeUrl: String? = null
+    @SerializedName(value = "Weight", alternate = ["weight"]) val weight: String? = null,
+    @SerializedName(value = "HeightCm", alternate = ["height_cm", "heightCm"]) val heightCm: String? = null,
+    @SerializedName(value = "WidthCm", alternate = ["width_cm", "widthCm"]) val widthCm: String? = null,
+    @SerializedName(value = "DepthCm", alternate = ["depth_cm", "depthCm"]) val depthCm: String? = null,
+    @SerializedName(value = "Composition", alternate = ["composition"]) val composition: String? = null,
+    @SerializedName(value = "YouTubeUrl", alternate = ["youtube_url", "youtubeUrl", "YouTubeURL"]) val youtubeUrl: String? = null
 )
+data class ProductCreateRequest(
+    @SerializedName("name") val name: String,
+    @SerializedName("description") val description: String,
+    @SerializedName("price") val price: Double,
+
+    @SerializedName("type") val type: String,
+    @SerializedName("address") val address: String,
+
+    @SerializedName("image_url") val imageUrl: String?,
+    @SerializedName("categories") val categories: List<String>?,
+    @SerializedName("images") val images: List<String>?,
+
+    @SerializedName("weight") val weight: String?,
+    @SerializedName("height_cm") val heightCm: String?,
+    @SerializedName("width_cm") val widthCm: String?,
+    @SerializedName("depth_cm") val depthCm: String?,
+    @SerializedName("composition") val composition: String?,
+    @SerializedName("youtube_url") val youtubeUrl: String?
+)
+
 data class UpdateSellerProfileRequest(
     val profile_picture: String
 )

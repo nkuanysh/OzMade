@@ -99,7 +99,11 @@ dependencies {
     //для языка
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("androidx.compose.material:material-icons-extended:1.5.0")
+
+
+    implementation("io.coil-kt:coil-compose:2.4.0") // последняя версия на 2026 год
+
 
     implementation("androidx.compose.material:material-icons-extended:1.5.0")
 

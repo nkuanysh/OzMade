@@ -3,205 +3,190 @@ package com.example.ozmade.main.seller
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.ozmade.main.seller.profile.SellerProfileViewModel
-import com.example.ozmade.main.seller.profile.data.SellerProfileUiState
-
-private enum class AppLang { KAZ, RUS }
-
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 @Composable
 fun SellerProfileScreen(
-    onBecomeBuyer: () -> Unit,
-    onNotifications: () -> Unit = {},
-    onArchive: () -> Unit = {},
-    onQuality: () -> Unit = {},
-    onDelivery: () -> Unit = {},
-    onSupport: () -> Unit = {},
-    onAbout: () -> Unit = {},
-    onLogout: () -> Unit = {},
-    viewModel: SellerProfileViewModel = hiltViewModel()
+    onBecomeBuyer: () -> Unit
 ) {
-    var lang by rememberSaveable { mutableStateOf(AppLang.RUS) }
-    val uiState by viewModel.uiState.collectAsState()
-
-    LaunchedEffect(Unit) { viewModel.load() }
-
-    val scrollState = rememberScrollState()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)          // ✅ скролл
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 16.dp)             // ✅ чтобы кнопка "Выйти" не прилипала к краю
-    ) {
-        Spacer(Modifier.height(14.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End,
-            verticalAlignment = Alignment.CenterVertically
+    Scaffold(
+        containerColor = Color(0xFFF8F9FA) // Мягкий фон для контраста с белыми карточками
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 16.dp)
         ) {
-            LangChip("Қаз", lang == AppLang.KAZ) { lang = AppLang.KAZ }
-            Spacer(Modifier.width(8.dp))
-            LangChip("Рус", lang == AppLang.RUS) { lang = AppLang.RUS }
-        }
+            Spacer(Modifier.height(24.dp))
 
-        Spacer(Modifier.height(10.dp))
+            // --- ЗАГОЛОВОК И МАГАЗИН ---
+            Text(
+                text = "Мой магазин",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
 
-        when (val state = uiState) {
-            is SellerProfileUiState.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .size(90.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                )
-                Spacer(Modifier.height(12.dp))
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(16.dp))
+
+            // --- КАРТОЧКА СТАТИСТИКИ ---
+            SellerStatsRow()
+
+            Spacer(Modifier.height(24.dp))
+
+            // --- МЕНЮ УПРАВЛЕНИЯ ---
+            Text(
+                text = "Управление",
+                style = MaterialTheme.typography.labelLarge,
+                color = Color.Gray,
+                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
+            )
+
+            Surface(
+                shape = RoundedCornerShape(24.dp),
+                color = Color.White,
+                shadowElevation = 0.5.dp
+            ) {
+                Column {
+                    SellerMenuItem(Icons.Outlined.Settings, "Настройки магазина", "Название, описание, логотип") { }
+                    HorizontalDivider(Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color(0xFFF1F1F1))
+                    SellerMenuItem(Icons.Outlined.Payments, "Реквизиты и оплата", "Куда приходят деньги") { }
+                    HorizontalDivider(Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color(0xFFF1F1F1))
+                    SellerMenuItem(Icons.Outlined.Analytics, "Аналитика продаж", "Статистика за месяц") { }
+                }
             }
 
-            is SellerProfileUiState.Error -> {
-                Text(state.message, color = MaterialTheme.colorScheme.error)
-                Spacer(Modifier.height(12.dp))
-                Button(onClick = { viewModel.load() }, modifier = Modifier.fillMaxWidth()) {
-                    Text("Повторить")
-                }
-                Spacer(Modifier.height(20.dp))
-            }
+            Spacer(Modifier.height(24.dp))
 
-            is SellerProfileUiState.Data -> {
-                val p = state.profile
-
-                Box(
-                    modifier = Modifier
-                        .size(90.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(44.dp))
-                }
-
-                Spacer(Modifier.height(12.dp))
-
+            // --- ПЕРЕКЛЮЧАТЕЛЬ В РЕЖИМ ПОКУПАТЕЛЯ ---
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
+                onClick = onBecomeBuyer
+            ) {
                 Row(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(horizontal = 8.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = p.name.ifBlank { "Без имени" },
-                        style = MaterialTheme.typography.titleLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                    Icon(
+                        Icons.Default.SwitchAccount,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary
                     )
+                    Spacer(Modifier.width(16.dp))
+                    Column {
+                        Text(
+                            "Вернуться в покупки",
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Text(
+                            "Переключиться на профиль покупателя",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(0.7f)
+                        )
+                    }
                 }
-
-                Text(
-                    text = "Статус: ${p.status}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-                Text(
-                    text = "Товаров: ${p.totalProducts}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-
-                Spacer(Modifier.height(20.dp))
             }
+
+            Spacer(Modifier.height(24.dp))
+
+            TextButton(
+                onClick = { /* Logout logic */ },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Text("Выйти из системы", color = Color.Gray)
+            }
+
+            Spacer(Modifier.height(16.dp))
         }
-
-        // пункты меню
-        ProfileSectionButton(Icons.Default.Notifications, "Уведомления", onNotifications)
-        ProfileSectionButton(Icons.Default.DateRange, "Архив", onArchive)
-        ProfileSectionButton(Icons.Default.Star, "Качество работы", onQuality)
-        ProfileSectionButton(Icons.Default.Place, "Доставка", onDelivery)
-        ProfileSectionButton(Icons.Default.MailOutline, "Служба поддержки", onSupport)
-        ProfileSectionButton(Icons.Default.Info, "О приложении", onAbout)
-        ProfileSectionButton(Icons.Default.Person, "Стать покупателем", onBecomeBuyer)
-
-        Spacer(Modifier.height(10.dp))
-
-        Button(
-            onClick = onLogout,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer
-            ),
-            shape = RoundedCornerShape(14.dp)
-        ) {
-            Icon(Icons.Default.ExitToApp, contentDescription = null)
-            Spacer(Modifier.width(8.dp))
-            Text("Выйти")
-        }
-
-        Spacer(Modifier.height(16.dp))
     }
 }
 
 @Composable
-private fun ProfileSectionButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+private fun SellerStatsRow() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        StatCard("Товары", "24", Icons.Default.Inventory, Modifier.weight(1f))
+        StatCard("Рейтинг", "4.9", Icons.Default.Star, Modifier.weight(1f), Color(0xFFFFA000))
+        StatCard("Заказы", "12", Icons.Default.LocalShipping, Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun StatCard(
+    label: String,
+    value: String,
+    icon: ImageVector,
+    modifier: Modifier,
+    iconColor: Color = MaterialTheme.colorScheme.primary
+) {
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        color = Color.White
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.height(4.dp))
+            Text(value, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+            Text(label, fontSize = 10.sp, color = Color.Gray)
+        }
+    }
+}
+
+@Composable
+private fun SellerMenuItem(
+    icon: ImageVector,
     title: String,
+    subtitle: String,
     onClick: () -> Unit
 ) {
-    Card(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 10.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp)
+            .clickable { onClick() }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(0.5f)),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
-            ) { Icon(icon, contentDescription = null) }
-
-            Spacer(Modifier.width(12.dp))
-
-            Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
+            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
         }
+        Spacer(Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(title, fontWeight = FontWeight.Bold, fontSize = 15.sp)
+            Text(subtitle, fontSize = 12.sp, color = Color.Gray)
+        }
+        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.LightGray)
     }
-}
-
-@Composable
-private fun LangChip(text: String, selected: Boolean, onClick: () -> Unit) {
-    val colors = AssistChipDefaults.assistChipColors(
-        containerColor = if (selected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-        labelColor = MaterialTheme.colorScheme.onSurface
-    )
-    AssistChip(onClick = onClick, label = { Text(text) }, colors = colors)
 }

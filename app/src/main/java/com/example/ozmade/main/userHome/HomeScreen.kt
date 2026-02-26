@@ -14,7 +14,6 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
@@ -32,7 +31,27 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.delay
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 
+fun categoryIcon(id: String): ImageVector {
+    return when (id) {
+        "food" -> Icons.Default.Restaurant
+        "clothes" -> Icons.Default.Checkroom
+        "art" -> Icons.Default.Palette
+        "craft" -> Icons.Default.Handyman
+        "gifts" -> Icons.Default.CardGiftcard
+        "holiday" -> Icons.Default.Celebration
+        "home" -> Icons.Default.Chair
+        else -> Icons.Default.Category
+    }
+}
 //private enum class AppLang { KAZ, RUS }
 
 private val LikedIdsSaver: Saver<MutableList<String>, Any> = listSaver(
@@ -86,159 +105,167 @@ fun HomeScreen(
 
     Box(Modifier.fillMaxSize()) {
 
-        LazyVerticalGrid(
-            state = gridState,
-            columns = GridCells.Fixed(2),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
-            modifier = Modifier.fillMaxSize()
-        ) {
-
-            // отступ под закреплённый поиск
-            item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(86.dp)) }
-
-            // Языки
-//            item(span = { GridItemSpan(2) }) {
-//                Row(
-//                    modifier = Modifier.fillMaxWidth(),
-//                    horizontalArrangement = Arrangement.End,
-//                    verticalAlignment = Alignment.CenterVertically
-//                ) {
-//                    LangChip("Қаз", lang == AppLang.KAZ) { lang = AppLang.KAZ }
-//                    Spacer(Modifier.width(8.dp))
-//                    LangChip("Рус", lang == AppLang.RUS) { lang = AppLang.RUS }
-//                }
-//            }
-
-            // Название
-            item(span = { GridItemSpan(2) }) {
-                Text(
-                    text = "OzMade",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 6.dp)
-                        ,
-                )
-            }
-
-            // Реклама
-            item(span = { GridItemSpan(2) }) {
-                when (uiState) {
-                    is HomeUiState.Loading -> {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(160.dp),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                    }
-
-                    is HomeUiState.Error -> {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(160.dp),
-                            shape = RoundedCornerShape(16.dp)
-                        ) {
-                            val msg = (uiState as HomeUiState.Error).message
-                            Column(
-                                Modifier.fillMaxSize().padding(16.dp),
-                                verticalArrangement = Arrangement.Center,
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(msg, color = MaterialTheme.colorScheme.error)
-                                Spacer(Modifier.height(10.dp))
-                                Button(onClick = { viewModel.load() }) { Text("Повторить") }
-                            }
-                        }
-                    }
-
-                    is HomeUiState.Data -> {
-                        HorizontalPager(
-                            state = pagerState,
-                            contentPadding = PaddingValues(horizontal = 6.dp),
-                            pageSpacing = 12.dp,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(160.dp)
-                                .padding(top = 10.dp)
-                        ) { page ->
-                            val banner = ads.getOrNull(page)
-                            AdBannerCard(
-                                title = banner?.title ?: "Реклама",
-                                onClick = { /* TODO: открыть deeplink banner?.deeplink */ }
-                            )
-                        }
-                    }
+        when (val state = uiState) {
+            is HomeUiState.Loading -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
                 }
             }
 
-            // Категории заголовок
-            item(span = { GridItemSpan(2) }) {
-                Text(
-                    text = "Категории",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 12.dp)
-                )
+            is HomeUiState.Error -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Ошибка: ${state.message}")
+                }
             }
 
-            // Категории горизонтально
-            item(span = { GridItemSpan(2) }) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(vertical = 10.dp)
+            is HomeUiState.Data -> {
+                val ads = state.ads
+                val categories = state.categories
+                val products = state.products
+
+                val filteredProducts = remember(search, products) {
+                    val q = search.trim()
+                    if (q.isEmpty()) products
+                    else products.filter {
+                        it.title.contains(q, ignoreCase = true) ||
+                                it.city.contains(q, ignoreCase = true)
+                    }
+                }
+
+                LazyVerticalGrid(
+                    state = gridState,
+                    columns = GridCells.Fixed(2),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    modifier = Modifier.fillMaxSize()
                 ) {
-                    items(categories) { cat ->
-                        CategoryChip(
-                            title = cat.title,
-                            onClick = { onOpenCategory(cat.id) }
+                    item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(86.dp)) }
+
+                    item(span = { GridItemSpan(2) }) {
+                        Text(
+                            text = "OzMade",
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth().padding(top = 6.dp)
+                        )
+                    }
+
+                    // Реклама
+                    item(span = { GridItemSpan(2) }) {
+                        if (ads.isNotEmpty()) {
+                            val pagerStateAds = rememberPagerState(
+                                initialPage = 0,
+                                pageCount = { ads.size }
+                            )
+
+                            LaunchedEffect(ads.size) {
+                                if (ads.size > 1) {
+                                    while (true) {
+                                        delay(4000)
+                                        val next = (pagerStateAds.currentPage + 1) % ads.size
+                                        pagerStateAds.animateScrollToPage(next)
+                                    }
+                                }
+                            }
+
+                            HorizontalPager(
+                                state = pagerStateAds,
+                                contentPadding = PaddingValues(horizontal = 8.dp),
+                                pageSpacing = 12.dp,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(160.dp)
+                            ) { page ->
+                                AdBannerCard(
+                                    ad = ads[page],
+                                    onClick = { /* TODO */ }
+                                )
+                            }
+                        } else {
+                            // на всякий: если всё-таки пусто
+                            Text("Реклама скоро появится", color = Color.Gray, modifier = Modifier.padding(8.dp))
+                        }
+                    }
+
+// Категории заголовок
+                    item(span = { GridItemSpan(2) }) {
+                        Text(
+                            text = "Категории",
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(top = 12.dp)
+                        )
+                    }
+
+// Категории горизонтально
+                    item(span = { GridItemSpan(2) }) {
+                        if (categories.isNotEmpty()) {
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                contentPadding = PaddingValues(vertical = 10.dp)
+                            ) {
+                                items(categories) { cat ->
+                                    CategoryChip(
+                                        title = cat.title,
+                                        icon = categoryIcon(cat.id),
+                                        onClick = { onOpenCategory(cat.id) }
+                                    )
+                                }
+                            }
+                        } else {
+                            Text("Категории скоро появятся", color = Color.Gray, modifier = Modifier.padding(8.dp))
+                        }
+                    }
+
+                    items(filteredProducts, key = { it.id }) { product ->
+                        ProductCard(
+                            product = product,
+                            liked = likedIds.contains(product.id),
+                            onToggleLike = {
+                                if (likedIds.contains(product.id)) likedIds.remove(product.id)
+                                else likedIds.add(product.id)
+                            },
+                            onClick = { onOpenProduct(product.id) }
                         )
                     }
                 }
             }
-
-            // Товары
-            items(filteredProducts, key = { it.id }) { product ->
-                ProductCard(
-                    product = product,
-                    liked = likedIds.contains(product.id),
-                    onToggleLike = {
-                        if (likedIds.contains(product.id)) likedIds.remove(product.id)
-                        else likedIds.add(product.id)
-                    },
-                    onClick = { onOpenProduct(product.id) }
-
-                )
-            }
         }
 
-        // Поиск закреплён сверху
+        // ✅ Поиск рисуем поверх ВСЕХ состояний (или можешь оставить только для Data)
         Surface(
-            tonalElevation = 6.dp,
+            tonalElevation = 8.dp,
+            shadowElevation = 8.dp,
+            shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.TopCenter)
+                .align(Alignment.TopCenter) // теперь снова BoxScope → работает
         ) {
-            Column(
+            OutlinedTextField(
+                value = search,
+                onValueChange = { search = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
-            ) {
-                OutlinedTextField(
-                    value = search,
-                    onValueChange = { search = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Поиск товаров или города") },
-                    singleLine = true,
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .height(56.dp),
+                placeholder = { Text("Поиск товаров или города") },
+                singleLine = true,
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (search.isNotEmpty()) {
+                        IconButton(onClick = { search = "" }) {
+                            Icon(Icons.Default.Close, contentDescription = "Очистить")
+                        }
+                    }
+                },
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
                 )
-            }
+            )
         }
     }
 }
@@ -255,43 +282,68 @@ private fun LangChip(text: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun AdBannerCard(title: String, onClick: () -> Unit) {
+private fun AdBannerCard(ad: AdBanner, onClick: () -> Unit) {
     Card(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()       // ширина по экрану
+            .height(160.dp)       // фиксированная высота
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp)
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.secondaryContainer),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxSize()
         ) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
+            // Картинка
+            ad.imageRes?.let { res ->
+                Image(
+                    painter = painterResource(id = res),
+                    contentDescription = ad.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            // Текст поверх картинки
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Black.copy(alpha = 0.4f))
+                    .align(Alignment.BottomStart)
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = ad.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun CategoryChip(title: String, onClick: () -> Unit) {
-    Card(
-        shape = RoundedCornerShape(14.dp),
-        modifier = Modifier.clickable(onClick = onClick)
+private fun CategoryChip(
+    title: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(20.dp))
+            .clickable(onClick = onClick)
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .padding(horizontal = 14.dp, vertical = 8.dp)
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(22.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-            )
-            Spacer(Modifier.width(8.dp))
-            Text(title, style = MaterialTheme.typography.bodyMedium)
-        }
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(18.dp)
+        )
+
+        Spacer(Modifier.width(6.dp))
+
+        Text(text = title)
     }
 }
 
@@ -303,73 +355,94 @@ private fun ProductCard(
     onClick: () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(6.dp)
     ) {
-        Column {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Изображение товара
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp)
+                    .height(160.dp)
+                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
+                // Placeholder для изображения
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(10.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(RoundedCornerShape(16.dp))
                         .background(MaterialTheme.colorScheme.tertiaryContainer)
                 )
 
+                // Кнопка "лайк" сверху
                 IconButton(
                     onClick = onToggleLike,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(6.dp)
+                        .padding(8.dp)
                         .size(36.dp)
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White.copy(alpha = 0.85f))
                 ) {
                     Icon(
                         imageVector = if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = if (liked) Color.Red else Color.Gray
                     )
                 }
             }
 
-            Column(modifier = Modifier.padding(10.dp)) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                // Цена
                 Text(
                     text = "${product.price} ₸",
                     style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1
+                    color = MaterialTheme.colorScheme.primary
                 )
 
-                Spacer(Modifier.height(2.dp))
+                Spacer(Modifier.height(4.dp))
 
+                // Название товара
                 Text(
                     text = product.title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
 
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(4.dp))
 
+                // Адрес
                 Text(
                     text = "${product.city}, ${product.address}",
                     style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
 
                 Spacer(Modifier.height(6.dp))
 
-                Text(
-                    text = "Рейтинг: ${product.rating}",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                // Рейтинг
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = null,
+                        tint = Color(0xFFFFC107),
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = "${product.rating}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
     }

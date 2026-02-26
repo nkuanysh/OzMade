@@ -29,6 +29,7 @@ import com.example.ozmade.network.model.UpdateSellerProfileRequest
 import com.example.ozmade.network.model.UploadUrlResponse
 import com.example.ozmade.network.model.EnsureThreadRequest
 import com.example.ozmade.network.model.EnsureThreadResponse
+import com.example.ozmade.network.model.ProductCreateRequest
 import com.example.ozmade.network.model.ReadyOrShippedRequest
 import com.example.ozmade.network.model.SellerDeliveryDto
 import com.example.ozmade.network.model.SellerQualityDto
@@ -44,6 +45,12 @@ interface OzMadeApi {
         @Query("page") page: Int? = 1,
         @Query("limit") limit: Int? = 10
     ): Response<List<ProductDto>>
+
+    @GET("ads")
+    suspend fun getAds(): Response<List<AdDto>>
+
+    @GET("categories")
+    suspend fun getCategories(): Response<List<CategoryDto>>
 
     @GET("products/{id}")
     suspend fun getProductDetails(@Path("id") id: Int): Response<ProductDetailsDto>
@@ -88,6 +95,10 @@ interface OzMadeApi {
     @GET("profile/orders")
     suspend fun getOrders(): Response<List<OrderDto>>
 
+
+
+
+
     @POST("seller/register")
     suspend fun registerSeller(): Response<MessageResponse>
 
@@ -99,7 +110,7 @@ interface OzMadeApi {
 
     @POST("seller/products")
     suspend fun createProduct(
-        @Body request: ProductRequest
+        @Body request: ProductCreateRequest
     ): Response<ProductDto>
 
     @PUT("seller/products/{id}")
@@ -108,27 +119,22 @@ interface OzMadeApi {
         @Body request: ProductRequest
     ): Response<ProductDto>
 
-    @DELETE("seller/products/{id}")
-    suspend fun deleteProduct(
-        @Path("id") id: Int
-    ): Response<MessageResponse>
-
-    @GET("ads")
-    suspend fun getAds(): Response<List<AdDto>>
-
-    @GET("products/{id}/reviews")
-    suspend fun getProductReviews(@Path("id") productId: String): ProductReviewsDto
-
-//    @GET("profile/chats/{thread_id}/messages")
-//    suspend fun getBuyerChatMessages(
-//        @Path("thread_id") threadId: String
-//    ): Response<List<ChatMessageItemDto>>
-
     @PATCH("seller/products/{id}")
     suspend fun patchProduct(
         @Path("id") id: String,
         @Body updates: Map<String, @JvmSuppressWildcards Any>
     ): Response<ProductDto>
+
+    @DELETE("seller/products/{id}")
+    suspend fun deleteProduct(
+        @Path("id") id: Int
+    ): Response<MessageResponse>
+
+
+    @GET("products/{id}/reviews")
+    suspend fun getProductReviews(@Path("id") productId: String): ProductReviewsDto
+
+
     @POST("profile/chats/ensure")
     suspend fun ensureBuyerChat(
         @Body request: EnsureThreadRequest
@@ -140,8 +146,6 @@ interface OzMadeApi {
 //        @Body request: SendMessageRequest
 //    ): Response<Unit>
 
-    @GET("categories")
-    suspend fun getCategories(): Response<List<CategoryDto>>
 
     @GET("seller/profile")
     suspend fun getSellerProfile(): Response<SellerProfileDto>
