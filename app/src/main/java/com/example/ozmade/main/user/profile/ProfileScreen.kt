@@ -25,7 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ozmade.main.user.profile.data.ProfileUiState
 import com.example.ozmade.main.user.profile.data.ProfileViewModel
-
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 private enum class AppLang { KAZ, RUS }
 
 @Composable
@@ -53,7 +54,9 @@ fun ProfileScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
+                .padding(bottom = 16.dp) // чтобы низ не прилипал
         ) {
             // --- ВЕРХНЯЯ ПАНЕЛЬ (Язык) ---
             Box(
@@ -149,6 +152,7 @@ fun ProfileScreen(
                 Spacer(Modifier.width(8.dp))
                 Text("Выйти из аккаунта", fontWeight = FontWeight.Bold)
             }
+
             Spacer(Modifier.height(16.dp))
         }
     }

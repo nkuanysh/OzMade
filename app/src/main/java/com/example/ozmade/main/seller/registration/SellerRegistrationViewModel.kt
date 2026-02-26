@@ -3,7 +3,7 @@ package com.example.ozmade.main.seller.registration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.seller.data.SellerRepository
-import com.example.ozmade.network.dto.SellerRegistrationRequestDto
+import com.example.ozmade.network.model.SellerRegistrationRequestDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,15 +25,16 @@ class SellerRegistrationViewModel @Inject constructor(
     private val _state = MutableStateFlow<SellerRegState>(SellerRegState.Idle)
     val state = _state.asStateFlow()
 
-    fun submit(request: SellerRegistrationRequestDto) {
+    fun submit() {
         _state.value = SellerRegState.Loading
         viewModelScope.launch {
-            try {
-                repo.registerSeller(request)
-                _state.value = SellerRegState.Success
-            } catch (e: Exception) {
-                _state.value = SellerRegState.Error(e.message ?: "Ошибка регистрации")
-            }
+            repo.registerSeller()
+                .onSuccess {
+                    _state.value = SellerRegState.Success
+                }
+                .onFailure {
+                    _state.value = SellerRegState.Error(it.message ?: "Ошибка регистрации")
+                }
         }
     }
 

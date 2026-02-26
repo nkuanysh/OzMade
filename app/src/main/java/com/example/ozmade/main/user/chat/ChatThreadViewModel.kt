@@ -14,7 +14,8 @@ sealed class ChatThreadUiState {
     data object Loading : ChatThreadUiState()
     data class Error(val message: String) : ChatThreadUiState()
     data class Data(
-        val threadId: String,
+        val chatId: Int?,
+        val productId: Int,
         val sellerName: String,
         val productTitle: String,
         val productPrice: Int,
@@ -30,7 +31,7 @@ class ChatThreadViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<ChatThreadUiState>(ChatThreadUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
-    private var currentThreadId: String? = null
+    private var currentChatId: Int? = null
     private var sellerName: String = ""
     private var productTitle: String = ""
     private var productPrice: Int = 0
@@ -46,41 +47,47 @@ class ChatThreadViewModel @Inject constructor(
         _uiState.value = ChatThreadUiState.Loading
         viewModelScope.launch {
             runCatching {
-                val tid = repo.ensureThread(
-                    sellerId, sellerName, productId, productTitle, productPrice, productImageUrl
-                )
-                currentThreadId = tid
+                val pid = productId.toIntOrNull() ?: error("Некорректный productId: $productId")
+
+                val existingChatId = repo.findChatIdOrNull(pid)
+
                 this@ChatThreadViewModel.sellerName = sellerName
                 this@ChatThreadViewModel.productTitle = productTitle
                 this@ChatThreadViewModel.productPrice = productPrice
-                val msgs = repo.getMessages(tid)
-                tid to msgs
-            }.onSuccess { (tid, msgs) ->
-                _uiState.value = ChatThreadUiState.Data(
-                    threadId = tid,
+                currentChatId = existingChatId
+
+                val msgs = if (existingChatId != null) repo.getMessages(existingChatId) else emptyList()
+
+                ChatThreadUiState.Data(
+                    chatId = existingChatId,
+                    productId = pid,
                     sellerName = sellerName,
                     productTitle = productTitle,
                     productPrice = productPrice,
                     messages = msgs
                 )
-            }.onFailure {
-                _uiState.value = ChatThreadUiState.Error(it.message ?: "Ошибка")
-            }
+            }.onSuccess { _uiState.value = it }
+                .onFailure { _uiState.value = ChatThreadUiState.Error(it.message ?: "Ошибка") }
         }
     }
 
     fun send(text: String) {
-        val tid = currentThreadId ?: return
+        val state = _uiState.value
+        if (state !is ChatThreadUiState.Data) return
+
         viewModelScope.launch {
-            repo.sendMessage(tid, text)
-            val msgs = repo.getMessages(tid)
-            _uiState.value = ChatThreadUiState.Data(
-                threadId = tid,
-                sellerName = sellerName,
-                productTitle = productTitle,
-                productPrice = productPrice,
-                messages = msgs
-            )
+            runCatching {
+                val newChatId = repo.sendMessageOrCreate(
+                    productId = state.productId,
+                    content = text,
+                    existingChatId = state.chatId
+                )
+                currentChatId = newChatId
+
+                val msgs = repo.getMessages(newChatId)
+                state.copy(chatId = newChatId, messages = msgs)
+            }.onSuccess { _uiState.value = it }
+                .onFailure { _uiState.value = ChatThreadUiState.Error(it.message ?: "Ошибка отправки") }
         }
     }
 }

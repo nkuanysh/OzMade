@@ -21,12 +21,6 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
-import com.example.ozmade.main.home.HomeScreen
-import com.example.ozmade.main.home.category.CategoryRoute
-import com.example.ozmade.main.home.details.ProductDetailsRoute
-import com.example.ozmade.main.home.reviews.ReviewsRoute
-import com.example.ozmade.main.home.seller.SellerRoute
-import com.example.ozmade.main.home.seller.reviews.SellerReviewsRoute
 import com.example.ozmade.main.seller.SellerMainScreen
 import com.example.ozmade.main.seller.onboarding.SellerGateRoute
 import com.example.ozmade.main.seller.onboarding.SellerOnboardingScreen
@@ -37,6 +31,12 @@ import com.example.ozmade.main.user.profile.EditProfileScreen
 import com.example.ozmade.main.user.profile.ProfileScreen
 import com.example.ozmade.main.user.profile.support.SupportChatScreen
 import com.example.ozmade.main.user.profile.support.SupportScreen
+import com.example.ozmade.main.userHome.HomeScreen
+import com.example.ozmade.main.userHome.category.CategoryRoute
+import com.example.ozmade.main.userHome.details.ProductDetailsRoute
+import com.example.ozmade.main.userHome.reviews.ReviewsRoute
+import com.example.ozmade.main.userHome.seller.SellerRoute
+import com.example.ozmade.main.userHome.seller.reviews.SellerReviewsRoute
 
 // 1. Красивая структура для элементов меню
 private sealed class BottomItem(

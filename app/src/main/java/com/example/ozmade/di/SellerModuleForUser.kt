@@ -1,6 +1,7 @@
 package com.example.ozmade.di
-import com.example.ozmade.main.home.seller.FakeSellerRepository
-import com.example.ozmade.main.home.seller.SellerRepository
+
+import com.example.ozmade.main.userHome.seller.RealSellerRepository
+import com.example.ozmade.main.userHome.seller.SellerRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,6 +15,6 @@ abstract class SellerModuleForUser {
     @Binds
     @Singleton
     abstract fun bindSellerRepository(
-        impl: FakeSellerRepository
+        impl: RealSellerRepository
     ): SellerRepository
 }

@@ -1,13 +1,13 @@
 package com.example.ozmade.main.user.chat.data
 
 data class ChatThreadUi(
-    val threadId: String,      // например: "$sellerId:$productId"
-    val sellerId: String,
-    val sellerName: String,
-    val productId: String,
+    val chatId: Int,
+    val sellerId: Int,
+    val sellerName: String,      // если нет — можно "Продавец #id"
+    val productId: Int,
     val productTitle: String,
     val productPrice: Int,
-    val productImageUrl: String? = null, // позже Coil
+    val productImageUrl: String? = null,
     val lastMessage: String,
     val lastTimeText: String
 )

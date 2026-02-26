@@ -19,7 +19,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 @Composable
 fun SellerProfileScreen(
     onBecomeBuyer: () -> Unit
@@ -31,7 +32,9 @@ fun SellerProfileScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
+                .padding(bottom = 16.dp)
         ) {
             Spacer(Modifier.height(24.dp))
 
@@ -105,9 +108,8 @@ fun SellerProfileScreen(
                 }
             }
 
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(24.dp))
 
-            // Кнопка выхода (опционально для продавца)
             TextButton(
                 onClick = { /* Logout logic */ },
                 modifier = Modifier.align(Alignment.CenterHorizontally)

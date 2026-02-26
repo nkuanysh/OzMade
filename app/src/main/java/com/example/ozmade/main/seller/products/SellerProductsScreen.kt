@@ -27,20 +27,21 @@ fun SellerProductsScreen(
     onFilterChange: (SellerProductsFilter) -> Unit,
 
     onAddProduct: () -> Unit,
-    onOpenEdit: (String) -> Unit,
+    onOpenEdit: (Int) -> Unit,
 
-    onUpdatePrice: (String, Int) -> Unit,
-    onToggleSale: (String) -> Unit,
-    onDelete: (String) -> Unit,
+    onUpdatePrice: (Int, Int) -> Unit,
+    onToggleSale: (Int) -> Unit,
+    onDelete: (Int) -> Unit,
 
-    onDismissError: () -> Unit
+    onDismissError: () -> Unit,
+    snackbarHostState: SnackbarHostState,
 ) {
-    var menuFor by remember { mutableStateOf<SellerProductUi?>(null) }
 
     var priceDialogFor by remember { mutableStateOf<SellerProductUi?>(null) }
     var deleteDialogFor by remember { mutableStateOf<SellerProductUi?>(null) }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddProduct) {
                 Icon(Icons.Default.Add, contentDescription = null)
@@ -120,7 +121,9 @@ fun SellerProductsScreen(
                             SellerProductCard(
                                 product = p,
                                 onOpen = { onOpenEdit(p.id) },
-                                onOpenMenu = { menuFor = p }
+                                onEditPrice = { priceDialogFor = p },
+                                onToggleSale = { onToggleSale(p.id) },
+                                onDelete = { deleteDialogFor = p }
                             )
                         }
 
@@ -131,16 +134,16 @@ fun SellerProductsScreen(
         }
 
         // Dropdown menu (3 точки)
-        val selected = menuFor
-        if (selected != null) {
-            SellerProductDropdown(
-                product = selected,
-                onDismiss = { menuFor = null },
-                onEditPrice = { priceDialogFor = selected; menuFor = null },
-                onToggleSale = { onToggleSale(selected.id); menuFor = null },
-                onDelete = { deleteDialogFor = selected; menuFor = null }
-            )
-        }
+//        val selected = menuFor
+//        if (selected != null) {
+//            SellerProductDropdown(
+//                product = selected,
+//                onDismiss = { menuFor = null },
+//                onEditPrice = { priceDialogFor = selected; menuFor = null },
+//                onToggleSale = { onToggleSale(selected.id); menuFor = null },
+//                onDelete = { deleteDialogFor = selected; menuFor = null }
+//            )
+//        }
 
         // Диалог изменения цены
         val priceP = priceDialogFor
@@ -180,7 +183,9 @@ fun SellerProductsScreen(
 private fun SellerProductCard(
     product: SellerProductUi,
     onOpen: () -> Unit,
-    onOpenMenu: () -> Unit
+    onEditPrice: () -> Unit,
+    onToggleSale: () -> Unit,
+    onDelete: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -194,13 +199,6 @@ private fun SellerProductCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-//            AsyncImage(
-//                model = product.imageUrl,
-//                contentDescription = null,
-//                modifier = Modifier
-//                    .size(64.dp)
-//            )
-
             Spacer(Modifier.width(12.dp))
 
             Column(modifier = Modifier.weight(1f)) {
@@ -221,55 +219,53 @@ private fun SellerProductCard(
                 Spacer(Modifier.height(6.dp))
 
                 AssistChip(
-                    onClick = { /* статус не кликаем */ },
+                    onClick = { },
                     label = { Text(product.status.title()) }
                 )
             }
 
-            IconButton(onClick = onOpenMenu) {
-                Icon(Icons.Default.MoreVert, contentDescription = null)
+            var menuExpanded by remember { mutableStateOf(false) }
+
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(Icons.Default.MoreVert, contentDescription = null)
+                }
+
+                val toggleTitle = when (product.status) {
+                    SellerProductStatus.ON_SALE -> "Снять с продажи"
+                    SellerProductStatus.OFF_SALE -> "Выставить на продажу"
+                    SellerProductStatus.PENDING_MODERATION -> "Остановить проверку"
+                }
+
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Изменить цену") },
+                        onClick = {
+                            menuExpanded = false
+                            onEditPrice()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(toggleTitle) },
+                        onClick = {
+                            menuExpanded = false
+                            onToggleSale()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Удалить товар") },
+                        onClick = {
+                            menuExpanded = false
+                            onDelete()
+                        }
+                    )
+                }
             }
         }
     }
-}
-
-@Composable
-private fun SellerProductDropdown(
-    product: SellerProductUi,
-    onDismiss: () -> Unit,
-    onEditPrice: () -> Unit,
-    onToggleSale: () -> Unit,
-    onDelete: () -> Unit
-) {
-    // DropdownMenu нужен anchor. Самый простой вариант — показывать как “плавающее меню” нельзя.
-    // Поэтому делаем через Dialog-like dropdown: используем AlertDialog с кнопками (визуально то же меню).
-    val toggleTitle = when (product.status) {
-        SellerProductStatus.ON_SALE -> "Снять с продажи"
-        SellerProductStatus.OFF_SALE -> "Выставить на продажу"
-        SellerProductStatus.PENDING_MODERATION -> "Остановить проверку"
-    }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(product.title) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = onEditPrice, modifier = Modifier.fillMaxWidth()) {
-                    Text("Изменить цену")
-                }
-                TextButton(onClick = onToggleSale, modifier = Modifier.fillMaxWidth()) {
-                    Text(toggleTitle)
-                }
-                TextButton(onClick = onDelete, modifier = Modifier.fillMaxWidth()) {
-                    Text("Удалить товар")
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Закрыть") }
-        }
-    )
 }
 
 @Composable
