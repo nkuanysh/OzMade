@@ -4,7 +4,8 @@ import com.google.gson.annotations.SerializedName
 
 data class ProductDto(
     @SerializedName("ID") val id: Int,
-
+    @SerializedName(value = "SellerID", alternate = ["seller_id", "sellerId"])
+    val sellerId: Int? = null,
     @SerializedName("Title") val title: String? = null,
     @SerializedName("Name") val name: String? = null,
     @SerializedName("Description") val description: String? = null,
@@ -44,6 +45,8 @@ data class ProductDetailsDto(
 
     @SerializedName("Title") val title: String,
     @SerializedName("Description") val description: String,
+    @SerializedName(value = "SellerID", alternate = ["seller_id", "sellerId"])
+    val sellerId: Int? = null,
 
     // старое
     @SerializedName("Type") val type: String? = null,
@@ -151,13 +154,13 @@ data class SellerProfileDto(
 )
 
 data class ChatDto(
-    @SerializedName("ID") val id: Int,
-    @SerializedName("CreatedAt") val createdAt: String,
-    @SerializedName("UpdatedAt") val updatedAt: String,
-    @SerializedName("DeletedAt") val deletedAt: String?,
-    @SerializedName("SellerID") val sellerId: Int,
-    @SerializedName("BuyerID") val buyerId: Int,
-    @SerializedName("Messages") val messages: List<MessageDto>?
+    @SerializedName(value="ID", alternate=["id"]) val id: Int,
+    @SerializedName(value="SellerID", alternate=["seller_id","sellerId"]) val sellerId: Int,
+    @SerializedName(value="BuyerID", alternate=["buyer_id","buyerId"]) val buyerId: Int,
+    @SerializedName(value="ProductID", alternate=["product_id","productId"]) val productId: Int? = null,
+    @SerializedName(value="ProductName", alternate=["product_name","productName"]) val productName: String? = null,
+    @SerializedName(value="ProductImage", alternate=["product_image","productImage"]) val productImage: String? = null,
+    @SerializedName(value="Messages", alternate=["messages"]) val messages: List<MessageDto>?
 )
 
 data class MessageDto(
@@ -167,7 +170,8 @@ data class MessageDto(
     @SerializedName("DeletedAt") val deletedAt: String?,
     @SerializedName("ChatID") val chatId: Int,
     @SerializedName("SenderID") val senderId: Int,
-    @SerializedName("Content") val content: String
+    @SerializedName("Content") val content: String,
+    @SerializedName(value = "SenderRole", alternate = ["sender_role", "senderRole"]) val senderRole: String? = null
 )
 
 // For RealSellerRepository
@@ -234,12 +238,6 @@ data class EnsureThreadRequest(
 data class EnsureThreadResponse(
     @SerializedName("thread_id") val threadId: String
 )
-
-data class SendMessageRequest(
-    @SerializedName("text") val text: String
-)
-
-
 
 data class SpecDto(
     @SerializedName("key") val key: String,

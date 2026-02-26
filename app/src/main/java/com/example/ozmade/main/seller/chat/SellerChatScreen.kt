@@ -56,6 +56,8 @@ fun SellerChatScreen(
                     }
                 }
             }
+
+            else -> {}
         }
     }
 }

@@ -34,6 +34,7 @@ class RealProductRepository @Inject constructor(
             dto.composition?.takeIf { it.isNotBlank() }?.let { add("Материал" to it) }
             dto.youtubeUrl?.takeIf { it.isNotBlank() }?.let { add("YouTube" to it) }
         }
+        val sellerIdStr = (dto.sellerId ?: 0).toString()
 
         // 5) собрать UI (ставим безопасные дефолты)
         return ProductDetailsUi(
@@ -54,7 +55,7 @@ class RealProductRepository @Inject constructor(
                 intercityEnabled = false
             ),
             seller = SellerUi(
-                id = "0",                              // сервер сейчас отдаёт SellerID, но в dto его нет
+                id = (dto.sellerId ?: 0).toString(),
                 name = "Продавец",
                 avatarUrl = null,
                 address = dto.address ?: "",

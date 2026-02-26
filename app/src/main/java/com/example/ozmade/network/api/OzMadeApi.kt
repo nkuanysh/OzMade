@@ -6,11 +6,11 @@ import com.example.ozmade.network.model.ProductDto
 import com.example.ozmade.network.model.AuthSyncResponse
 import com.example.ozmade.network.model.CategoryDto
 import com.example.ozmade.network.model.ChatDto
-import com.example.ozmade.network.model.ChatMessageItemDto
-import com.example.ozmade.network.model.ChatThreadDto
+import com.example.ozmade.network.model.ChatSendMessageRequest
 import com.example.ozmade.network.model.CommentDto
 import com.example.ozmade.network.model.CommentRequest
 import com.example.ozmade.network.model.CompleteOrderRequest
+import com.example.ozmade.network.model.CreateChatRequest
 import com.example.ozmade.network.model.CreateOrderRequest
 import com.example.ozmade.network.model.FavoriteStatusResponse
 import com.example.ozmade.network.model.MessageDto
@@ -32,7 +32,6 @@ import com.example.ozmade.network.model.EnsureThreadResponse
 import com.example.ozmade.network.model.ReadyOrShippedRequest
 import com.example.ozmade.network.model.SellerDeliveryDto
 import com.example.ozmade.network.model.SellerQualityDto
-import com.example.ozmade.network.model.SendMessageRequest
 import com.example.ozmade.network.model.UpdateSellerDeliveryRequest
 import retrofit2.Response
 import retrofit2.http.*
@@ -48,9 +47,6 @@ interface OzMadeApi {
 
     @GET("products/{id}")
     suspend fun getProductDetails(@Path("id") id: Int): Response<ProductDetailsDto>
-
-//    @GET("products/{id}")
-//    suspend fun getProductDetailsFull(@Path("id") id: String): ProductDetailsFullDto
 
     @POST("products/{id}/view")
     suspend fun incrementProductView(@Path("id") id: Int): Response<Unit>
@@ -123,13 +119,10 @@ interface OzMadeApi {
     @GET("products/{id}/reviews")
     suspend fun getProductReviews(@Path("id") productId: String): ProductReviewsDto
 
-    @GET("profile/chats")
-    suspend fun getBuyerChats(): Response<List<ChatThreadDto>>
-
-    @GET("profile/chats/{thread_id}/messages")
-    suspend fun getBuyerChatMessages(
-        @Path("thread_id") threadId: String
-    ): Response<List<ChatMessageItemDto>>
+//    @GET("profile/chats/{thread_id}/messages")
+//    suspend fun getBuyerChatMessages(
+//        @Path("thread_id") threadId: String
+//    ): Response<List<ChatMessageItemDto>>
 
     @PATCH("seller/products/{id}")
     suspend fun patchProduct(
@@ -141,11 +134,11 @@ interface OzMadeApi {
         @Body request: EnsureThreadRequest
     ): Response<EnsureThreadResponse>
 
-    @POST("profile/chats/{thread_id}/messages")
-    suspend fun sendBuyerChatMessage(
-        @Path("thread_id") threadId: String,
-        @Body request: SendMessageRequest
-    ): Response<Unit>
+//    @POST("profile/chats/{thread_id}/messages")
+//    suspend fun sendBuyerChatMessage(
+//        @Path("thread_id") threadId: String,
+//        @Body request: SendMessageRequest
+//    ): Response<Unit>
 
     @GET("categories")
     suspend fun getCategories(): Response<List<CategoryDto>>
@@ -157,20 +150,6 @@ interface OzMadeApi {
     suspend fun updateSellerProfile(
         @Body request: UpdateSellerProfileRequest
     ): Response<MessageResponse>
-
-    @GET("seller/chats")
-    suspend fun getSellerChats(): Response<List<ChatDto>>
-
-    @GET("seller/chats/{chat_id}/messages")
-    suspend fun getChatMessages(
-        @Path("chat_id") chatId: Int
-    ): Response<List<MessageDto>>
-
-    @POST("seller/chats/{chat_id}/messages")
-    suspend fun sendSellerChatMessage(
-        @Path("chat_id") chatId: Int,
-        @Body request: SendMessageRequest
-    ): Response<Unit>
 
     @GET("sellers/{id}")
     suspend fun getSellerPage(@Path("id") sellerId: String): SellerPageDto
@@ -222,4 +201,28 @@ interface OzMadeApi {
         @Path("id") id: Int,
         @Body request: CompleteOrderRequest
     ): Response<Unit>
+
+    // 1) создать чат или вернуть существующий + отправить первое сообщение
+    @POST("seller/chats")
+    suspend fun createChatOrGetExisting(
+        @Body request: CreateChatRequest
+    ): Response<ChatDto> // по описанию возвращает chat object
+
+    // 2) список чатов покупателя
+    @GET("seller/chats")
+    suspend fun getBuyerChats(): Response<List<ChatDto>>
+
+    // 3) сообщения (общий для buyer/seller)
+    @GET("seller/chats/{chat_id}/messages")
+    suspend fun getChatMessages(
+        @Path("chat_id") chatId: Int
+    ): Response<List<MessageDto>>
+
+    // 4) отправка сообщения (когда chatId уже есть)
+    @POST("seller/chats/{chat_id}/messages")
+    suspend fun sendChatMessage(
+        @Path("chat_id") chatId: Int,
+        @Body request: ChatSendMessageRequest
+    ): Response<MessageDto> // у тебя в описании 201 Created, лучше вернуть MessageDto
+
 }

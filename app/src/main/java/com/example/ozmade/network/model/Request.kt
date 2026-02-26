@@ -89,3 +89,12 @@ data class SellerRegistrationRequestDto(
     @SerializedName("about") val about: String? = null,
     @SerializedName("id_card_url") val idCardUrl: String? = null
 )
+data class ChatSendMessageRequest(
+    @SerializedName("content") val content: String
+)
+
+
+data class CreateChatRequest(
+    @SerializedName("product_id") val productId: Int,
+    @SerializedName("content") val content: String
+)

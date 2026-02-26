@@ -13,22 +13,30 @@ interface AuthRepository {
 
 @Singleton
 class RealAuthRepository @Inject constructor(
-    private val api: OzMadeApi
+    private val api: OzMadeApi,
+    private val sessionStore: SessionStore // ✅ ДОБАВИЛИ
 ) : AuthRepository {
 
-    override suspend fun syncUserWithBackend(): Result<AuthSyncResponse> = withContext(Dispatchers.IO) {
-        try {
-            // The FirebaseAuthInterceptor automatically attaches the token here!
-            val response = api.syncUser()
+    override suspend fun syncUserWithBackend(): Result<AuthSyncResponse> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = api.syncUser()
 
-            if (response.isSuccessful && response.body() != null) {
-                Result.success(response.body()!!)
-            } else {
-                Result.failure(Exception("Backend sync failed with code: ${response.code()}"))
+                if (!response.isSuccessful) {
+                    return@withContext Result.failure(
+                        Exception("Backend sync failed with code: ${response.code()}")
+                    )
+                }
+
+                val body = response.body()
+                    ?: return@withContext Result.failure(Exception("Empty body from syncUser()"))
+
+                sessionStore.setUserId(body.userId)
+
+                Result.success(body)
+            } catch (e: Exception) {
+                Result.failure(e)
             }
-        } catch (e: Exception) {
-            Result.failure(e)
         }
-    }
 }
 
