@@ -1,0 +1,2 @@
+    api.syncUser();
+    api.getProfile();
