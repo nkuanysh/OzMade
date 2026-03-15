@@ -54,15 +54,15 @@ fun categoryIcon(id: String): ImageVector {
 }
 //private enum class AppLang { KAZ, RUS }
 
-private val LikedIdsSaver: Saver<MutableList<String>, Any> = listSaver(
+private val LikedIdsSaver: Saver<MutableList<Int>, Any> = listSaver(
     save = { it.toList() },
-    restore = { restored -> mutableStateListOf<String>().apply { addAll(restored) } }
+    restore = { restored -> mutableStateListOf<Int>().apply { addAll(restored) } }
 )
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
-    onOpenProduct: (String) -> Unit,
+    onOpenProduct: (Int) -> Unit,
     onOpenCategory: (String) -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -72,7 +72,7 @@ fun HomeScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    val likedIds = rememberSaveable(saver = LikedIdsSaver) { mutableStateListOf<String>() }
+    val likedIds = rememberSaveable(saver = LikedIdsSaver) { mutableStateListOf<Int>() }
     val gridState = rememberLazyGridState()
 
     // Достаём данные из state

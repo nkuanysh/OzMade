@@ -11,7 +11,7 @@ data class GoogleLoginRequestDto(val idToken: String)
 
 // --- Response DTOs ---
 data class OtpResponseDto(val message: String, val sessionId: String?)
-data class AuthResponseDto(val token: String, val userId: String, val name: String, val role: String)
+data class AuthResponseDto(val token: String, val userId: Int, val name: String, val role: String)
 
 // --- Mappers ---
 fun AuthResponseDto.toDomain(phone: String): User {

@@ -30,9 +30,9 @@ fun SellerScreen(
     onBack: () -> Unit,
     onRetry: () -> Unit,
     onSearchChanged: (String) -> Unit,
-    onToggleLike: (String) -> Unit,
-    onOpenProduct: (String) -> Unit,
-    onOpenSellerReviews: (String) -> Unit,
+    onToggleLike: (Int) -> Unit,
+    onOpenProduct: (Int) -> Unit,
+    onOpenSellerReviews: (Int) -> Unit,
 
     ) {
     var search by remember { mutableStateOf("") }

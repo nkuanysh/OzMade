@@ -33,13 +33,13 @@ import androidx.compose.ui.platform.LocalFocusManager
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatThreadRoute(
-    sellerId: String,
-    productId: String,
+    sellerId: Int,
+    productId: Int,
     sellerName: String,
     productTitle: String,
     productPrice: Int,
     onBack: () -> Unit,
-    onOpenProduct: (String) -> Unit,
+    onOpenProduct: (Int) -> Unit,
     viewModel: ChatThreadViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()

@@ -24,7 +24,7 @@ val categories = listOf(
     Category("home", "Для дома")
 )
 data class Product(
-    val id: String,
+    val id: Int,
     val title: String,
     val price: Double,
     val city: String,

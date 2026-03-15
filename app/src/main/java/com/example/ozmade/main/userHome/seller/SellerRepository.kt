@@ -1,9 +1,9 @@
 package com.example.ozmade.main.userHome.seller
 
 interface SellerRepository {
-    suspend fun getSellerPage(sellerId: String): SellerPageResponse
-    suspend fun toggleLike(productId: String): Boolean
-    suspend fun isLiked(productId: String): Boolean
+    suspend fun getSellerPage(sellerId: Int): SellerPageResponse
+    suspend fun toggleLike(productId: Int): Boolean
+    suspend fun isLiked(productId: Int): Boolean
 }
 
 data class SellerPageResponse(

@@ -14,9 +14,9 @@ data class SellerQualityUi(
 )
 
 data class SellerQualityReviewUi(
-    val id: String,
+    val id: Int,
     val userName: String,
-    val productId: String,
+    val productId: Int,
     val productTitle: String,
     val rating: Double,
     val dateText: String,

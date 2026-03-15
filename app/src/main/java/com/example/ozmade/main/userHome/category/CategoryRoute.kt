@@ -8,7 +8,7 @@ import com.example.ozmade.main.home.category.CategoryScreen
 fun CategoryRoute(
     categoryId: String,
     onBack: () -> Unit,
-    onOpenProduct: (String) -> Unit,
+    onOpenProduct: (Int) -> Unit,
     viewModel: CategoryViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()

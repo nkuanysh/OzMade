@@ -16,7 +16,7 @@ class ProductDetailsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<ProductDetailsUiState>(ProductDetailsUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
-    fun load(productId: String) {
+    fun load(productId: Int) {
         _uiState.value = ProductDetailsUiState.Loading
         viewModelScope.launch {
             runCatching {

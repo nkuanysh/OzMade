@@ -5,12 +5,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun ProductDetailsRoute(
-    productId: String,
+    productId: Int,
     onBack: () -> Unit,
-    onChat: (sellerId: String, sellerName: String, productId: String, productTitle: String, price: Double) -> Unit,
+    onChat: (sellerId: Int, sellerName: String, productId: Int, productTitle: String, price: Double) -> Unit,
     onOrder: (qty: Int) -> Unit,
-    onOpenReviews: (String) -> Unit,
-    onOpenSeller: (String) -> Unit,
+    onOpenReviews: (Int) -> Unit,
+    onOpenSeller: (Int) -> Unit,
     viewModel: ProductDetailsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()

@@ -15,7 +15,7 @@ class SellerViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<SellerUiState>(SellerUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
-    fun load(sellerId: String) {
+    fun load(sellerId: Int) {
         _uiState.value = SellerUiState.Loading
         viewModelScope.launch {
             runCatching { repo.getSellerPage(sellerId) }
@@ -38,7 +38,7 @@ class SellerViewModel @Inject constructor(
         }
     }
 
-    fun toggleLike(productId: String) {
+    fun toggleLike(productId: Int) {
         val state = _uiState.value
         if (state !is SellerUiState.Data) return
 

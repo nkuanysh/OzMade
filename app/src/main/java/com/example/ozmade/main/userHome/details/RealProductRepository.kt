@@ -9,8 +9,8 @@ class RealProductRepository @Inject constructor(
     private val api: OzMadeApi
 ) : ProductRepository {
 
-    override suspend fun getProductDetails(productId: String): ProductDetailsUi {
-        val id = productId.toIntOrNull() ?: error("Некорректный productId: $productId")
+    override suspend fun getProductDetails(productId: Int): ProductDetailsUi {
+        val id = productId
 
         // 1) увеличить просмотры (не критично если упадёт)
         runCatching { api.incrementProductView(id) }
@@ -38,7 +38,7 @@ class RealProductRepository @Inject constructor(
 
         // 5) собрать UI (ставим безопасные дефолты)
         return ProductDetailsUi(
-            id = dto.id.toString(),
+            id = dto.id,
             title = dto.title,
             price = dto.price ?: 0.0,                 // важно: без !!
             rating = dto.averageRating ?: 0.0,
@@ -55,7 +55,7 @@ class RealProductRepository @Inject constructor(
                 intercityEnabled = false
             ),
             seller = SellerUi(
-                id = (dto.sellerId ?: 0).toString(),
+                id = (dto.sellerId ?: 0),
                 name = "Продавец",
                 avatarUrl = null,
                 address = dto.address ?: "",
@@ -65,27 +65,27 @@ class RealProductRepository @Inject constructor(
         )
     }
 
-    override suspend fun isLiked(productId: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun isLiked(productId: Int): Boolean = withContext(Dispatchers.IO) {
         try {
             val response = api.getFavorites()
-            response.body()?.any { it.id.toString() == productId } == true
+            response.body()?.any { it.id == productId } == true
         } catch (e: Exception) {
             false
         }
     }
 
-    override suspend fun toggleLike(productId: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun toggleLike(productId: Int): Boolean = withContext(Dispatchers.IO) {
         try {
-            val response = api.toggleFavorite(productId.toInt())
+            val response = api.toggleFavorite(productId)
             response.isSuccessful && response.body()?.status == "added"
         } catch (e: Exception) {
             false
         }
     }
 
-    override suspend fun postComment(productId: String, rating: Int, text: String): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun postComment(productId: Int, rating: Int, text: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val resp = api.postComment(productId.toInt(), com.example.ozmade.network.model.CommentRequest(rating, text))
+            val resp = api.postComment(productId, com.example.ozmade.network.model.CommentRequest(rating, text))
             if (resp.isSuccessful) Result.success(Unit)
             else Result.failure(Exception("Error ${resp.code()}"))
         } catch (e: Exception) {
@@ -93,7 +93,7 @@ class RealProductRepository @Inject constructor(
         }
     }
 
-    override suspend fun reportProduct(productId: String, reason: String): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun reportProduct(productId: Int, reason: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val resp = api.reportProduct(productId.toInt(), com.example.ozmade.network.model.ReportRequest(reason))
             if (resp.isSuccessful) Result.success(Unit)

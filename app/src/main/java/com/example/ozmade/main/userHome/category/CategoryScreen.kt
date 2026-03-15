@@ -30,7 +30,7 @@ fun CategoryScreen(
     uiState: CategoryUiState,
     onBack: () -> Unit,
     onRetry: () -> Unit,
-    onOpenProduct: (String) -> Unit
+    onOpenProduct: (Int) -> Unit
 ) {
     Scaffold { padding ->
         when (uiState) {
@@ -60,7 +60,7 @@ fun CategoryScreen(
             }
 
             is CategoryUiState.Data -> {
-                val likedIds = remember { mutableStateListOf<String>() }
+                val likedIds = remember { mutableStateListOf<Int>() }
 
                 Box(
                     modifier = Modifier

@@ -7,7 +7,7 @@ class RealReviewsRepository @Inject constructor(
     private val api: OzMadeApi
 ) : ReviewsRepository {
 
-    override suspend fun getReviews(productId: String): ReviewsResponse {
+    override suspend fun getReviews(productId: Int): ReviewsResponse {
         val dto = api.getProductReviews(productId)
 
         val summary = ReviewsSummaryUi(

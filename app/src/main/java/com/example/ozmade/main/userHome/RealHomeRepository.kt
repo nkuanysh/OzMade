@@ -64,7 +64,7 @@ private fun CategoryDto.toDomain(): Category =
 
 private fun ProductDto.toDomain(): Product =
     Product(
-        id = id.toString(),
+        id = id,
         title = title ?: name ?: "Unknown",
         price = cost ?: price ?: 0.0,
         city = address?.substringBefore(",") ?: "Unknown",

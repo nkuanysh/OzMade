@@ -1,7 +1,7 @@
 package com.example.ozmade.main.userHome.seller.reviews
 
 data class SellerReviewsHeaderUi(
-    val sellerId: String,
+    val sellerId: Int,
     val sellerName: String,
     val reviewsCount: Int,
     val averageRating: Double,
@@ -9,9 +9,9 @@ data class SellerReviewsHeaderUi(
 )
 
 data class SellerReviewUi(
-    val id: String,
+    val id: Int,
     val userName: String,
-    val productId: String,
+    val productId: Int,
     val productTitle: String,
     val rating: Double,
     val dateText: String,

@@ -37,9 +37,9 @@ class ChatThreadViewModel @Inject constructor(
     private var productPrice: Int = 0
 
     fun openChat(
-        sellerId: String,
+        sellerId: Int,
         sellerName: String,
-        productId: String,
+        productId: Int,
         productTitle: String,
         productPrice: Int,
         productImageUrl: String? = null
@@ -47,7 +47,7 @@ class ChatThreadViewModel @Inject constructor(
         _uiState.value = ChatThreadUiState.Loading
         viewModelScope.launch {
             runCatching {
-                val pid = productId.toIntOrNull() ?: error("Некорректный productId: $productId")
+                val pid = productId
 
                 val existingChatId = repo.findChatIdOrNull(pid)
 

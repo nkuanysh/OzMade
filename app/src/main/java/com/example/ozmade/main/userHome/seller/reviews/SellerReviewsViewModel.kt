@@ -16,7 +16,7 @@ class SellerReviewsViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<SellerReviewsUiState>(SellerReviewsUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
-    fun load(sellerId: String) {
+    fun load(sellerId: Int) {
         _uiState.value = SellerReviewsUiState.Loading
         viewModelScope.launch {
             runCatching { repo.getSellerReviews(sellerId) }

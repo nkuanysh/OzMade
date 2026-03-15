@@ -1,7 +1,7 @@
 package com.example.ozmade.main.userHome.seller
 
 data class SellerHeaderUi(
-    val id: String,
+    val id: Int,
     val name: String,
     val status: String,         // "Новый мастер" и т.д.
     val ordersCount: Int,
@@ -11,7 +11,7 @@ data class SellerHeaderUi(
 )
 
 data class SellerProductUi(
-    val id: String,
+    val id: Int,
     val title: String,
     val price: Double,
     val city: String,
@@ -24,7 +24,7 @@ sealed class SellerUiState {
     data class Data(
         val seller: SellerHeaderUi,
         val products: List<SellerProductUi>,
-        val likedIds: Set<String>
+        val likedIds: Set<Int>
     ) : SellerUiState()
     data class Error(val message: String) : SellerUiState()
 }

@@ -35,7 +35,7 @@ import kotlin.math.sin
 @Composable
 fun SellerQualityRoute(
     onBack: () -> Unit,
-    onOpenProduct: (String) -> Unit,
+    onOpenProduct: (Int) -> Unit,
     viewModel: SellerQualityViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -55,7 +55,7 @@ private fun SellerQualityScreen(
     uiState: SellerQualityUiState,
     onBack: () -> Unit,
     onRetry: () -> Unit,
-    onOpenProduct: (String) -> Unit
+    onOpenProduct: (Int) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -194,7 +194,7 @@ private fun RatingCard(rating: Double, ratingsCount: Int) {
 @Composable
 private fun ReviewCard(
     review: SellerQualityReviewUi,
-    onOpenProduct: (String) -> Unit
+    onOpenProduct: (Int) -> Unit
 ) {
     Card(shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.padding(14.dp)) {

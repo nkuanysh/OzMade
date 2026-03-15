@@ -12,44 +12,45 @@ import javax.inject.Singleton
 class RealSellerChatRepository @Inject constructor(
     private val api: OzMadeApi,
     private val sessionStore: SessionStore
-
 ) : SellerChatRepository {
 
     override suspend fun getThreads(): List<SellerChatThreadUi> = withContext(Dispatchers.IO) {
-        val resp = api.getBuyerChats()
+        // ✅ FIXED: Call /seller/chats (seller endpoint, not /chats)
+        val resp = api.getSellerChats()
         if (!resp.isSuccessful) error("Не удалось загрузить чаты (${resp.code()})")
         val chats = resp.body().orEmpty()
 
         chats.map { chat ->
-            val last = chat.messages?.maxByOrNull { it.createdAt } // ISO строка, обычно ок для сортировки
+            val last = chat.messages?.maxByOrNull { it.createdAt }
             SellerChatThreadUi(
                 chatId = chat.id,
                 buyerId = chat.buyerId,
-                buyerName = "Покупатель #${chat.buyerId}", // ✅ пока так, имени у тебя нет в DTO
+                buyerName = "Покупатель #${chat.buyerId}",
                 lastMessage = last?.content ?: "",
-                lastTimeText = last?.createdAt ?: ""       // ✅ пока так, красивое время сделаем позже
+                lastTimeText = last?.createdAt ?: ""
             )
         }
     }
 
     override suspend fun getMessages(chatId: Int): List<SellerChatMessageUi> = withContext(Dispatchers.IO) {
-        val resp = api.getChatMessages(chatId)
+        // ✅ FIXED: Call /seller/chats/:chat_id/messages (seller endpoint)
+        val resp = api.getSellerChatMessages(chatId)
         if (!resp.isSuccessful) error("Не удалось загрузить сообщения (${resp.code()})")
         val dtos = resp.body().orEmpty()
 
         dtos.map { dto ->
             SellerChatMessageUi(
-                id = dto.id.toString(),
+                id = dto.id,
                 text = dto.content,
-                isMine = (dto.senderRole == "SELLER"),
+                isMine = (dto.senderId == sessionStore.myUserId()),
                 timeText = dto.createdAt
             )
         }
     }
 
     override suspend fun sendMessage(chatId: Int, text: String) = withContext(Dispatchers.IO) {
-        // ⚠️ Этот метод в api нужно добавить (см. пункт C)
-        val resp = api.sendChatMessage(chatId, ChatSendMessageRequest(content = text))
+        // ✅ FIXED: Call /seller/chats/:chat_id/messages (seller endpoint for sending)
+        val resp = api.sendSellerChatMessage(chatId, ChatSendMessageRequest(content = text))
         if (!resp.isSuccessful) error("Не удалось отправить (${resp.code()})")
     }
 }

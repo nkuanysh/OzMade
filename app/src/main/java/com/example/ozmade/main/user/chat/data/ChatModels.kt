@@ -13,7 +13,7 @@ data class ChatThreadUi(
 )
 
 data class ChatMessageUi(
-    val id: String,
+    val id: Int,
     val text: String,
     val isMine: Boolean,
     val timeText: String

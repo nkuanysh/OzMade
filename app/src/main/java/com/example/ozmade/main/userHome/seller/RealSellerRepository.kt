@@ -7,7 +7,7 @@ class RealSellerRepository @Inject constructor(
     private val api: OzMadeApi
 ) : SellerRepository {
 
-    override suspend fun getSellerPage(sellerId: String): SellerPageResponse {
+    override suspend fun getSellerPage(sellerId: Int): SellerPageResponse {
         val dto = api.getSellerPage(sellerId)
 
         val seller = SellerHeaderUi(
@@ -35,6 +35,6 @@ class RealSellerRepository @Inject constructor(
     }
 
     // лайки позже можно вынести в отдельный FavoritesApi
-    override suspend fun toggleLike(productId: String): Boolean = false
-    override suspend fun isLiked(productId: String): Boolean = false
+    override suspend fun toggleLike(productId: Int): Boolean = false
+    override suspend fun isLiked(productId: Int): Boolean = false
 }

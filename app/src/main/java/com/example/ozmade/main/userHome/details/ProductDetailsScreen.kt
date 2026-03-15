@@ -32,9 +32,12 @@ import androidx.compose.ui.unit.sp
 import kotlin.math.max
 import androidx.compose.animation.animateContentSize
 import androidx.compose.material3.HorizontalDivider
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ozmade.main.userHome.details.DeliveryInfoUi
 import com.example.ozmade.main.userHome.details.ProductDetailsUi
 import com.example.ozmade.main.userHome.details.SellerUi
+import com.example.ozmade.main.userHome.details.data.ChatActionState
+import com.example.ozmade.main.userHome.details.data.ProductChatViewModel
 
 private enum class DetailsTab { DESCRIPTION, SPECS }
 
@@ -47,13 +50,49 @@ fun ProductDetailsScreen(
     onShare: () -> Unit,
     onChat: () -> Unit,
     onOrder: (Int) -> Unit,
-    onOpenReviews: (String) -> Unit,
-    onOpenSeller: (String) -> Unit,
-    onBack: () -> Unit
+    onOpenReviews: (Int) -> Unit,
+    onOpenSeller: (Int) -> Unit,
+    onBack: () -> Unit,
+    chatViewModel: ProductChatViewModel = hiltViewModel()
+
 ) {
     var tab by remember { mutableStateOf(DetailsTab.DESCRIPTION) }
     val scrollState = rememberScrollState()
     val pagerState = rememberPagerState(pageCount = { max(product.images.size, 1) })
+    val chatState by chatViewModel.chatState.collectAsState()
+
+    // Handle chat state changes
+    LaunchedEffect(chatState) {
+        when (val state = chatState) {
+            is ChatActionState.Success -> {
+                // Navigate to chat with this product
+                onChat() // Call the callback to navigate
+                chatViewModel.resetState()
+            }
+            is ChatActionState.Error -> {
+                // Show error snackbar or dialog
+                // TODO: Show error UI
+                chatViewModel.resetState()
+            }
+            else -> {}
+        }
+    }
+
+    // ... rest of your existing code ...
+
+    // In BottomActionsBar, update the chat button:
+    Button(
+        onClick = {
+            chatViewModel.initiateChat(product.id) // Initiate chat with product ID
+        },
+        enabled = chatState !is ChatActionState.Loading
+    ) {
+        if (chatState is ChatActionState.Loading) {
+            CircularProgressIndicator(modifier = Modifier.size(20.dp))
+        } else {
+            Text("Чат")
+        }
+    }
 
     // Вычисляем прозрачность верхнего бара в зависимости от скролла
     val topBarAlpha by remember {

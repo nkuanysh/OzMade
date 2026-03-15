@@ -52,7 +52,7 @@ class SellerRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateProductPrice(productId: Int, newPrice: Int) {
-        api.patchProduct(productId.toString(), mapOf("Price" to newPrice))
+        api.patchProduct(productId, mapOf("Price" to newPrice))
     }
 
     override suspend fun toggleProductSaleState(productId: Int) {

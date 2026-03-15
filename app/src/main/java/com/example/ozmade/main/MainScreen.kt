@@ -71,7 +71,7 @@ fun MainScreen(onLogout: () -> Unit) {
             currentDestination?.route?.startsWith("chat/") == false
 
     // Функция для глубокой навигации
-    fun openProductFromDeep(productId: String) {
+    fun openProductFromDeep(productId: Int) {
         navController.navigate("product/$productId") {
             popUpTo(BottomItem.Home.route) { inclusive = false }
             launchSingleTop = true
@@ -106,7 +106,7 @@ fun MainScreen(onLogout: () -> Unit) {
 
             composable(
                 route = "category/{id}",
-                arguments = listOf(navArgument("id") { type = NavType.StringType })
+                arguments = listOf(navArgument("id") { type = NavType.IntType })
             ) { backStackEntry ->
                 CategoryRoute(
                     categoryId = backStackEntry.arguments?.getString("id") ?: "",
@@ -117,10 +117,10 @@ fun MainScreen(onLogout: () -> Unit) {
 
             composable(
                 route = "product/{id}",
-                arguments = listOf(navArgument("id") { type = NavType.StringType })
+                arguments = listOf(navArgument("id") { type = NavType.IntType })
             ) { backStackEntry ->
                 ProductDetailsRoute(
-                    productId = backStackEntry.arguments?.getString("id") ?: "",
+                    productId = backStackEntry.arguments?.getInt("id") ?: 0,
                     onBack = { navController.popBackStack() },
                     onChat = { sid, sName, pid, pTitle, price ->
                         val encS = Uri.encode(sName)
@@ -150,16 +150,16 @@ fun MainScreen(onLogout: () -> Unit) {
             composable(
                 route = "chat/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
                 arguments = listOf(
-                    navArgument("sellerId") { type = NavType.StringType },
-                    navArgument("productId") { type = NavType.StringType },
+                    navArgument("sellerId") { type = NavType.IntType },
+                    navArgument("productId") { type = NavType.IntType },
                     navArgument("sellerName") { defaultValue = "" },
                     navArgument("productTitle") { defaultValue = "" },
                     navArgument("price") { type = NavType.IntType; defaultValue = 0 }
                 )
             ) { backStackEntry ->
                 ChatThreadRoute(
-                    sellerId = backStackEntry.arguments?.getString("sellerId") ?: "",
-                    productId = backStackEntry.arguments?.getString("productId") ?: "",
+                    sellerId = backStackEntry.arguments?.getInt("sellerId") ?: 0,
+                    productId = backStackEntry.arguments?.getInt("productId") ?: 0,
                     sellerName = backStackEntry.arguments?.getString("sellerName") ?: "Продавец",
                     productTitle = backStackEntry.arguments?.getString("productTitle") ?: "Товар",
                     productPrice = backStackEntry.arguments?.getInt("price") ?: 0,
@@ -187,7 +187,7 @@ fun MainScreen(onLogout: () -> Unit) {
             // --- ПРОДАВЕЦ ---
             composable("seller/{sellerId}") { b ->
                 SellerRoute(
-                    sellerId = b.arguments?.getString("sellerId") ?: "",
+                    sellerId = b.arguments?.getInt("sellerId") ?: 0,
                     onBack = { navController.popBackStack() },
                     onOpenProduct = { pid -> openProductFromDeep(pid) },
                     onOpenSellerReviews = { sid -> navController.navigate("seller_reviews/$sid") }
@@ -228,10 +228,10 @@ fun MainScreen(onLogout: () -> Unit) {
 
             // Доп. экраны
             composable("reviews/{productId}") { b ->
-                ReviewsRoute(productId = b.arguments?.getString("productId") ?: "", onBack = { navController.popBackStack() })
+                ReviewsRoute(productId = b.arguments?.getInt("productId") ?: 0, onBack = { navController.popBackStack() })
             }
             composable("seller_reviews/{sellerId}") { b ->
-                SellerReviewsRoute(sellerId = b.arguments?.getString("sellerId") ?: "", onBack = { navController.popBackStack() }, onOpenProduct = { pid -> openProductFromDeep(pid) })
+                SellerReviewsRoute(sellerId = b.arguments?.getInt("sellerId") ?: 0, onBack = { navController.popBackStack() }, onOpenProduct = { pid -> openProductFromDeep(pid) })
             }
         }
     }

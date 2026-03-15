@@ -5,7 +5,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun ReviewsRoute(
-    productId: String,
+    productId: Int,
     onBack: () -> Unit,
     viewModel: ReviewsViewModel = hiltViewModel()
 ) {

@@ -97,7 +97,7 @@ data class ProductDetailsDto(
     @SerializedName("Comments") val comments: List<CommentDto>? = null
 )
 data class ProductDetailsFullDto(
-    @SerializedName("id") val id: String,
+    @SerializedName("id") val id: Int,
     @SerializedName("title") val title: String,
     @SerializedName("price") val price: Double,
     @SerializedName("images") val images: List<String>,
@@ -181,7 +181,7 @@ data class SellerPageDto(
 )
 
 data class SellerHeaderDto(
-    @SerializedName("id") val id: String,
+    @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String,
     @SerializedName("status") val status: String,
     @SerializedName("orders_count") val ordersCount: Int,
@@ -191,7 +191,7 @@ data class SellerHeaderDto(
 )
 
 data class SellerProductDto(
-    @SerializedName("id") val id: String,
+    @SerializedName("id") val id: Int,
     @SerializedName("title") val title: String,
     @SerializedName("price") val price: Double,
     @SerializedName("city") val city: String,
@@ -200,10 +200,10 @@ data class SellerProductDto(
 )
 
 data class ChatThreadDto(
-    @SerializedName("thread_id") val threadId: String,
-    @SerializedName("seller_id") val sellerId: String,
+    @SerializedName("thread_id") val threadId: Int,
+    @SerializedName("seller_id") val sellerId: Int,
     @SerializedName("seller_name") val sellerName: String,
-    @SerializedName("product_id") val productId: String,
+    @SerializedName("product_id") val productId: Int,
     @SerializedName("product_title") val productTitle: String,
     @SerializedName("product_price") val productPrice: Int,
     @SerializedName("product_image_url") val productImageUrl: String?,
@@ -212,13 +212,13 @@ data class ChatThreadDto(
 )
 
 data class ChatMessageItemDto(
-    @SerializedName("id") val id: String,
+    @SerializedName("id") val id: Int,
     @SerializedName("text") val text: String,
     @SerializedName("is_mine") val isMine: Boolean,
     @SerializedName("time_text") val timeText: String
 )
 data class SellerRegistrationResponseDto(
-    @SerializedName("seller_id") val sellerId: String,
+    @SerializedName("seller_id") val sellerId: Int,
     @SerializedName("status") val status: String
 )
 
@@ -231,12 +231,12 @@ data class UpdateProductStatusRequest(
 )
 
 data class EnsureThreadRequest(
-    @SerializedName("seller_id") val sellerId: String,
-    @SerializedName("product_id") val productId: String
+    @SerializedName("seller_id") val sellerId: Int,
+    @SerializedName("product_id") val productId: Int
 )
 
 data class EnsureThreadResponse(
-    @SerializedName("thread_id") val threadId: String
+    @SerializedName("thread_id") val threadId: Int
 )
 
 data class SpecDto(
@@ -253,7 +253,7 @@ data class DeliveryInfoDto(
 )
 
 data class SellerInfoDto(
-    @SerializedName("id") val id: String,
+    @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String,
     @SerializedName("avatar_url") val avatarUrl: String,
     @SerializedName("address") val address: String,
@@ -267,14 +267,14 @@ data class ProductReviewsDto(
 )
 
 data class ReviewsSummaryDto(
-    @SerializedName("product_id") val productId: String,
+    @SerializedName("product_id") val productId: Int,
     @SerializedName("average_rating") val averageRating: Double,
     @SerializedName("ratings_count") val ratingsCount: Int,
     @SerializedName("reviews_count") val reviewsCount: Int
 )
 
 data class ReviewItemDto(
-    @SerializedName("id") val id: String,
+    @SerializedName("id") val id: Int,
     @SerializedName("user_name") val userName: String,
     @SerializedName("rating") val rating: Double,
     @SerializedName("created_at") val createdAt: String,
@@ -300,7 +300,7 @@ data class SellerReviewsDto(
 )
 
 data class SellerReviewsHeaderDto(
-    @SerializedName("seller_id") val sellerId: String,
+    @SerializedName("seller_id") val sellerId: Int,
     @SerializedName("seller_name") val sellerName: String,
     @SerializedName("reviews_count") val reviewsCount: Int,
     @SerializedName("average_rating") val averageRating: Double,
@@ -308,9 +308,9 @@ data class SellerReviewsHeaderDto(
 )
 
 data class SellerReviewItemDto(
-    @SerializedName("id") val id: String,
+    @SerializedName("id") val id: Int,
     @SerializedName("user_name") val userName: String,
-    @SerializedName("product_id") val productId: String,
+    @SerializedName("product_id") val productId: Int,
     @SerializedName("product_title") val productTitle: String,
     @SerializedName("rating") val rating: Double,
     @SerializedName("created_at") val createdAt: String,

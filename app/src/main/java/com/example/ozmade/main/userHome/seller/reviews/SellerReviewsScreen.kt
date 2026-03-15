@@ -35,7 +35,7 @@ fun SellerReviewsScreen(
     uiState: SellerReviewsUiState,
     onBack: () -> Unit,
     onRetry: () -> Unit,
-    onOpenProduct: (String) -> Unit
+    onOpenProduct: (Int) -> Unit
 
 ) {
     Scaffold(
@@ -155,7 +155,7 @@ private fun SellerReviewsHeader(header: SellerReviewsHeaderUi) {
 @Composable
 private fun SellerReviewCard(
     review: SellerReviewUi,
-    onOpenProduct: (String) -> Unit
+    onOpenProduct: (Int) -> Unit
 ) {
     Card(shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.padding(14.dp)) {

@@ -1,7 +1,7 @@
 package com.example.ozmade.main.userHome.reviews
 
 data class ReviewUi(
-    val id: String,
+    val id: Int,
     val userName: String,
     val rating: Double, // 0..5 (может быть 3.5)
     val dateText: String, // пока текстом: "15.02.2026"
@@ -9,7 +9,7 @@ data class ReviewUi(
 )
 
 data class ReviewsSummaryUi(
-    val productId: String,
+    val productId: Int,
     val averageRating: Double,
     val ratingsCount: Int,
     val reviewsCount: Int

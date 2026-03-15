@@ -8,7 +8,7 @@ data class DeliveryInfoUi(
     val intercityEnabled: Boolean = false,
 )
 data class SellerUi(
-    val id: String,
+    val id: Int,
     val name: String,
     val avatarUrl: String? = null,
     val address: String,
@@ -17,7 +17,7 @@ data class SellerUi(
 )
 
 data class ProductDetailsUi(
-    val id: String,
+    val id: Int,
     val title: String,
     val price: Double,
     val rating: Double,

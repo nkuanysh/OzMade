@@ -33,7 +33,7 @@ class DeliveryChooseViewModel2 @Inject constructor(
     fun load(productId: Int) {
         viewModelScope.launch {
             _state.value = UiState.Loading
-            runCatching { productRepo.getProductDetails(productId.toString()) }
+            runCatching { productRepo.getProductDetails(productId) }
                 .onSuccess { _state.value = UiState.Data(product = it) }
                 .onFailure { _state.value = UiState.Error(it.message ?: "Ошибка загрузки") }
         }

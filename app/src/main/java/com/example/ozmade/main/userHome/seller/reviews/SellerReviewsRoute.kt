@@ -5,9 +5,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun SellerReviewsRoute(
-    sellerId: String,
+    sellerId: Int,
     onBack: () -> Unit,
-    onOpenProduct: (String) -> Unit,
+    onOpenProduct: (Int) -> Unit,
     viewModel: SellerReviewsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()

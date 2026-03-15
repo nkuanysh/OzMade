@@ -9,7 +9,7 @@ data class SellerChatThreadUi(
 )
 
 data class SellerChatMessageUi(
-    val id: String,
+    val id: Int,
     val text: String,
     val isMine: Boolean,
     val timeText: String

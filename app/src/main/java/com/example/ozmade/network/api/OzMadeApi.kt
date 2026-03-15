@@ -121,7 +121,7 @@ interface OzMadeApi {
 
     @PATCH("seller/products/{id}")
     suspend fun patchProduct(
-        @Path("id") id: String,
+        @Path("id") id: Int,
         @Body updates: Map<String, @JvmSuppressWildcards Any>
     ): Response<ProductDto>
 
@@ -132,20 +132,7 @@ interface OzMadeApi {
 
 
     @GET("products/{id}/reviews")
-    suspend fun getProductReviews(@Path("id") productId: String): ProductReviewsDto
-
-
-    @POST("profile/chats/ensure")
-    suspend fun ensureBuyerChat(
-        @Body request: EnsureThreadRequest
-    ): Response<EnsureThreadResponse>
-
-//    @POST("profile/chats/{thread_id}/messages")
-//    suspend fun sendBuyerChatMessage(
-//        @Path("thread_id") threadId: String,
-//        @Body request: SendMessageRequest
-//    ): Response<Unit>
-
+    suspend fun getProductReviews(@Path("id") productId: Int): ProductReviewsDto
 
     @GET("seller/profile")
     suspend fun getSellerProfile(): Response<SellerProfileDto>
@@ -156,10 +143,10 @@ interface OzMadeApi {
     ): Response<MessageResponse>
 
     @GET("sellers/{id}")
-    suspend fun getSellerPage(@Path("id") sellerId: String): SellerPageDto
+    suspend fun getSellerPage(@Path("id") sellerId: Int): SellerPageDto
 
     @GET("sellers/{id}/reviews")
-    suspend fun getSellerReviews(@Path("id") sellerId: String): SellerReviewsDto
+    suspend fun getSellerReviews(@Path("id") sellerId: Int): SellerReviewsDto
 
     @GET("seller/quality")
     suspend fun getSellerQuality(): Response<SellerQualityDto>
@@ -206,27 +193,39 @@ interface OzMadeApi {
         @Body request: CompleteOrderRequest
     ): Response<Unit>
 
-    // 1) создать чат или вернуть существующий + отправить первое сообщение
-    @POST("seller/chats")
-    suspend fun createChatOrGetExisting(
+    // BUYER CHAT ENDPOINTS (for buyers to create/get chats with sellers)
+    @POST("chats")
+    suspend fun createBuyerChat(
         @Body request: CreateChatRequest
-    ): Response<ChatDto> // по описанию возвращает chat object
+    ): Response<ChatDto>
 
-    // 2) список чатов покупателя
-    @GET("seller/chats")
+    @GET("chats")
     suspend fun getBuyerChats(): Response<List<ChatDto>>
 
-    // 3) сообщения (общий для buyer/seller)
-    @GET("seller/chats/{chat_id}/messages")
-    suspend fun getChatMessages(
+    @GET("chats/{chat_id}/messages")
+    suspend fun getBuyerChatMessages(
         @Path("chat_id") chatId: Int
     ): Response<List<MessageDto>>
 
-    // 4) отправка сообщения (когда chatId уже есть)
-    @POST("seller/chats/{chat_id}/messages")
-    suspend fun sendChatMessage(
+    @POST("chats/{chat_id}/messages")
+    suspend fun sendBuyerChatMessage(
         @Path("chat_id") chatId: Int,
         @Body request: ChatSendMessageRequest
-    ): Response<MessageDto> // у тебя в описании 201 Created, лучше вернуть MessageDto
+    ): Response<MessageDto>
+
+    // SELLER CHAT ENDPOINTS (for sellers to view chats from buyers)
+    @GET("seller/chats")
+    suspend fun getSellerChats(): Response<List<ChatDto>>
+
+    @GET("seller/chats/{chat_id}/messages")
+    suspend fun getSellerChatMessages(
+        @Path("chat_id") chatId: Int
+    ): Response<List<MessageDto>>
+
+    @POST("seller/chats/{chat_id}/messages")
+    suspend fun sendSellerChatMessage(
+        @Path("chat_id") chatId: Int,
+        @Body request: ChatSendMessageRequest
+    ): Response<MessageDto>
 
 }

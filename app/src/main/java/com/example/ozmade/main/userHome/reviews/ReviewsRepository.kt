@@ -1,7 +1,7 @@
 package com.example.ozmade.main.userHome.reviews
 
 interface ReviewsRepository {
-    suspend fun getReviews(productId: String): ReviewsResponse
+    suspend fun getReviews(productId: Int): ReviewsResponse
 }
 
 data class ReviewsResponse(
