@@ -2,6 +2,7 @@ package com.example.ozmade.main.user.profile.data
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ozmade.network.auth.SessionStore
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,7 +12,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val repo: ProfileRepository
+    private val repo: ProfileRepository,
+    private val sessionStore: SessionStore,
+    private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
@@ -35,6 +38,8 @@ class ProfileViewModel @Inject constructor(
     fun logout() {
         viewModelScope.launch {
             repo.logout()
+            sessionStore.clear()
+            firebaseAuth.signOut()
             FirebaseAuth.getInstance().signOut()}
     }
 }

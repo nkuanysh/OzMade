@@ -143,8 +143,11 @@ data class MessageResponse(
 )
 
 data class UploadUrlResponse(
-    @SerializedName("upload_url") val uploadUrl: String,
-    @SerializedName("file_url") val fileUrl: String? = null
+    @SerializedName("upload_url")
+    val uploadUrl: String,
+
+    @SerializedName("file_url")
+    val fileUrl: String
 )
 
 data class SellerProfileDto(

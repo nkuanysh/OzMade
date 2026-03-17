@@ -37,6 +37,7 @@ class ChatThreadViewModel @Inject constructor(
     private var productPrice: Int = 0
 
     fun openChat(
+        chatId: Int?,
         sellerId: Int,
         sellerName: String,
         productId: Int,
@@ -45,22 +46,23 @@ class ChatThreadViewModel @Inject constructor(
         productImageUrl: String? = null
     ) {
         _uiState.value = ChatThreadUiState.Loading
+
         viewModelScope.launch {
             runCatching {
-                val pid = productId
-
-                val existingChatId = repo.findChatIdOrNull(pid)
-
                 this@ChatThreadViewModel.sellerName = sellerName
                 this@ChatThreadViewModel.productTitle = productTitle
                 this@ChatThreadViewModel.productPrice = productPrice
-                currentChatId = existingChatId
+                currentChatId = chatId
 
-                val msgs = if (existingChatId != null) repo.getMessages(existingChatId) else emptyList()
+                val msgs = if (chatId != null) {
+                    repo.getMessages(chatId)
+                } else {
+                    emptyList()
+                }
 
                 ChatThreadUiState.Data(
-                    chatId = existingChatId,
-                    productId = pid,
+                    chatId = chatId,
+                    productId = productId,
                     sellerName = sellerName,
                     productTitle = productTitle,
                     productPrice = productPrice,
@@ -82,10 +84,15 @@ class ChatThreadViewModel @Inject constructor(
                     content = text,
                     existingChatId = state.chatId
                 )
+
                 currentChatId = newChatId
 
                 val msgs = repo.getMessages(newChatId)
-                state.copy(chatId = newChatId, messages = msgs)
+
+                state.copy(
+                    chatId = newChatId,
+                    messages = msgs
+                )
             }.onSuccess { _uiState.value = it }
                 .onFailure { _uiState.value = ChatThreadUiState.Error(it.message ?: "Ошибка отправки") }
         }

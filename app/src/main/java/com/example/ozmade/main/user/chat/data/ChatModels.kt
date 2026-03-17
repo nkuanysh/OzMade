@@ -3,7 +3,7 @@ package com.example.ozmade.main.user.chat.data
 data class ChatThreadUi(
     val chatId: Int,
     val sellerId: Int,
-    val sellerName: String,      // если нет — можно "Продавец #id"
+    val sellerName: String,
     val productId: Int,
     val productTitle: String,
     val productPrice: Int,

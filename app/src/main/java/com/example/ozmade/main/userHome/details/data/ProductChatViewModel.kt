@@ -26,19 +26,20 @@ class ProductChatViewModel @Inject constructor(
 
     fun initiateChat(productId: Int) {
         _chatState.value = ChatActionState.Loading
+
         viewModelScope.launch {
             runCatching {
-                // Try to find existing chat for this product
-                val existingChatId = chatRepository.findChatIdOrNull(productId)
+                val existingChatId = chatRepository
+                    .getThreads()
+                    .firstOrNull { it.productId == productId }
+                    ?.chatId
 
                 if (existingChatId != null) {
-                    // Chat already exists, return it
                     existingChatId
                 } else {
-                    // Create new chat with initial message
                     chatRepository.sendMessageOrCreate(
                         productId = productId,
-                        content = "Заинтересован в этом товаре", // Default initial message
+                        content = "Заинтересован в этом товаре",
                         existingChatId = null
                     )
                 }

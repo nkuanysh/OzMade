@@ -70,13 +70,22 @@ class SellerAddProductViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(loading = true, error = null, success = false) }
 
-            val request = toCreateRequest(st)
-            val result = repo.createProduct(request)
+            val draft = toCreateRequest(st)
+
+            val result = repo.createProductWithPhotos(
+                photoUris = st.photos,
+                draft = draft
+            )
 
             result.onSuccess {
-                _state.update { it.copy(loading = false, success = true) }
+                _state.update { AddProductState(success = true) }
             }.onFailure { e ->
-                _state.update { it.copy(loading = false, error = e.message ?: "Не удалось добавить товар") }
+                _state.update {
+                    it.copy(
+                        loading = false,
+                        error = e.message ?: "Не удалось добавить товар"
+                    )
+                }
             }
         }
     }
@@ -84,21 +93,19 @@ class SellerAddProductViewModel @Inject constructor(
     private fun toCreateRequest(st: AddProductState): ProductCreateRequest {
         val price = st.priceValue ?: 0.0
 
-        // пока нет загрузки на сервер — url неоткуда взять
-        val imageUrl: String? = null
-        val images: List<String>? = null
+        val backendType = st.selectedCategories.firstOrNull()?.backendValue ?: "crafts"
 
         return ProductCreateRequest(
             name = st.title.trim(),
             description = st.description.trim(),
             price = price,
 
-            type = st.type.trim(),
-            address = st.address.trim(),
+            type = backendType,
+            address = st.address.trim().ifBlank { null },
 
-            imageUrl = imageUrl,
-            categories = st.selectedCategories.map { it.title },
-            images = images,
+            imageUrl = null,
+            categories = st.selectedCategories.map { it.backendValue },
+            images = null,
 
             weight = st.weightText.trim().ifBlank { null },
             heightCm = st.heightText.trim().ifBlank { null },

@@ -6,6 +6,14 @@ import javax.inject.Singleton
 @Singleton
 class SessionStore @Inject constructor() {
     private var userId: Int? = null
-    fun setUserId(id: Int) { userId = id }
+
+    fun setUserId(id: Int) {
+        userId = id
+    }
+
     fun myUserId(): Int? = userId
+
+    fun clear() {
+        userId = null
+    }
 }

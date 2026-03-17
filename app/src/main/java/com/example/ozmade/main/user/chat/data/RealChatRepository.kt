@@ -15,14 +15,15 @@ class RealChatRepository @Inject constructor(
     private val sessionStore: SessionStore
 ) : ChatRepository {
 
-    override suspend fun getThreads() = withContext(Dispatchers.IO) {
-        // ✅ FIXED: Call /chats (buyer endpoint) instead of /seller/chats
+    override suspend fun getThreads(): List<ChatThreadUi> = withContext(Dispatchers.IO) {
         val resp = api.getBuyerChats()
         if (!resp.isSuccessful) error("Не удалось загрузить чаты (${resp.code()})")
+
         val chats = resp.body().orEmpty()
 
         chats.map { c ->
             val last = c.messages?.maxByOrNull { it.createdAt }
+
             ChatThreadUi(
                 chatId = c.id,
                 sellerId = c.sellerId,
@@ -37,15 +38,10 @@ class RealChatRepository @Inject constructor(
         }
     }
 
-    override suspend fun findChatIdOrNull(productId: Int): Int? = withContext(Dispatchers.IO) {
-        val threads = getThreads()
-        threads.firstOrNull { it.productId == productId }?.chatId
-    }
-
-    override suspend fun getMessages(chatId: Int) = withContext(Dispatchers.IO) {
-        // ✅ FIXED: Call /chats/:chat_id/messages (buyer endpoint)
+    override suspend fun getMessages(chatId: Int): List<ChatMessageUi> = withContext(Dispatchers.IO) {
         val resp = api.getBuyerChatMessages(chatId)
         if (!resp.isSuccessful) error("Не удалось загрузить сообщения (${resp.code()})")
+
         val myId = sessionStore.myUserId()
 
         resp.body().orEmpty().map { dto ->
@@ -65,20 +61,23 @@ class RealChatRepository @Inject constructor(
     ): Int = withContext(Dispatchers.IO) {
 
         if (existingChatId == null) {
-            // ✅ FIXED: Call /chats (create new chat)
             val resp = api.createBuyerChat(
-                CreateChatRequest(productId = productId, content = content)
+                CreateChatRequest(
+                    productId = productId,
+                    content = content
+                )
             )
             if (!resp.isSuccessful) error("Не удалось создать чат (${resp.code()})")
+
             val chat = resp.body() ?: error("Пустой ответ createChat")
             return@withContext chat.id
         } else {
-            // ✅ FIXED: Call /chats/:chat_id/messages (send message to existing chat)
             val resp = api.sendBuyerChatMessage(
                 existingChatId,
                 ChatSendMessageRequest(content = content)
             )
             if (!resp.isSuccessful) error("Не удалось отправить (${resp.code()})")
+
             return@withContext existingChatId
         }
     }

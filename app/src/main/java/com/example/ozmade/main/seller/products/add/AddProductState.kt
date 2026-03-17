@@ -9,8 +9,11 @@ data class AddProductState(
     val title: String = "",
     val priceText: String = "",
     val selectedCategories: Set<SellerCategory> = emptySet(),
+
+    // если потом понадобится отдельный type/address — можно будет управлять ими из UI
     val type: String = "",
     val address: String = "",
+
     val weightText: String = "",
     val heightText: String = "",
     val widthText: String = "",
@@ -25,20 +28,28 @@ data class AddProductState(
     val success: Boolean = false
 ) {
     val canAddMorePhotos: Boolean = photos.size < MAX_PHOTOS
+
+//    val priceValue: Double?
+//        get() = priceText.replace(',', '.').toDoubleOrNull()
     val priceValue: Double? = priceText.replace(',', '.').toDoubleOrNull()
 
-    val isValid: Boolean =
-        photos.isNotEmpty() &&
-                title.isNotBlank() &&
+
+    val isValid: Boolean
+        get() = photos.isNotEmpty() &&
+                title.trim().isNotBlank() &&
                 (priceValue != null && priceValue > 0.0) &&
                 selectedCategories.isNotEmpty() &&
-                description.isNotBlank()}
+                description.trim().isNotBlank()
+}
 
-enum class SellerCategory(val title: String) {
-    FOOD("Еда"),
-    CLOTHES("Одежда"),
-    ART("Искусство"),
-    CRAFTS("Ремесло"),
-    GIFTS("Подарки"),
-    HOME("Для Дома")
+enum class SellerCategory(
+    val title: String,
+    val backendValue: String
+) {
+    FOOD("Еда", "food"),
+    CLOTHES("Одежда", "clothes"),
+    ART("Искусство", "art"),
+    CRAFTS("Ремесло", "crafts"),
+    GIFTS("Подарки", "gifts"),
+    HOME("Для Дома", "home")
 }

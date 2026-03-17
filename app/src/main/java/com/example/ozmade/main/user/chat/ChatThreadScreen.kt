@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatThreadRoute(
+    chatId: Int?,
     sellerId: Int,
     productId: Int,
     sellerName: String,
@@ -44,8 +45,9 @@ fun ChatThreadRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(sellerId, productId) {
+    LaunchedEffect(chatId, sellerId, productId) {
         viewModel.openChat(
+            chatId = chatId,
             sellerId = sellerId,
             sellerName = sellerName,
             productId = productId,
@@ -59,7 +61,6 @@ fun ChatThreadRoute(
         onBack = onBack,
         onSend = { viewModel.send(it) },
         onOpenProduct = { onOpenProduct(productId) }
-
     )
 }
 

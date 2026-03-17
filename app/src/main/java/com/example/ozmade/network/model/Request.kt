@@ -39,20 +39,27 @@ data class ProductCreateRequest(
     @SerializedName("name") val name: String,
     @SerializedName("description") val description: String,
     @SerializedName("price") val price: Double,
-
-    @SerializedName("type") val type: String,
-    @SerializedName("address") val address: String,
-
-    @SerializedName("image_url") val imageUrl: String?,
-    @SerializedName("categories") val categories: List<String>?,
-    @SerializedName("images") val images: List<String>?,
-
-    @SerializedName("weight") val weight: String?,
-    @SerializedName("height_cm") val heightCm: String?,
-    @SerializedName("width_cm") val widthCm: String?,
-    @SerializedName("depth_cm") val depthCm: String?,
-    @SerializedName("composition") val composition: String?,
-    @SerializedName("youtube_url") val youtubeUrl: String?
+    @SerializedName("type") val type: String?,
+    @SerializedName("address")
+    val address: String?,
+    @SerializedName("image_url")
+    val imageUrl: String?,
+    @SerializedName("categories")
+    val categories: List<String>?,
+    @SerializedName("images")
+    val images: List<String>?,
+    @SerializedName("weight")
+    val weight: String?,
+    @SerializedName("height_cm")
+    val heightCm: String?,
+    @SerializedName("width_cm")
+    val widthCm: String?,
+    @SerializedName("depth_cm")
+    val depthCm: String?,
+    @SerializedName("composition")
+    val composition: String?,
+    @SerializedName("youtube_url")
+    val youtubeUrl: String?
 )
 
 data class UpdateSellerProfileRequest(

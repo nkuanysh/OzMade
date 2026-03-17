@@ -126,7 +126,9 @@ fun MainScreen(onLogout: () -> Unit) {
                     onChat = { sid, sName, pid, pTitle, price ->
                         val encS = Uri.encode(sName)
                         val encT = Uri.encode(pTitle)
-                        navController.navigate("chat/$sid/$pid?sellerName=$encS&productTitle=$encT&price=$price")
+                        navController.navigate(
+                            "chat_new/$sid/$pid?sellerName=$encS&productTitle=$encT&price=$price"
+                        )
                     },
                     onOrder = { /* TODO */ },
                     onOpenReviews = { pid -> navController.navigate("reviews/$pid") },
@@ -149,13 +151,38 @@ fun MainScreen(onLogout: () -> Unit) {
                     onOpenThread = { t ->
                         val encS = Uri.encode(t.sellerName)
                         val encT = Uri.encode(t.productTitle)
-                        navController.navigate("chat/${t.sellerId}/${t.productId}?sellerName=$encS&productTitle=$encT&price=${t.productPrice}")
+                        navController.navigate(
+                            "chat/${t.chatId}/${t.sellerId}/${t.productId}?sellerName=$encS&productTitle=$encT&price=${t.productPrice}"
+                        )
                     }
                 )
             }
 
-            composable(
-                route = "chat/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
+
+                composable(
+                    route = "chat/{chatId}/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
+                    arguments = listOf(
+                        navArgument("chatId") { type = NavType.IntType },
+                        navArgument("sellerId") { type = NavType.IntType },
+                        navArgument("productId") { type = NavType.IntType },
+                        navArgument("sellerName") { defaultValue = "" },
+                        navArgument("productTitle") { defaultValue = "" },
+                        navArgument("price") { type = NavType.IntType; defaultValue = 0 }
+                    )
+                ) { backStackEntry ->
+                    ChatThreadRoute(
+                        chatId = backStackEntry.arguments?.getInt("chatId"),
+                        sellerId = backStackEntry.arguments?.getInt("sellerId") ?: 0,
+                        productId = backStackEntry.arguments?.getInt("productId") ?: 0,
+                        sellerName = backStackEntry.arguments?.getString("sellerName") ?: "Продавец",
+                        productTitle = backStackEntry.arguments?.getString("productTitle") ?: "Товар",
+                        productPrice = backStackEntry.arguments?.getInt("price") ?: 0,
+                        onBack = { navController.popBackStack() },
+                        onOpenProduct = { pid -> openProductFromDeep(pid) }
+                    )
+                }
+                        composable(
+                        route = "chat_new/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
                 arguments = listOf(
                     navArgument("sellerId") { type = NavType.IntType },
                     navArgument("productId") { type = NavType.IntType },
@@ -165,6 +192,7 @@ fun MainScreen(onLogout: () -> Unit) {
                 )
             ) { backStackEntry ->
                 ChatThreadRoute(
+                    chatId = null,
                     sellerId = backStackEntry.arguments?.getInt("sellerId") ?: 0,
                     productId = backStackEntry.arguments?.getInt("productId") ?: 0,
                     sellerName = backStackEntry.arguments?.getString("sellerName") ?: "Продавец",

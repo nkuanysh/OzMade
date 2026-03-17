@@ -95,7 +95,20 @@ interface OzMadeApi {
     @GET("profile/orders")
     suspend fun getOrders(): Response<List<OrderDto>>
 
+//    @POST("products/{id}/orders")
+//    suspend fun createOrder(
+//        @Body request: CreateOrderRequest
+//    ): Response<OrderDto>
 
+    @POST("orders/{id}/cancel")
+    suspend fun cancelOrder(
+        @Path("id") orderId: Int
+    ): Response<MessageResponse>
+
+    @POST("orders/{id}/received")
+    suspend fun markOrderReceived(
+        @Path("id") orderId: Int
+    ): Response<MessageResponse>
 
 
 
@@ -104,6 +117,11 @@ interface OzMadeApi {
 
     @GET("seller/upload-id-url")
     suspend fun getUploadIdUrl(): Response<UploadUrlResponse>
+
+    @GET("seller/upload-product-photo-url")
+    suspend fun getUploadProductPhotoUrl(
+        @Query("content_type") contentType: String
+    ): Response<UploadUrlResponse>
 
     @GET("seller/products")
     suspend fun getSellerProducts(): Response<List<ProductDto>>
