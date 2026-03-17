@@ -1,6 +1,5 @@
 package com.example.ozmade.main.userHome
 
-import android.util.Log
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.model.AdDto
 import com.example.ozmade.network.model.CategoryDto
@@ -17,9 +16,20 @@ class RealHomeRepository @Inject constructor(
         val productsDeferred = async { api.getProducts() }
         val adsDeferred = async { runCatching { api.getAds() }.getOrNull() }
         val catsDeferred = async { runCatching { api.getCategories() }.getOrNull() }
+        val favoritesDeferred = async { runCatching { api.getFavorites() }.getOrNull() }
 
         val productsResp = productsDeferred.await()
-        val products = productsResp.body()?.map { it.toDomain() } ?: emptyList()
+        val favoriteResp = favoritesDeferred.await()
+
+        val favoriteIds = favoriteResp
+            ?.body()
+            .orEmpty()
+            .map { it.id }
+            .toSet()
+
+        val products = productsResp.body()?.map { dto ->
+            dto.toDomain(liked = favoriteIds.contains(dto.id))
+        } ?: emptyList()
 
         val adsFromApi = adsDeferred.await()?.body()?.map { it.toDomain() }.orEmpty()
         val catsFromApi = catsDeferred.await()?.body()?.map { it.toDomain() }.orEmpty()
@@ -28,15 +38,16 @@ class RealHomeRepository @Inject constructor(
 
         val categories = when {
             catsFromApi.isNotEmpty() -> catsFromApi
-
-            // если нет /categories — берём фиксированный список (как ты и хотел)
             fallbackCategories.isNotEmpty() -> fallbackCategories
-
-            // (на всякий) если вообще не хочешь фикс, можно строить из типов продуктов
             else -> products.map { it.categoryId }
                 .filter { it.isNotBlank() }
                 .distinct()
-                .map { type -> Category(id = type, title = type.replaceFirstChar { c -> c.uppercase() }) }
+                .map { type ->
+                    Category(
+                        id = type,
+                        title = type.replaceFirstChar { c -> c.uppercase() }
+                    )
+                }
         }
 
         HomeResponse(
@@ -44,6 +55,22 @@ class RealHomeRepository @Inject constructor(
             categories = categories,
             products = products
         )
+    }
+
+    override suspend fun toggleFavorite(productId: Int): Boolean {
+        val response = api.toggleFavorite(productId)
+
+        if (!response.isSuccessful) {
+            error("Не удалось изменить избранное (${response.code()})")
+        }
+
+        return when (response.body()?.status?.lowercase()) {
+            "added" -> true
+            "removed" -> false
+            else -> {
+                api.getFavorites().body()?.any { it.id == productId } == true
+            }
+        }
     }
 }
 
@@ -62,7 +89,7 @@ private fun CategoryDto.toDomain(): Category =
         iconUrl = iconUrl
     )
 
-private fun ProductDto.toDomain(): Product =
+private fun ProductDto.toDomain(liked: Boolean = false): Product =
     Product(
         id = id,
         title = title ?: name ?: "Unknown",
@@ -70,9 +97,11 @@ private fun ProductDto.toDomain(): Product =
         city = address?.substringBefore(",") ?: "Unknown",
         address = address ?: "Unknown",
         rating = averageRating ?: 0.0,
-        imageUrl = imageUrl ?:  "",
-        categoryId = type ?: ""
+        imageUrl = imageUrl ?: "",
+        categoryId = type ?: "",
+        liked = liked
     )
+
 private val fallbackCategories = listOf(
     Category("food", "Еда"),
     Category("clothes", "Одежда"),
@@ -84,5 +113,9 @@ private val fallbackCategories = listOf(
 )
 
 private fun fallbackAds() = listOf(
-    AdBanner(id = "local-1", title = "Супер скидки!", imageRes = com.example.ozmade.R.drawable.banner1),
+    AdBanner(
+        id = "local-1",
+        title = "Супер скидки!",
+        imageRes = com.example.ozmade.R.drawable.banner1
+    ),
 )

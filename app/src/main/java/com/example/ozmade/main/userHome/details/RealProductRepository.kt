@@ -1,5 +1,6 @@
 package com.example.ozmade.main.userHome.details
 
+import com.example.ozmade.main.user.favorites.FavoriteProductUi
 import com.example.ozmade.network.api.OzMadeApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -75,11 +76,37 @@ class RealProductRepository @Inject constructor(
     }
 
     override suspend fun toggleLike(productId: Int): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val response = api.toggleFavorite(productId)
-            response.isSuccessful && response.body()?.status == "added"
-        } catch (e: Exception) {
-            false
+        val response = api.toggleFavorite(productId)
+
+        if (!response.isSuccessful) {
+            error("Не удалось изменить избранное (${response.code()})")
+        }
+
+        when (response.body()?.status?.lowercase()) {
+            "added" -> true
+            "removed" -> false
+            else -> {
+                // запасной вариант: перечитать избранное с сервера
+                api.getFavorites().body()?.any { it.id == productId } == true
+            }
+        }
+    }
+
+    override suspend fun getFavorites(): List<FavoriteProductUi> = withContext(Dispatchers.IO) {
+        val response = api.getFavorites()
+        if (!response.isSuccessful) error("Не удалось загрузить избранное (${response.code()})")
+
+        val list = response.body().orEmpty()
+
+        list.map { dto ->
+            FavoriteProductUi(
+                id = dto.id,
+                title = dto.title ?: dto.name ?: "Без названия",
+                price = dto.cost ?: dto.price ?: 0.0,
+                imageUrl = dto.imageUrl,
+                address = dto.address ?: "",
+                rating = dto.averageRating ?: 0.0
+            )
         }
     }
 

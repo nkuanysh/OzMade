@@ -31,7 +31,9 @@ data class Product(
     val address: String,
     val rating: Double,
     val categoryId: String,
-    val imageUrl: String? = null
+    val imageUrl: String? = null,
+    val liked: Boolean = false
+
 )
 
 sealed class HomeUiState {

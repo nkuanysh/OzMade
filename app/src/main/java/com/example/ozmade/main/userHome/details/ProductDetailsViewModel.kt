@@ -34,8 +34,14 @@ class ProductDetailsViewModel @Inject constructor(
         if (state !is ProductDetailsUiState.Data) return
 
         viewModelScope.launch {
-            val newLiked = repo.toggleLike(state.product.id)
-            _uiState.value = state.copy(liked = newLiked)
+            runCatching {
+                repo.toggleLike(state.product.id)
+            }.onSuccess { newLiked ->
+                _uiState.value = state.copy(liked = newLiked)
+            }.onFailure {
+                // если хочешь, потом можно показать Snackbar
+                _uiState.value = state
+            }
         }
     }
 }

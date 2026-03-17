@@ -26,6 +26,7 @@ import com.example.ozmade.main.seller.onboarding.SellerGateRoute
 import com.example.ozmade.main.seller.onboarding.SellerOnboardingScreen
 import com.example.ozmade.main.user.chat.ChatScreen
 import com.example.ozmade.main.user.chat.ChatThreadRoute
+import com.example.ozmade.main.user.favorites.FavoritesRoute
 import com.example.ozmade.main.user.favorites.FavoritesScreen
 import com.example.ozmade.main.user.profile.EditProfileScreen
 import com.example.ozmade.main.user.profile.ProfileScreen
@@ -134,7 +135,13 @@ fun MainScreen(onLogout: () -> Unit) {
             }
 
             // --- ИЗБРАННОЕ ---
-            composable(BottomItem.Favorites.route) { FavoritesScreen() }
+            composable(BottomItem.Favorites.route) { FavoritesRoute(
+                onBuyClick = {
+                    navController.navigate("home")
+                },
+                onOpenProduct = { id -> navController.navigate("product/$id")
+                }
+            ) }
 
             // --- ЧАТЫ ---
             composable(BottomItem.Chat.route) {

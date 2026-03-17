@@ -19,9 +19,6 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,10 +51,6 @@ fun categoryIcon(id: String): ImageVector {
 }
 //private enum class AppLang { KAZ, RUS }
 
-private val LikedIdsSaver: Saver<MutableList<Int>, Any> = listSaver(
-    save = { it.toList() },
-    restore = { restored -> mutableStateListOf<Int>().apply { addAll(restored) } }
-)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -72,7 +65,6 @@ fun HomeScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    val likedIds = rememberSaveable(saver = LikedIdsSaver) { mutableStateListOf<Int>() }
     val gridState = rememberLazyGridState()
 
     // Достаём данные из state
@@ -220,10 +212,9 @@ fun HomeScreen(
                     items(filteredProducts, key = { it.id }) { product ->
                         ProductCard(
                             product = product,
-                            liked = likedIds.contains(product.id),
+                            liked = product.liked,
                             onToggleLike = {
-                                if (likedIds.contains(product.id)) likedIds.remove(product.id)
-                                else likedIds.add(product.id)
+                                viewModel.toggleLike(product.id)
                             },
                             onClick = { onOpenProduct(product.id) }
                         )
