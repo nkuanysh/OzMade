@@ -8,7 +8,7 @@ fun ProductDetailsRoute(
     productId: Int,
     onBack: () -> Unit,
     onChat: (sellerId: Int, sellerName: String, productId: Int, productTitle: String, price: Double) -> Unit,
-    onOrder: (qty: Int) -> Unit,
+    onOpenDelivery: (productId: Int, qty: Int) -> Unit,
     onOpenReviews: (Int) -> Unit,
     onOpenSeller: (Int) -> Unit,
     viewModel: ProductDetailsViewModel = hiltViewModel(),
@@ -49,8 +49,8 @@ fun ProductDetailsRoute(
                         p.price.toDouble()
                     )
                 },
-                onOrder = { qty ->
-                    onOrder(qty)
+                onOpenDelivery = { qty ->
+                    onOpenDelivery(p.id, qty)
                 },
                 onOpenReviews = onOpenReviews,
                 onOpenSeller = onOpenSeller,

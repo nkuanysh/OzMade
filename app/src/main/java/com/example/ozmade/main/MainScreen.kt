@@ -65,7 +65,10 @@ fun MainScreen(onLogout: () -> Unit) {
         "seller_gate",
         "seller_onboarding",
         "seller_registration",
-        "seller_main"
+        "seller_main",
+        "delivery/{productId}/{qty}",
+        "buyer_orders",
+        "buyer_order/{orderId}",
     )
 
     val showBottomBar = currentDestination?.route !in hideBottomBarRoutes &&
@@ -130,11 +133,63 @@ fun MainScreen(onLogout: () -> Unit) {
                             "chat_new/$sid/$pid?sellerName=$encS&productTitle=$encT&price=$price"
                         )
                     },
-                    onOrder = { /* TODO */ },
+                    onOpenDelivery = { pid, qty ->
+                        navController.navigate("delivery/$pid/$qty")
+                    },
                     onOpenReviews = { pid -> navController.navigate("reviews/$pid") },
                     onOpenSeller = { sid -> navController.navigate("seller/$sid") }
                 )
             }
+            //ORDER
+            composable(
+                route = "delivery/{productId}/{qty}",
+                arguments = listOf(
+                    navArgument("productId") { type = NavType.IntType },
+                    navArgument("qty") { type = NavType.IntType }
+                )
+            ) { backStackEntry ->
+                val productId = backStackEntry.arguments?.getInt("productId") ?: 0
+                val qty = backStackEntry.arguments?.getInt("qty") ?: 1
+
+                com.example.ozmade.main.user.orderflow.ui.DeliveryChooseRoute2(
+                    productId = productId,
+                    quantity = qty,
+                    onBack = { navController.popBackStack() },
+                    onCreated = {
+                        navController.navigate("buyer_orders") {
+                            launchSingleTop = true
+                        }
+                    }
+                )
+            }
+
+            composable("buyer_orders") {
+                com.example.ozmade.main.user.orders.BuyerOrdersRoute(
+                    onBack = { navController.popBackStack() },
+                    onOpenOrder = { orderId ->
+                        navController.navigate("buyer_order/$orderId")
+                    }
+                )
+            }
+
+            composable(
+                route = "buyer_order/{orderId}",
+                arguments = listOf(
+                    navArgument("orderId") { type = NavType.IntType }
+                )
+            ) { backStackEntry ->
+                val orderId = backStackEntry.arguments?.getInt("orderId") ?: 0
+
+                com.example.ozmade.main.user.orders.BuyerOrderDetailsRoute(
+                    orderId = orderId,
+                    onBack = { navController.popBackStack() },
+                    onOpenProduct = { pid ->
+                        navController.navigate("product/$pid")
+                    }
+                )
+            }
+
+
 
             // --- ИЗБРАННОЕ ---
             composable(BottomItem.Favorites.route) { FavoritesRoute(

@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
@@ -13,20 +15,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+
 @Composable
 fun SellerProfileScreen(
+    onOpenStoreSettings: () -> Unit = {},
+    onOpenDelivery: () -> Unit,
+    onOpenPayments: () -> Unit = {},
+    onOpenAnalytics: () -> Unit = {},
     onBecomeBuyer: () -> Unit
 ) {
     Scaffold(
-        containerColor = Color(0xFFF8F9FA) // Мягкий фон для контраста с белыми карточками
+        containerColor = Color(0xFFF8F9FA)
     ) { padding ->
         Column(
             modifier = Modifier
@@ -38,7 +42,6 @@ fun SellerProfileScreen(
         ) {
             Spacer(Modifier.height(24.dp))
 
-            // --- ЗАГОЛОВОК И МАГАЗИН ---
             Text(
                 text = "Мой магазин",
                 style = MaterialTheme.typography.headlineSmall,
@@ -47,12 +50,10 @@ fun SellerProfileScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            // --- КАРТОЧКА СТАТИСТИКИ ---
             SellerStatsRow()
 
             Spacer(Modifier.height(24.dp))
 
-            // --- МЕНЮ УПРАВЛЕНИЯ ---
             Text(
                 text = "Управление",
                 style = MaterialTheme.typography.labelLarge,
@@ -66,17 +67,53 @@ fun SellerProfileScreen(
                 shadowElevation = 0.5.dp
             ) {
                 Column {
-                    SellerMenuItem(Icons.Outlined.Settings, "Настройки магазина", "Название, описание, логотип") { }
-                    HorizontalDivider(Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color(0xFFF1F1F1))
-                    SellerMenuItem(Icons.Outlined.Payments, "Реквизиты и оплата", "Куда приходят деньги") { }
-                    HorizontalDivider(Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color(0xFFF1F1F1))
-                    SellerMenuItem(Icons.Outlined.Analytics, "Аналитика продаж", "Статистика за месяц") { }
+                    SellerMenuItem(
+                        Icons.Outlined.Settings,
+                        "Настройки магазина",
+                        "Название, описание, логотип",
+                        onClick = onOpenStoreSettings
+                    )
+                    HorizontalDivider(
+                        Modifier.padding(horizontal = 16.dp),
+                        thickness = 0.5.dp,
+                        color = Color(0xFFF1F1F1)
+                    )
+
+                    SellerMenuItem(
+                        Icons.Outlined.LocalShipping,
+                        "Доставка",
+                        "Самовывоз, моя доставка, межгород",
+                        onClick = onOpenDelivery
+                    )
+                    HorizontalDivider(
+                        Modifier.padding(horizontal = 16.dp),
+                        thickness = 0.5.dp,
+                        color = Color(0xFFF1F1F1)
+                    )
+
+                    SellerMenuItem(
+                        Icons.Outlined.Payments,
+                        "Реквизиты и оплата",
+                        "Куда приходят деньги",
+                        onClick = onOpenPayments
+                    )
+                    HorizontalDivider(
+                        Modifier.padding(horizontal = 16.dp),
+                        thickness = 0.5.dp,
+                        color = Color(0xFFF1F1F1)
+                    )
+
+                    SellerMenuItem(
+                        Icons.Outlined.Analytics,
+                        "Аналитика продаж",
+                        "Статистика за месяц",
+                        onClick = onOpenAnalytics
+                    )
                 }
             }
 
             Spacer(Modifier.height(24.dp))
 
-            // --- ПЕРЕКЛЮЧАТЕЛЬ В РЕЖИМ ПОКУПАТЕЛЯ ---
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(20.dp),
@@ -177,7 +214,7 @@ private fun SellerMenuItem(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(0.5f)),
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
             contentAlignment = Alignment.Center
         ) {
             Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))

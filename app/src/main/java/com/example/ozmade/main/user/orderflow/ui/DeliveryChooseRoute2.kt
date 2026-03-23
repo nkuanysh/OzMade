@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -23,36 +24,53 @@ fun DeliveryChooseRoute2(
 ) {
     val state by viewModel.state.collectAsState()
 
-    LaunchedEffect(productId) { viewModel.load(productId) }
+    LaunchedEffect(productId) {
+        viewModel.load(productId)
+    }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = { Text("Способ доставки") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) } }
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, null)
+                    }
+                }
             )
         }
     ) { padding ->
         when (val st = state) {
             is DeliveryChooseViewModel2.UiState.Loading -> {
-                Box(Modifier.padding(padding).fillMaxSize(), contentAlignment = androidx.compose.ui.Alignment.Center) {
+                Box(
+                    Modifier
+                        .padding(padding)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
                     CircularProgressIndicator()
                 }
             }
+
             is DeliveryChooseViewModel2.UiState.Error -> {
                 Column(Modifier.padding(padding).padding(16.dp)) {
                     Text(st.message, color = MaterialTheme.colorScheme.error)
                     Spacer(Modifier.height(12.dp))
-                    Button(onClick = { viewModel.load(productId) }, modifier = Modifier.fillMaxWidth()) { Text("Повторить") }
+                    Button(
+                        onClick = { viewModel.load(productId) },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Повторить")
+                    }
                 }
             }
+
             is DeliveryChooseViewModel2.UiState.Data -> {
                 DeliveryChooseContent(
                     product = st.product,
                     quantity = quantity,
                     saving = st.saving,
                     error = st.actionError,
-                    onBack = onBack,
                     onCreate = { deliveryType, shippingAddress ->
                         viewModel.createOrder(
                             productId = productId,
@@ -74,18 +92,47 @@ private fun DeliveryChooseContent(
     quantity: Int,
     saving: Boolean,
     error: String?,
-    onBack: () -> Unit,
     onCreate: (String, String?) -> Unit
 ) {
     var selected by remember { mutableStateOf<String?>(null) }
     var shippingAddress by remember { mutableStateOf("") }
 
-    Column(Modifier.padding(16.dp)) {
-        Text(product.title, style = MaterialTheme.typography.titleLarge)
-        Text("Цена: ${product.price} ₸   Кол-во: $quantity")
-        Text("Итого: ${product.price * quantity} ₸")
+    val total = product.price * quantity
+    val trimmedAddress = shippingAddress.trim()
 
-        Spacer(Modifier.height(14.dp))
+    val hasAnyDelivery =
+        product.delivery.pickupEnabled ||
+                product.delivery.freeDeliveryEnabled ||
+                product.delivery.intercityEnabled
+
+    if (!hasAnyDelivery) {
+        Card(
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.errorContainer
+            )
+        ) {
+            Text(
+                text = "Продавец пока не настроил способы доставки.",
+                modifier = Modifier.padding(12.dp),
+                color = MaterialTheme.colorScheme.onErrorContainer
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(product.title, style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(6.dp))
+        Text("Цена: ${product.price} ₸")
+        Text("Количество: $quantity")
+        Text("Итого: $total ₸", style = MaterialTheme.typography.titleMedium)
+
+        Spacer(Modifier.height(16.dp))
 
         val d = product.delivery
 
@@ -102,7 +149,7 @@ private fun DeliveryChooseContent(
         if (d.freeDeliveryEnabled) {
             DeliveryOption(
                 title = "Моя доставка",
-                subtitle = "Посмотреть зону доставки (пока заглушка/карта позже)",
+                subtitle = "Зона доставки продавца",
                 selected = selected == DeliveryType.MY_DELIVERY,
                 onClick = { selected = DeliveryType.MY_DELIVERY }
             )
@@ -112,7 +159,7 @@ private fun DeliveryChooseContent(
         if (d.intercityEnabled) {
             DeliveryOption(
                 title = "Межгород",
-                subtitle = "Заполните адрес доставки",
+                subtitle = "Введите полный адрес доставки",
                 selected = selected == DeliveryType.INTERCITY,
                 onClick = { selected = DeliveryType.INTERCITY }
             )
@@ -123,9 +170,11 @@ private fun DeliveryChooseContent(
                     value = shippingAddress,
                     onValueChange = { shippingAddress = it },
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Город, район, улица, дом, кв") }
+                    label = { Text("Город, район, улица, дом, кв.") },
+                    minLines = 2
                 )
             }
+
             Spacer(Modifier.height(10.dp))
         }
 
@@ -139,14 +188,23 @@ private fun DeliveryChooseContent(
         Button(
             onClick = {
                 val type = selected ?: return@Button
-                val addr = if (type == DeliveryType.INTERCITY) shippingAddress else null
-                onCreate(type, addr)
+                val addressToSend =
+                    if (type == DeliveryType.INTERCITY) trimmedAddress else null
+
+                onCreate(type, addressToSend)
             },
-            enabled = !saving && selected != null && (selected != DeliveryType.INTERCITY || shippingAddress.isNotBlank()),
-            modifier = Modifier.fillMaxWidth().height(52.dp)
+            enabled = !saving &&
+                    selected != null &&
+                    (selected != DeliveryType.INTERCITY || trimmedAddress.isNotBlank()),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp)
         ) {
-            if (saving) CircularProgressIndicator(modifier = Modifier.size(18.dp))
-            else Text("Заказать сейчас")
+            if (saving) {
+                CircularProgressIndicator(modifier = Modifier.size(18.dp))
+            } else {
+                Text("Заказать сейчас")
+            }
         }
     }
 }
@@ -160,7 +218,10 @@ private fun DeliveryOption(
 ) {
     Card(onClick = onClick) {
         Column(Modifier.padding(14.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Text(title, style = MaterialTheme.typography.titleMedium)
                 RadioButton(selected = selected, onClick = onClick)
             }
