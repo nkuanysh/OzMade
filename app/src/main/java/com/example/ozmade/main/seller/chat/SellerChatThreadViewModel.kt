@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.seller.chat.data.SellerChatMessageUi
 import com.example.ozmade.main.seller.chat.data.SellerChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,6 +33,7 @@ class SellerChatThreadViewModel @Inject constructor(
 
     private var currentChatId: Int? = null
     private var buyerName: String = ""
+    private var pollingJob: Job? = null
 
     fun open(chatId: Int, buyerName: String) {
         this.currentChatId = chatId
@@ -40,10 +44,29 @@ class SellerChatThreadViewModel @Inject constructor(
             runCatching { repo.getMessages(chatId) }
                 .onSuccess { msgs ->
                     _uiState.value = SellerChatThreadUiState.Data(chatId, buyerName, msgs)
+                    startPolling(chatId)
                 }
                 .onFailure {
                     _uiState.value = SellerChatThreadUiState.Error(it.message ?: "Ошибка")
                 }
+        }
+    }
+
+    private fun startPolling(chatId: Int) {
+        pollingJob?.cancel()
+        pollingJob = viewModelScope.launch {
+            while (isActive) {
+                delay(3000) // Poll every 3 seconds
+                val state = _uiState.value
+                if (state is SellerChatThreadUiState.Data) {
+                    runCatching { repo.getMessages(chatId) }
+                        .onSuccess { newMsgs ->
+                            if (newMsgs != state.messages) {
+                                _uiState.value = state.copy(messages = newMsgs)
+                            }
+                        }
+                }
+            }
         }
     }
 
@@ -59,5 +82,10 @@ class SellerChatThreadViewModel @Inject constructor(
                 _uiState.value = SellerChatThreadUiState.Error(it.message ?: "Ошибка")
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        pollingJob?.cancel()
     }
 }
