@@ -28,6 +28,7 @@ import com.example.ozmade.network.model.UpdateProfileRequest
 import com.example.ozmade.network.model.UpdateSellerProfileRequest
 import com.example.ozmade.network.model.UploadUrlResponse
 import com.example.ozmade.network.model.EnsureThreadResponse
+import com.example.ozmade.network.model.FCMTokenRequest
 import com.example.ozmade.network.model.ProductCreateRequest
 import com.example.ozmade.network.model.ReadyOrShippedRequest
 import com.example.ozmade.network.model.SellerDeliveryDto
@@ -245,4 +246,8 @@ interface OzMadeApi {
         @Body request: ChatSendMessageRequest
     ): Response<MessageDto>
 
+    @PATCH("profile/fcm-token")
+    suspend fun updateFCMToken(
+        @Body request: FCMTokenRequest
+    ): Response<MessageResponse>
 }

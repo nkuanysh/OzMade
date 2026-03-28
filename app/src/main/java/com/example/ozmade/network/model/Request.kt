@@ -35,7 +35,6 @@ data class ProductRequest(
     @SerializedName(value = "Composition", alternate = ["composition"]) val composition: String? = null,
     @SerializedName(value = "YouTubeUrl", alternate = ["youtube_url", "youtubeUrl", "YouTubeURL"]) val youtubeUrl: String? = null
 )
-
 data class ProductCreateRequest(
     @SerializedName("Title") val name: String,
     @SerializedName("Description") val description: String,
@@ -92,7 +91,6 @@ data class SellerRegistrationRequestDto(
     @SerializedName("about") val about: String? = null,
     @SerializedName("id_card_url") val idCardUrl: String? = null
 )
-
 data class ChatSendMessageRequest(
     @SerializedName("content") val content: String
 )
@@ -114,4 +112,9 @@ data class UpdateSellerDeliveryRequest(
     @SerializedName("delivery_center_address") val centerAddress: String? = null,
 
     @SerializedName("intercity_enabled") val intercityEnabled: Boolean? = null
+)
+
+data class FCMTokenRequest(
+    @SerializedName("fcm_token")
+    val fcmToken: String
 )
