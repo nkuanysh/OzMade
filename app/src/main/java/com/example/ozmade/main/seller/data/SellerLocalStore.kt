@@ -20,4 +20,8 @@ class SellerLocalStore(private val context: Context) {
     suspend fun setSellerRegistered(value: Boolean) {
         context.dataStore.edit { it[KEY_REGISTERED] = value }
     }
+
+    suspend fun clear() {
+        context.dataStore.edit { it.clear() }
+    }
 }

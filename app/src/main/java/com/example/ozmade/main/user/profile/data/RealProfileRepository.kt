@@ -1,11 +1,17 @@
 package com.example.ozmade.main.user.profile.data
 
+import android.content.Context
+import coil.annotation.ExperimentalCoilApi
+import coil.imageLoader
 import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.network.model.FCMTokenRequest
 import com.example.ozmade.network.model.UpdateProfileRequest
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class RealProfileRepository @Inject constructor(
-    private val api: OzMadeApi
+    private val api: OzMadeApi,
+    @ApplicationContext private val context: Context
 ) : ProfileRepository {
 
     override suspend fun getMyProfile(): UserProfile {
@@ -51,10 +57,27 @@ class RealProfileRepository @Inject constructor(
         return if (resp.isSuccessful) resp.body().orEmpty() else emptyList()
     }
 
+    @OptIn(ExperimentalCoilApi::class)
     override suspend fun logout() {
-        // Обычно при Firebase logout — firebaseAuth.signOut()
-        // Но ты сказал auth остаётся через Firebase — logout делайте в auth части.
-        // Здесь можно удалить локальный кеш/токен, если появится.
+        // 1. Clear FCM token on backend
+        runCatching {
+            api.updateFCMToken(FCMTokenRequest(""))
+        }
+
+        // 2. Clear physical cache directory
+        try {
+            context.cacheDir.deleteRecursively()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        // 3. Clear Coil image cache
+        try {
+            context.imageLoader.diskCache?.clear()
+            context.imageLoader.memoryCache?.clear()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }
 

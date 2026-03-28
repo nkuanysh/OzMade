@@ -2,6 +2,7 @@ package com.example.ozmade.di
 
 import android.content.Context
 import com.example.ozmade.main.seller.data.SellerLocalStore
+import com.example.ozmade.main.user.profile.locale.LanguageStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,5 +18,11 @@ object SellerLocalModule {
     @Singleton
     fun provideSellerLocalStore(@ApplicationContext context: Context): SellerLocalStore {
         return SellerLocalStore(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLanguageStore(@ApplicationContext context: Context): LanguageStore {
+        return LanguageStore(context)
     }
 }

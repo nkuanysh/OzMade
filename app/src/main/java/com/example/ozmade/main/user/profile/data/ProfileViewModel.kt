@@ -2,6 +2,8 @@ package com.example.ozmade.main.user.profile.data
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ozmade.main.seller.data.SellerLocalStore
+import com.example.ozmade.main.user.profile.locale.LanguageStore
 import com.example.ozmade.network.auth.SessionStore
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +16,9 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val repo: ProfileRepository,
     private val sessionStore: SessionStore,
-    private val firebaseAuth: FirebaseAuth
+    private val firebaseAuth: FirebaseAuth,
+    private val sellerLocalStore: SellerLocalStore,
+    private val languageStore: LanguageStore
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
@@ -39,7 +43,9 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             repo.logout()
             sessionStore.clear()
+            sellerLocalStore.clear()
+            languageStore.clear()
             firebaseAuth.signOut()
-            FirebaseAuth.getInstance().signOut()}
+        }
     }
 }

@@ -32,4 +32,8 @@ class LanguageStore(private val context: Context) {
         val current = context.dataStore.data.map { it[KEY_LANG] }.map { it != null }
         return current.map { it }.first()
     }
+
+    suspend fun clear() {
+        context.dataStore.edit { it.clear() }
+    }
 }
