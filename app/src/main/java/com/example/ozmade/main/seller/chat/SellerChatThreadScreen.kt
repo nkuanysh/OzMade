@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -51,6 +52,14 @@ private fun SellerChatThreadScreen(
 ) {
     var input by remember { mutableStateOf("") }
     var menuExpanded by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+
+    // Auto-scroll when new messages arrive
+    LaunchedEffect(uiState) {
+        if (uiState is SellerChatThreadUiState.Data && uiState.messages.isNotEmpty()) {
+            listState.animateScrollToItem(uiState.messages.size - 1)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -135,6 +144,7 @@ private fun SellerChatThreadScreen(
             }
             is SellerChatThreadUiState.Data -> {
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.padding(padding).fillMaxSize(),
                     contentPadding = PaddingValues(12.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)

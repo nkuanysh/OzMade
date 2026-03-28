@@ -5,8 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.user.chat.data.ChatMessageUi
 import com.example.ozmade.main.user.chat.data.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,9 +35,7 @@ class ChatThreadViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     private var currentChatId: Int? = null
-    private var sellerName: String = ""
-    private var productTitle: String = ""
-    private var productPrice: Int = 0
+    private var pollingJob: Job? = null
 
     fun openChat(
         chatId: Int?,
@@ -45,15 +46,11 @@ class ChatThreadViewModel @Inject constructor(
         productPrice: Int,
         productImageUrl: String? = null
     ) {
+        currentChatId = chatId
         _uiState.value = ChatThreadUiState.Loading
 
         viewModelScope.launch {
             runCatching {
-                this@ChatThreadViewModel.sellerName = sellerName
-                this@ChatThreadViewModel.productTitle = productTitle
-                this@ChatThreadViewModel.productPrice = productPrice
-                currentChatId = chatId
-
                 val msgs = if (chatId != null) {
                     repo.getMessages(chatId)
                 } else {
@@ -68,8 +65,30 @@ class ChatThreadViewModel @Inject constructor(
                     productPrice = productPrice,
                     messages = msgs
                 )
-            }.onSuccess { _uiState.value = it }
-                .onFailure { _uiState.value = ChatThreadUiState.Error(it.message ?: "Ошибка") }
+            }.onSuccess { 
+                _uiState.value = it 
+                if (chatId != null) startPolling(chatId)
+            }.onFailure { 
+                _uiState.value = ChatThreadUiState.Error(it.message ?: "Ошибка") 
+            }
+        }
+    }
+
+    private fun startPolling(chatId: Int) {
+        pollingJob?.cancel()
+        pollingJob = viewModelScope.launch {
+            while (isActive) {
+                delay(3000) // Poll every 3 seconds
+                val state = _uiState.value
+                if (state is ChatThreadUiState.Data) {
+                    runCatching { repo.getMessages(chatId) }
+                        .onSuccess { newMsgs ->
+                            if (newMsgs != state.messages) {
+                                _uiState.value = state.copy(messages = newMsgs)
+                            }
+                        }
+                }
+            }
         }
     }
 
@@ -85,7 +104,10 @@ class ChatThreadViewModel @Inject constructor(
                     existingChatId = state.chatId
                 )
 
-                currentChatId = newChatId
+                if (state.chatId == null) {
+                    currentChatId = newChatId
+                    startPolling(newChatId)
+                }
 
                 val msgs = repo.getMessages(newChatId)
 
@@ -96,5 +118,10 @@ class ChatThreadViewModel @Inject constructor(
             }.onSuccess { _uiState.value = it }
                 .onFailure { _uiState.value = ChatThreadUiState.Error(it.message ?: "Ошибка отправки") }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        pollingJob?.cancel()
     }
 }

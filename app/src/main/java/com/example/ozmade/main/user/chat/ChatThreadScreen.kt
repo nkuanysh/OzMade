@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -73,11 +74,16 @@ private fun ChatThreadScreen(
     onOpenProduct: () -> Unit
 ) {
     var input by remember { mutableStateOf("") }
-
-    // меню в topbar
     var menuExpanded by remember { mutableStateOf(false) }
-
     val focusManager = LocalFocusManager.current
+    val listState = rememberLazyListState()
+
+    // Auto-scroll when new messages arrive
+    LaunchedEffect(uiState) {
+        if (uiState is ChatThreadUiState.Data && uiState.messages.isNotEmpty()) {
+            listState.animateScrollToItem(uiState.messages.size - 1)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -101,24 +107,7 @@ private fun ChatThreadScreen(
                         ) {
                             DropdownMenuItem(
                                 text = { Text("Удалить чат") },
-                                onClick = {
-                                    menuExpanded = false
-                                    // TODO: delete chat action
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Заблокировать") },
-                                onClick = {
-                                    menuExpanded = false
-                                    // TODO: block action
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Пожаловаться") },
-                                onClick = {
-                                    menuExpanded = false
-                                    // TODO: report action
-                                }
+                                onClick = { menuExpanded = false }
                             )
                         }
                     }
@@ -126,7 +115,6 @@ private fun ChatThreadScreen(
             )
         },
         bottomBar = {
-            // красивый input bar
             Surface(tonalElevation = 8.dp) {
                 Row(
                     modifier = Modifier
@@ -134,14 +122,10 @@ private fun ChatThreadScreen(
                         .padding(horizontal = 12.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = {
-                        // TODO: emoji panel
-                        focusManager.clearFocus()
-                    }) {
+                    IconButton(onClick = { focusManager.clearFocus() }) {
                         Icon(Icons.Default.Face, contentDescription = null)
                     }
 
-                    // поле ввода
                     TextField(
                         value = input,
                         onValueChange = { input = it },
@@ -162,21 +146,14 @@ private fun ChatThreadScreen(
 
                     Spacer(Modifier.width(4.dp))
 
-                    IconButton(onClick = {
-                        // TODO: attach
-                        focusManager.clearFocus()
-                    }) {
+                    IconButton(onClick = { focusManager.clearFocus() }) {
                         Icon(Icons.Default.Add, contentDescription = null)
                     }
 
                     val trimmed = input.trim()
 
-                    // справа: если пусто -> mic, если есть текст -> send
                     if (trimmed.isEmpty()) {
-                        IconButton(onClick = {
-                            // TODO: audio record
-                            focusManager.clearFocus()
-                        }) {
+                        IconButton(onClick = { focusManager.clearFocus() }) {
                             Icon(Icons.Default.PlayArrow, contentDescription = null)
                         }
                     } else {
@@ -221,6 +198,7 @@ private fun ChatThreadScreen(
                     )
 
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(12.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
