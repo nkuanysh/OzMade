@@ -131,6 +131,10 @@ private fun DeliveryChooseContent(
         Text("Цена: ${product.price} ₸")
         Text("Количество: $quantity")
         Text("Итого: $total ₸", style = MaterialTheme.typography.titleMedium)
+        Text("DEBUG title=${product.title}")
+        Text("DEBUG price=${product.price}")
+        Text("DEBUG sellerAddress=${product.seller.address}")
+        Text("DEBUG pickupAddress=${product.delivery.pickupAddress}")
 
         Spacer(Modifier.height(16.dp))
 
@@ -139,7 +143,7 @@ private fun DeliveryChooseContent(
         if (d.pickupEnabled) {
             DeliveryOption(
                 title = "Самовывоз",
-                subtitle = "Адрес: ${product.seller.address}\nВремя: ${d.pickupTime ?: "—"}",
+                subtitle = "Адрес: ${d.pickupAddress ?: "—"}\nВремя: ${d.pickupTime ?: "—"}",
                 selected = selected == DeliveryType.PICKUP,
                 onClick = { selected = DeliveryType.PICKUP }
             )
@@ -147,9 +151,19 @@ private fun DeliveryChooseContent(
         }
 
         if (d.freeDeliveryEnabled) {
+            val zoneText = buildString {
+                append(d.freeDeliveryText ?: "Доставка продавца")
+                if (!d.centerAddress.isNullOrBlank()) {
+                    append("\nТочка: ${d.centerAddress}")
+                }
+                if (d.radiusKm != null) {
+                    append("\nРадиус: ${d.radiusKm} км")
+                }
+            }
+
             DeliveryOption(
                 title = "Моя доставка",
-                subtitle = "Зона доставки продавца",
+                subtitle = zoneText,
                 selected = selected == DeliveryType.MY_DELIVERY,
                 onClick = { selected = DeliveryType.MY_DELIVERY }
             )

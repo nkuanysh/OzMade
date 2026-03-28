@@ -110,4 +110,8 @@ dependencies {
 
     implementation("io.coil-kt:coil-compose:2.4.0") // последняя версия на 2026 год
 
+    //notification
+    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
+    implementation("com.google.firebase:firebase-messaging-ktx")
+
 }

@@ -6,6 +6,9 @@ data class DeliveryInfoUi(
     val freeDeliveryEnabled: Boolean = false,
     val freeDeliveryText: String? = null,
     val intercityEnabled: Boolean = false,
+    val pickupAddress: String? = null,
+    val centerAddress: String? = null,
+    val radiusKm: Double? = null
 )
 data class SellerUi(
     val id: Int,

@@ -100,3 +100,8 @@ data class CreateChatRequest(
     @SerializedName("product_id") val productId: Int,
     @SerializedName("content") val content: String
 )
+
+data class FCMTokenRequest(
+    @SerializedName("fcm_token")
+    val fcmToken: String
+)

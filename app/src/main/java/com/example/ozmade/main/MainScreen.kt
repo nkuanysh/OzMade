@@ -1,6 +1,7 @@
 package com.example.ozmade.main
 
 import android.net.Uri
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -53,9 +54,33 @@ private sealed class BottomItem(
 }
 
 @Composable
-fun MainScreen(onLogout: () -> Unit) {
+fun MainScreen(
+    onLogout: () -> Unit,
+    openChatFromPush: Boolean = false,
+    pushChatId: Int = 0,
+    pushSellerId: Int = 0,
+    pushProductId: Int = 0,
+    pushSellerName: String = "Продавец",
+    pushProductTitle: String = "Товар",
+    pushPrice: Int = 0
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    LaunchedEffect(openChatFromPush, pushChatId) {
+        if (openChatFromPush && pushChatId != 0) {
+
+            val encSellerName = Uri.encode(pushSellerName)
+            val encProductTitle = Uri.encode(pushProductTitle)
+
+            navController.navigate(
+                "chat/$pushChatId/$pushSellerId/$pushProductId?sellerName=$encSellerName&productTitle=$encProductTitle&price=$pushPrice"
+
+            )
+            Log.d("PUSH", "OPEN CHAT: $pushChatId")
+        }
+    }
+
     val currentDestination = navBackStackEntry?.destination
 
     // Список путей, где нужно СКРЫТЬ нижний бар
