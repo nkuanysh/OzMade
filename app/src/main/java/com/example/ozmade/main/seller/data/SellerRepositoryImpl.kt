@@ -90,21 +90,11 @@ class SellerRepositoryImpl @Inject constructor(
         val uploadedUrls = mutableListOf<String>()
 
         photoUris.forEach { uri ->
-            val mimeType = getMimeType(uri)
-            val tempFile = uriToTempFile(uri, mimeType)
-
-            try {
-                val uploadInfo = getUploadUrl(mimeType).getOrElse { throw it }
-
-                uploadImageToUrl(
-                    uploadUrl = uploadInfo.uploadUrl,
-                    file = tempFile,
-                    mimeType = mimeType
-                ).getOrElse { throw it }
-
-                uploadedUrls += uploadInfo.fileUrl
-            } finally {
-                tempFile.delete()
+            if (uri.toString().startsWith("http")) {
+                uploadedUrls += uri.toString()
+            } else {
+                val url = uploadPhoto(uri).getOrThrow()
+                uploadedUrls += url
             }
         }
 
@@ -129,6 +119,34 @@ class SellerRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override suspend fun updateProductWithPhotos(
+        productId: Int,
+        photoUris: List<Uri>,
+        request: ProductRequest
+    ): Result<Unit> = runCatching {
+        val uploadedUrls = mutableListOf<String>()
+
+        photoUris.forEach { uri ->
+            if (uri.toString().startsWith("http")) {
+                uploadedUrls += uri.toString()
+            } else {
+                val url = uploadPhoto(uri).getOrThrow()
+                uploadedUrls += url
+            }
+        }
+
+        val finalRequest = request.copy(
+            imageUrl = uploadedUrls.firstOrNull(),
+            images = uploadedUrls
+        )
+
+        val resp = api.updateProduct(productId, finalRequest)
+        if (!resp.isSuccessful) {
+            error("Ошибка обновления товара: ${resp.code()} ${resp.message()}")
+        }
+        Unit
     }
 
     override suspend fun getProductDetails(productId: Int): ProductDetailsDto {
@@ -176,6 +194,21 @@ class SellerRepositoryImpl @Inject constructor(
         mimeType: String
     ): Result<Unit> {
         return uploadService.putFile(uploadUrl, file, mimeType)
+    }
+
+    override suspend fun uploadPhoto(uri: Uri): Result<String> = runCatching {
+        val mimeType = getMimeType(uri)
+        val tempFile = uriToTempFile(uri, mimeType)
+        try {
+            val uploadInfo = getUploadUrl(mimeType).getOrThrow()
+            val uUrl = uploadInfo.uploadUrl ?: error("Server returned null uploadUrl")
+            val fUrl = uploadInfo.fileUrl ?: error("Server returned null fileUrl")
+            
+            uploadImageToUrl(uUrl, tempFile, mimeType).getOrThrow()
+            fUrl
+        } finally {
+            tempFile.delete()
+        }
     }
 
     private fun getMimeType(uri: Uri): String {

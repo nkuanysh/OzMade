@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.seller.data.SellerRepository
 import com.example.ozmade.main.seller.products.add.AddProductState
 import com.example.ozmade.main.seller.products.add.SellerCategory
-import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.model.ProductRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +35,16 @@ class SellerEditProductViewModel @Inject constructor(
                 val dto = repo.getProductDetails(productId)
 
                 _state.update { st ->
+                    val productPhotos = if (!dto.images.isNullOrEmpty()) {
+                        dto.images.map { Uri.parse(it) }
+                    } else if (!dto.imageUrl.isNullOrBlank()) {
+                        listOf(Uri.parse(dto.imageUrl))
+                    } else {
+                        emptyList()
+                    }
+
+                    val catTitles = dto.categories ?: listOfNotNull(dto.type)
+                    
                     st.copy(
                         loading = false,
                         error = null,
@@ -43,10 +52,16 @@ class SellerEditProductViewModel @Inject constructor(
                         title = dto.title ?: "",
                         description = dto.description ?: "",
                         priceText = (dto.price ?: 0.0).toString(),
-                        photos = listOfNotNull(dto.imageUrl?.let { Uri.parse(it) }),
+                        photos = productPhotos,
                         selectedCategories = SellerCategory.entries
-                            .filter { it.title == (dto.type ?: "") }
-                            .toSet()
+                            .filter { cat -> catTitles.any { it == cat.title || it == cat.backendValue } }
+                            .toSet(),
+                        weightText = dto.weight ?: "",
+                        heightText = dto.heightCm ?: "",
+                        widthText = dto.widthCm ?: "",
+                        depthText = dto.depthCm ?: "",
+                        composition = dto.composition ?: "",
+                        youtubeUrl = dto.youtubeUrl ?: ""
                     )
                 }
             }.onFailure { e ->
@@ -55,7 +70,6 @@ class SellerEditProductViewModel @Inject constructor(
         }
     }
 
-    // === те же методы что в Add ===
     fun onPickPhotos(new: List<Uri>) {
         _state.update { st ->
             val merged = (st.photos + new).distinct().take(10)
@@ -107,7 +121,12 @@ class SellerEditProductViewModel @Inject constructor(
             _state.update { it.copy(loading = true, error = null, success = false) }
 
             val req = toProductRequest(st)
-            val result = repo.updateProduct(productId, req)
+            
+            val result = repo.updateProductWithPhotos(
+                productId = productId,
+                photoUris = st.photos,
+                request = req
+            )
 
             result.onSuccess {
                 _state.update { it.copy(loading = false, success = true) }
@@ -124,8 +143,10 @@ class SellerEditProductViewModel @Inject constructor(
             name = st.title.trim(),
             description = st.description.trim(),
             price = price,
-            categories = st.selectedCategories.map { it.title },
-            images = st.photos.map(Uri::toString),
+            type = st.selectedCategories.firstOrNull()?.backendValue ?: "",
+            categories = st.selectedCategories.map { it.backendValue },
+            imageUrl = null,
+            images = null,
             weight = st.weightText.trim().ifBlank { null },
             heightCm = st.heightText.trim().ifBlank { null },
             widthCm = st.widthText.trim().ifBlank { null },

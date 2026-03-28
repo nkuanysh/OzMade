@@ -29,10 +29,8 @@ data class ProductDto(
     val depthCm: String? = null,
     @SerializedName(value = "Composition", alternate = ["composition"])
     val composition: String? = null,
-
     @SerializedName(value = "YouTubeUrl", alternate = ["youtube_url", "youtubeUrl", "YouTubeURL"])
     val youtubeUrl: String? = null,
-
     @SerializedName("WhatsAppLink") val whatsappLink: String? = null,
     @SerializedName("ViewCount") val viewCount: Int? = null,
     @SerializedName("AverageRating") val averageRating: Double? = null,
@@ -42,42 +40,27 @@ data class ProductDto(
 
 data class ProductDetailsDto(
     @SerializedName("ID") val id: Int,
-
     @SerializedName("Title") val title: String,
     @SerializedName("Description") val description: String,
     @SerializedName(value = "SellerID", alternate = ["seller_id", "sellerId"])
     val sellerId: Int? = null,
-
-    // старое
     @SerializedName("Type") val type: String? = null,
-
-    // новое
     @SerializedName(value = "Categories", alternate = ["categories"])
     val categories: List<String>? = null,
-
     @SerializedName(value = "Cost", alternate = ["Price", "price", "cost"])
     val price: Double? = null,
-
     @SerializedName(value = "Address", alternate = ["address"])
     val address: String? = null,
-
     @SerializedName(value = "WhatsAppLink", alternate = ["whatsapp_link", "whatsappLink"])
     val whatsappLink: String? = null,
-
     @SerializedName(value = "ViewCount", alternate = ["view_count", "viewCount"])
     val viewCount: Int? = null,
-
     @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"])
     val createdAt: String? = null,
-
     @SerializedName(value = "ImageURL", alternate = ["ImageName", "image_url"])
     val imageUrl: String? = null,
-
-    // новое 1..10 фото
     @SerializedName(value = "Images", alternate = ["images"])
     val images: List<String>? = null,
-
-    // характеристики
     @SerializedName(value = "Weight", alternate = ["weight"])
     val weight: String? = null,
     @SerializedName(value = "HeightCm", alternate = ["height_cm", "heightCm"])
@@ -88,14 +71,12 @@ data class ProductDetailsDto(
     val depthCm: String? = null,
     @SerializedName(value = "Composition", alternate = ["composition"])
     val composition: String? = null,
-
     @SerializedName(value = "YouTubeUrl", alternate = ["youtube_url", "youtubeUrl", "YouTubeURL"])
     val youtubeUrl: String? = null,
-
-    // отзывы и рейтинг — остаются, они не “редактируемые”
     @SerializedName("AverageRating") val averageRating: Double? = null,
     @SerializedName("Comments") val comments: List<CommentDto>? = null
 )
+
 data class ProductDetailsFullDto(
     @SerializedName("id") val id: Int,
     @SerializedName("title") val title: String,
@@ -109,6 +90,7 @@ data class ProductDetailsFullDto(
     @SerializedName("delivery") val delivery: DeliveryInfoDto,
     @SerializedName("seller") val seller: SellerInfoDto
 )
+
 data class CommentDto(
     @SerializedName("ID") val id: Int,
     @SerializedName("UserID") val userId: Int,
@@ -143,11 +125,10 @@ data class MessageResponse(
 )
 
 data class UploadUrlResponse(
-    @SerializedName("upload_url")
-    val uploadUrl: String,
-
-    @SerializedName("file_url")
-    val fileUrl: String
+    @SerializedName(value = "uploadUrl", alternate = ["upload_url"])
+    val uploadUrl: String?,
+    @SerializedName(value = "fileUrl", alternate = ["file_url"])
+    val fileUrl: String?
 )
 
 data class SellerProfileDto(
@@ -177,7 +158,6 @@ data class MessageDto(
     @SerializedName(value = "SenderRole", alternate = ["sender_role", "senderRole"]) val senderRole: String? = null
 )
 
-// For RealSellerRepository
 data class SellerPageDto(
     @SerializedName("seller") val seller: SellerHeaderDto,
     @SerializedName("products") val products: List<SellerProductDto>
@@ -220,22 +200,10 @@ data class ChatMessageItemDto(
     @SerializedName("is_mine") val isMine: Boolean,
     @SerializedName("time_text") val timeText: String
 )
+
 data class SellerRegistrationResponseDto(
     @SerializedName("seller_id") val sellerId: Int,
     @SerializedName("status") val status: String
-)
-
-data class UpdateProductPriceRequest(
-    @SerializedName("price") val price: Int
-)
-
-data class UpdateProductStatusRequest(
-    @SerializedName("status") val status: String
-)
-
-data class EnsureThreadRequest(
-    @SerializedName("seller_id") val sellerId: Int,
-    @SerializedName("product_id") val productId: Int
 )
 
 data class EnsureThreadResponse(
@@ -324,71 +292,44 @@ data class SellerQualityDto(
     @SerializedName("seller_name") val sellerName: String,
     @SerializedName("orders_count") val ordersCount: Int,
     @SerializedName("days_with_ozmade") val daysWithOzMade: Int,
-
     @SerializedName("average_rating") val averageRating: Double,
     @SerializedName("ratings_count") val ratingsCount: Int,
-
     @SerializedName("reviews_count") val reviewsCount: Int,
     @SerializedName("reviews") val reviews: List<SellerReviewItemDto>
 )
+
 data class SellerDeliveryDto(
     @SerializedName("pickup_enabled") val pickupEnabled: Boolean,
     @SerializedName("pickup_address") val pickupAddress: String?,
-    @SerializedName("pickup_time") val pickupTime: String?, // "10:00 - 18:00"
-
+    @SerializedName("pickup_time") val pickupTime: String?,
     @SerializedName("free_delivery_enabled") val myDeliveryEnabled: Boolean,
     @SerializedName("delivery_center_lat") val centerLat: Double?,
     @SerializedName("delivery_center_lng") val centerLng: Double?,
     @SerializedName("delivery_radius_km") val radiusKm: Int?,
     @SerializedName("delivery_center_address") val centerAddress: String?,
-
     @SerializedName("intercity_enabled") val intercityEnabled: Boolean
-)
-data class UpdateSellerDeliveryRequest(
-    @SerializedName("pickup_enabled") val pickupEnabled: Boolean? = null,
-    @SerializedName("pickup_address") val pickupAddress: String? = null,
-    @SerializedName("pickup_time") val pickupTime: String? = null,
-
-    @SerializedName("free_delivery_enabled") val myDeliveryEnabled: Boolean? = null,
-    @SerializedName("delivery_center_lat") val centerLat: Double? = null,
-    @SerializedName("delivery_center_lng") val centerLng: Double? = null,
-    @SerializedName("delivery_radius_km") val radiusKm: Int? = null,
-    @SerializedName("delivery_center_address") val centerAddress: String? = null,
-
-    @SerializedName("intercity_enabled") val intercityEnabled: Boolean? = null
 )
 
 data class OrderDto(
     @SerializedName("ID") val id: Int,
-
     @SerializedName("Status") val status: String,
     @SerializedName("CreatedAt") val createdAt: String,
-
     @SerializedName("ProductID") val productId: Int,
     @SerializedName("ProductTitle") val productTitle: String? = null,
     @SerializedName("ProductImageUrl") val productImageUrl: String? = null,
-
-    @SerializedName("Price") val price: Double? = null, // цена за 1
+    @SerializedName("Price") val price: Double? = null,
     @SerializedName("Quantity") val quantity: Int,
     @SerializedName("TotalCost") val totalCost: Double,
-
     @SerializedName("SellerID") val sellerId: Int? = null,
     @SerializedName("SellerName") val sellerName: String? = null,
-
-    // доставка
-    @SerializedName("DeliveryType") val deliveryType: String, // PICKUP/MY_DELIVERY/INTERCITY
-
+    @SerializedName("DeliveryType") val deliveryType: String,
     @SerializedName("PickupAddress") val pickupAddress: String? = null,
     @SerializedName("PickupTime") val pickupTime: String? = null,
-
     @SerializedName("ZoneCenterLat") val zoneCenterLat: Double? = null,
     @SerializedName("ZoneCenterLng") val zoneCenterLng: Double? = null,
     @SerializedName("ZoneRadiusKm") val zoneRadiusKm: Int? = null,
     @SerializedName("ZoneCenterAddress") val zoneCenterAddress: String? = null,
-
     @SerializedName("ShippingAddressText") val shippingAddressText: String? = null,
     @SerializedName("ShippingComment") val shippingComment: String? = null,
-
-    // код (показывать покупателю можно, но в UI мы не будем требовать от него ввод)
     @SerializedName("ConfirmCode") val confirmCode: String? = null
 )

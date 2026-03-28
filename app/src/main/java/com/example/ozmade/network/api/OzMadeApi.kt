@@ -27,7 +27,6 @@ import com.example.ozmade.network.model.SellerReviewsDto
 import com.example.ozmade.network.model.UpdateProfileRequest
 import com.example.ozmade.network.model.UpdateSellerProfileRequest
 import com.example.ozmade.network.model.UploadUrlResponse
-import com.example.ozmade.network.model.EnsureThreadRequest
 import com.example.ozmade.network.model.EnsureThreadResponse
 import com.example.ozmade.network.model.ProductCreateRequest
 import com.example.ozmade.network.model.ReadyOrShippedRequest

@@ -27,10 +27,19 @@ interface SellerRepository {
     ): Result<ProductDto>
 
     suspend fun updateProduct(productId: Int, request: ProductRequest): Result<Unit>
+    
+    suspend fun updateProductWithPhotos(
+        productId: Int,
+        photoUris: List<Uri>,
+        request: ProductRequest
+    ): Result<Unit>
+
     suspend fun getProductDetails(productId: Int): ProductDetailsDto
     suspend fun getSellerProfile(): SellerProfileDto?
     suspend fun updateSellerProfile(profilePictureUrl: String): Result<Unit>
 
     suspend fun getUploadUrl(contentType: String): Result<UploadUrlResponse>
     suspend fun uploadImageToUrl(uploadUrl: String, file: File, mimeType: String): Result<Unit>
+    
+    suspend fun uploadPhoto(uri: Uri): Result<String>
 }

@@ -17,15 +17,15 @@ data class UpdateProfileRequest(
 )
 
 data class ProductRequest(
-    @SerializedName(value = "Name", alternate = ["name"]) val name: String,
+    @SerializedName(value = "Title", alternate = ["Name", "name"]) val name: String,
     @SerializedName(value = "Description", alternate = ["description"]) val description: String,
-    @SerializedName(value = "Price", alternate = ["price"]) val price: Double,
+    @SerializedName(value = "Cost", alternate = ["Price", "price", "cost"]) val price: Double,
     @SerializedName(value = "Type", alternate = ["type"]) val type: String? = null,
     // несколько категорий
     @SerializedName(value = "Categories", alternate = ["categories"]) val categories: List<String>? = null,
     // адрес (может не меняться при редактировании)
     @SerializedName(value = "Address", alternate = ["address"]) val address: String? = null,
-    @SerializedName(value = "ImageURL", alternate = ["image_url", "ImageName"]) val imageUrl: String? = null,
+    @SerializedName(value = "ImageName", alternate = ["ImageURL", "image_url"]) val imageUrl: String? = null,
     @SerializedName(value = "Images", alternate = ["images"]) val images: List<String>? = null,
     // характеристики
     @SerializedName(value = "Weight", alternate = ["weight"]) val weight: String? = null,
@@ -35,30 +35,31 @@ data class ProductRequest(
     @SerializedName(value = "Composition", alternate = ["composition"]) val composition: String? = null,
     @SerializedName(value = "YouTubeUrl", alternate = ["youtube_url", "youtubeUrl", "YouTubeURL"]) val youtubeUrl: String? = null
 )
+
 data class ProductCreateRequest(
-    @SerializedName("name") val name: String,
-    @SerializedName("description") val description: String,
-    @SerializedName("price") val price: Double,
-    @SerializedName("type") val type: String?,
-    @SerializedName("address")
+    @SerializedName("Title") val name: String,
+    @SerializedName("Description") val description: String,
+    @SerializedName("Cost") val price: Double,
+    @SerializedName("Type") val type: String?,
+    @SerializedName("Address")
     val address: String?,
-    @SerializedName("image_url")
+    @SerializedName("ImageName")
     val imageUrl: String?,
-    @SerializedName("categories")
+    @SerializedName("Categories")
     val categories: List<String>?,
-    @SerializedName("images")
+    @SerializedName("Images")
     val images: List<String>?,
-    @SerializedName("weight")
+    @SerializedName("Weight")
     val weight: String?,
-    @SerializedName("height_cm")
+    @SerializedName("HeightCm")
     val heightCm: String?,
-    @SerializedName("width_cm")
+    @SerializedName("WidthCm")
     val widthCm: String?,
-    @SerializedName("depth_cm")
+    @SerializedName("DepthCm")
     val depthCm: String?,
-    @SerializedName("composition")
+    @SerializedName("Composition")
     val composition: String?,
-    @SerializedName("youtube_url")
+    @SerializedName("YouTubeUrl")
     val youtubeUrl: String?
 )
 
@@ -69,7 +70,7 @@ data class UpdateSellerProfileRequest(
 data class CreateOrderRequest(
     @SerializedName("product_id") val productId: Int,
     @SerializedName("quantity") val quantity: Int,
-    @SerializedName("delivery_type") val deliveryType: String, // PICKUP/MY_DELIVERY/INTERCITY
+    @SerializedName("delivery_type") val deliveryType: String,
     @SerializedName("shipping_address_text") val shippingAddressText: String? = null
 )
 
@@ -91,12 +92,26 @@ data class SellerRegistrationRequestDto(
     @SerializedName("about") val about: String? = null,
     @SerializedName("id_card_url") val idCardUrl: String? = null
 )
+
 data class ChatSendMessageRequest(
     @SerializedName("content") val content: String
 )
 
-
 data class CreateChatRequest(
     @SerializedName("product_id") val productId: Int,
     @SerializedName("content") val content: String
+)
+
+data class UpdateSellerDeliveryRequest(
+    @SerializedName("pickup_enabled") val pickupEnabled: Boolean? = null,
+    @SerializedName("pickup_address") val pickupAddress: String? = null,
+    @SerializedName("pickup_time") val pickupTime: String? = null,
+
+    @SerializedName("free_delivery_enabled") val myDeliveryEnabled: Boolean? = null,
+    @SerializedName("delivery_center_lat") val centerLat: Double? = null,
+    @SerializedName("delivery_center_lng") val centerLng: Double? = null,
+    @SerializedName("delivery_radius_km") val radiusKm: Int? = null,
+    @SerializedName("delivery_center_address") val centerAddress: String? = null,
+
+    @SerializedName("intercity_enabled") val intercityEnabled: Boolean? = null
 )
