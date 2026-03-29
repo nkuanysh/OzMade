@@ -26,11 +26,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.ozmade.main.user.orderflow.ui.OrderBottomSheet
 import kotlin.math.max
 
@@ -93,19 +95,28 @@ fun ProductDetailsScreen(
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier.fillMaxSize()
-                    ) { _ ->
+                    ) { pageIndex ->
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                Icons.Default.Image,
-                                contentDescription = null,
-                                modifier = Modifier.size(64.dp),
-                                tint = Color.LightGray
-                            )
+                            if (product.images.isNotEmpty()) {
+                                AsyncImage(
+                                    model = product.images[pageIndex],
+                                    contentDescription = null,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                Icon(
+                                    Icons.Default.Image,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(64.dp),
+                                    tint = Color.LightGray
+                                )
+                            }
                         }
                     }
 

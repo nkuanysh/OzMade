@@ -90,8 +90,9 @@ class SellerRepositoryImpl @Inject constructor(
         val uploadedUrls = mutableListOf<String>()
 
         photoUris.forEach { uri ->
-            if (uri.toString().startsWith("http")) {
-                uploadedUrls += uri.toString()
+            val uriString = uri.toString()
+            if (uriString.startsWith("http")) {
+                uploadedUrls += extractFilename(uriString)
             } else {
                 val url = uploadPhoto(uri).getOrThrow()
                 uploadedUrls += url
@@ -129,8 +130,9 @@ class SellerRepositoryImpl @Inject constructor(
         val uploadedUrls = mutableListOf<String>()
 
         photoUris.forEach { uri ->
-            if (uri.toString().startsWith("http")) {
-                uploadedUrls += uri.toString()
+            val uriString = uri.toString()
+            if (uriString.startsWith("http")) {
+                uploadedUrls += extractFilename(uriString)
             } else {
                 val url = uploadPhoto(uri).getOrThrow()
                 uploadedUrls += url
@@ -230,5 +232,24 @@ class SellerRepositoryImpl @Inject constructor(
         } ?: error("Не удалось открыть изображение")
 
         return tempFile
+    }
+
+    private fun extractFilename(uriString: String): String {
+        if (!uriString.startsWith("http")) return uriString
+        
+        // Если это URL Google Cloud Storage, извлекаем имя файла
+        if (uriString.contains("storage.googleapis.com")) {
+            val uri = Uri.parse(uriString)
+            val path = uri.path
+            if (!path.isNullOrBlank()) {
+                val lastSegment = path.substringAfterLast("/")
+                if (lastSegment.isNotBlank()) return lastSegment
+            }
+            // Если путь пустой или битый, возвращаем пустую строку, 
+            // чтобы бэкенд не плодил вложенные ссылки
+            return ""
+        }
+        
+        return uriString
     }
 }

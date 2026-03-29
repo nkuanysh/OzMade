@@ -2,6 +2,7 @@ package com.example.ozmade.main.userHome.details
 
 import com.example.ozmade.main.user.favorites.FavoriteProductUi
 import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -13,20 +14,20 @@ class RealProductRepository @Inject constructor(
     override suspend fun getProductDetails(productId: Int): ProductDetailsUi {
         val id = productId
 
-        // 1) увеличить просмотры (не критично если упадёт)
         runCatching { api.incrementProductView(id) }
 
-        // 2) получить детали
         val resp = api.getProductDetails(id)
         if (!resp.isSuccessful) error("Не удалось загрузить товар (${resp.code()})")
         val dto = resp.body() ?: error("Пустой ответ от сервера")
 
-        // 3) собрать images (у сервера сейчас часто приходит ImageName, а Images может быть null)
-        val images: List<String> =
+        // Prioritize the images list, as the main imageUrl (ImageName) 
+        // sometimes contains a bucket-level signed URL instead of an object URL.
+        val rawImages: List<String> =
             dto.images?.takeIf { it.isNotEmpty() }
                 ?: listOfNotNull(dto.imageUrl)
+        
+        val images = rawImages.map { ImageUtils.formatImageUrl(it) }.filter { it.isNotBlank() }
 
-        // 4) собрать specs из полей (у тебя они есть в dto)
         val specs = buildList<Pair<String, String>> {
             dto.weight?.takeIf { it.isNotBlank() }?.let { add("Вес" to it) }
             dto.heightCm?.takeIf { it.isNotBlank() }?.let { add("Высота" to it) }
@@ -35,16 +36,14 @@ class RealProductRepository @Inject constructor(
             dto.composition?.takeIf { it.isNotBlank() }?.let { add("Материал" to it) }
             dto.youtubeUrl?.takeIf { it.isNotBlank() }?.let { add("YouTube" to it) }
         }
-        val sellerIdStr = (dto.sellerId ?: 0).toString()
 
-        // 5) собрать UI (ставим безопасные дефолты)
         return ProductDetailsUi(
             id = dto.id,
             title = dto.title,
-            price = dto.price ?: 0.0,                 // важно: без !!
+            price = dto.price ?: 0.0,
             rating = dto.averageRating ?: 0.0,
             reviewsCount = dto.comments?.size ?: 0,
-            ordersCount = 0,                          // сервер пока не отдаёт — ставим 0
+            ordersCount = 0,
             images = images,
             description = dto.description,
             specs = specs,
@@ -86,7 +85,6 @@ class RealProductRepository @Inject constructor(
             "added" -> true
             "removed" -> false
             else -> {
-                // запасной вариант: перечитать избранное с сервера
                 api.getFavorites().body()?.any { it.id == productId } == true
             }
         }
@@ -99,11 +97,14 @@ class RealProductRepository @Inject constructor(
         val list = response.body().orEmpty()
 
         list.map { dto ->
+            val img = ImageUtils.formatImageUrl(
+                dto.images?.firstOrNull() ?: dto.imageUrl
+            )
             FavoriteProductUi(
                 id = dto.id,
                 title = dto.title ?: dto.name ?: "Без названия",
                 price = dto.cost ?: dto.price ?: 0.0,
-                imageUrl = dto.imageUrl,
+                imageUrl = img,
                 address = dto.address ?: "",
                 rating = dto.averageRating ?: 0.0
             )

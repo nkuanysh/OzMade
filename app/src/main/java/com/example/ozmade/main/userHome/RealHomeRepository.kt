@@ -4,6 +4,7 @@ import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.model.AdDto
 import com.example.ozmade.network.model.CategoryDto
 import com.example.ozmade.network.model.ProductDto
+import com.example.ozmade.utils.ImageUtils
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import javax.inject.Inject
@@ -77,7 +78,7 @@ class RealHomeRepository @Inject constructor(
 private fun AdDto.toDomain(): AdBanner =
     AdBanner(
         id = id,
-        imageUrl = imageUrl,
+        imageUrl = ImageUtils.formatImageUrl(imageUrl),
         title = title,
         deeplink = deeplink
     )
@@ -86,7 +87,7 @@ private fun CategoryDto.toDomain(): Category =
     Category(
         id = id,
         title = title,
-        iconUrl = iconUrl
+        iconUrl = ImageUtils.formatImageUrl(iconUrl)
     )
 
 private fun ProductDto.toDomain(liked: Boolean = false): Product =
@@ -97,7 +98,7 @@ private fun ProductDto.toDomain(liked: Boolean = false): Product =
         city = address?.substringBefore(",") ?: "Unknown",
         address = address ?: "Unknown",
         rating = averageRating ?: 0.0,
-        imageUrl = imageUrl ?: "",
+        imageUrl = ImageUtils.formatImageUrl(imageUrl ?: images?.firstOrNull()),
         categoryId = type ?: "",
         liked = liked
     )
