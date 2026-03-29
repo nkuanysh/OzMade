@@ -26,24 +26,36 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
-            <!-- Product Deep Links -->
+            <!-- Custom Scheme Deep Links -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="ozmade" />
+            </intent-filter>
+
+            <!-- Android App Links (Vercel) -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                    android:host="ozmade-applink.vercel.app"
+                    android:pathPrefix="/products/" />
+                <data android:scheme="https"
+                    android:host="ozmade-applink.vercel.app"
+                    android:pathPrefix="/chats/" />
+            </intent-filter>
 
+            <!-- HTTP Deep Links (IP) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="http"
                     android:host="34.178.41.41"
                     android:port="8080"
                     android:pathPrefix="/products/" />
-            </intent-filter>
-
-            <!-- Chat Deep Links -->
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
                 <data android:scheme="http"
                     android:host="34.178.41.41"
                     android:port="8080"

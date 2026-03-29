@@ -42,21 +42,37 @@ class MainActivity : ComponentActivity() {
                     val productTitle = intent?.getStringExtra("product_title") ?: "Товар"
                     val price = intent?.getIntExtra("price", 0) ?: 0
 
-                    // App Link (Deep Link) data (from URI)
+                    // Deep Link data
                     val data: Uri? = intent?.data
                     var deepLinkProductId = 0
                     var deepLinkChatId = 0
                     
                     data?.let { uri ->
                         Log.d("DeepLink", "URI: $uri")
-                        val segments = uri.pathSegments
-                        if (segments.size >= 2) {
-                            when (segments[0]) {
-                                "products" -> {
-                                    deepLinkProductId = segments[1].toIntOrNull() ?: 0
+                        
+                        // Handle custom scheme ozmade://products/123 or ozmade://chats/55
+                        if (uri.scheme == "ozmade") {
+                            val host = uri.host
+                            val segments = uri.pathSegments
+                            
+                            if (host == "products") {
+                                deepLinkProductId = segments.firstOrNull()?.toIntOrNull() ?: 0
+                            } else if (host == "chats") {
+                                deepLinkChatId = segments.firstOrNull()?.toIntOrNull() ?: 0
+                            }
+                        } else {
+                            // Handle HTTP/HTTPS: https://ozmade-applink.vercel.app/products/123
+                            val segments = uri.pathSegments
+                            if (segments.size >= 2) {
+                                when (segments[0]) {
+                                    "products" -> deepLinkProductId = segments[1].toIntOrNull() ?: 0
+                                    "chats" -> deepLinkChatId = segments[1].toIntOrNull() ?: 0
                                 }
-                                "chats" -> {
-                                    deepLinkChatId = segments[1].toIntOrNull() ?: 0
+                            } else if (segments.size >= 1 && uri.host == "34.178.41.41") {
+                                // Fallback for old IP links if needed
+                                when (segments[0]) {
+                                    "products" -> deepLinkProductId = segments.getOrNull(1)?.toIntOrNull() ?: 0
+                                    "chats" -> deepLinkChatId = segments.getOrNull(1)?.toIntOrNull() ?: 0
                                 }
                             }
                         }

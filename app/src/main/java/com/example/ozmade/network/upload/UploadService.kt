@@ -3,6 +3,7 @@ package com.example.ozmade.network.upload
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -28,9 +29,15 @@ class UploadService {
             val mediaType = mimeType.toMediaTypeOrNull()
             val requestBody = file.asRequestBody(mediaType)
 
+            // Use toHttpUrl() to parse the signed URL. This prevents OkHttp from 
+            // re-encoding parameters that are already part of the signature.
+            val url = uploadUrl.toHttpUrl()
+
             val request = Request.Builder()
-                .url(uploadUrl)
+                .url(url)
                 .put(requestBody)
+                // The Content-Type must match EXACTLY what was sent to the backend 
+                // when requesting the signed URL.
                 .header("Content-Type", mimeType)
                 .build()
 
@@ -43,7 +50,7 @@ class UploadService {
                     Log.d("UploadService", "Upload successful")
                 }
             }
-            Unit // Обязательно возвращаем Unit, чтобы тип был Result<Unit>
+            Unit
         }
     }
 }

@@ -62,22 +62,30 @@ fun MainScreen(
     pushProductId: Int = 0,
     pushSellerName: String = "Продавец",
     pushProductTitle: String = "Товар",
-    pushPrice: Int = 0
+    pushPrice: Int = 0,
+    deepLinkProductId: Int = 0
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     LaunchedEffect(openChatFromPush, pushChatId) {
         if (openChatFromPush && pushChatId != 0) {
-
             val encSellerName = Uri.encode(pushSellerName)
             val encProductTitle = Uri.encode(pushProductTitle)
 
             navController.navigate(
                 "chat/$pushChatId/$pushSellerId/$pushProductId?sellerName=$encSellerName&productTitle=$encProductTitle&price=$pushPrice"
-
             )
             Log.d("PUSH", "OPEN CHAT: $pushChatId")
+        }
+    }
+
+    LaunchedEffect(deepLinkProductId) {
+        if (deepLinkProductId != 0) {
+            navController.navigate("product/$deepLinkProductId") {
+                popUpTo(BottomItem.Home.route) { inclusive = false }
+                launchSingleTop = true
+            }
         }
     }
 
@@ -85,7 +93,8 @@ fun MainScreen(
 
     // Список путей, где нужно СКРЫТЬ нижний бар
     val hideBottomBarRoutes = listOf(
-        "chat/{sellerId}/{productId}",
+        "chat/{chatId}/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
+        "chat_new/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
         "support_chat",
         "seller_gate",
         "seller_onboarding",
@@ -97,7 +106,8 @@ fun MainScreen(
     )
 
     val showBottomBar = currentDestination?.route !in hideBottomBarRoutes &&
-            currentDestination?.route?.startsWith("chat/") == false
+            currentDestination?.route?.startsWith("chat/") == false &&
+            currentDestination?.route?.startsWith("chat_new/") == false
 
     // Функция для глубокой навигации
     fun openProductFromDeep(productId: Int) {
@@ -135,7 +145,7 @@ fun MainScreen(
 
             composable(
                 route = "category/{id}",
-                arguments = listOf(navArgument("id") { type = NavType.IntType })
+                arguments = listOf(navArgument("id") { type = NavType.StringType })
             ) { backStackEntry ->
                 CategoryRoute(
                     categoryId = backStackEntry.arguments?.getString("id") ?: "",

@@ -43,7 +43,7 @@ fun ProductDetailsRoute(
                 liked = state.liked,
                 onToggleLike = { viewModel.toggleLike() },
                 onShare = {
-                    val shareLink = "http://34.178.41.41:8080/products/${p.id}"
+                    val shareLink = "https://ozmade-applink.vercel.app/products/${p.id}"
                     val shareIntent = Intent().apply {
                         action = Intent.ACTION_SEND
                         putExtra(Intent.EXTRA_TEXT, "Посмотрите этот товар на OzMade: $shareLink")

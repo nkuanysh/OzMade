@@ -1,6 +1,5 @@
 package com.example.ozmade.navigation
 
-import android.net.Uri
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
@@ -45,30 +44,6 @@ fun AppNavHost(
             !langChosen -> Routes.LANG
             isLoggedIn -> Routes.HOME
             else -> Routes.AUTH
-        }
-    }
-
-    LaunchedEffect(start, openChatFromPush, pushChatId) {
-        if (
-            start == Routes.HOME &&
-            openChatFromPush &&
-            pushChatId != 0
-        ) {
-            val encSellerName = Uri.encode(pushSellerName)
-            val encProductTitle = Uri.encode(pushProductTitle)
-
-            navController.navigate(
-                "chat/$pushChatId/$pushSellerId/$pushProductId?sellerName=$encSellerName&productTitle=$encProductTitle&price=$pushPrice"
-            )
-        }
-    }
-
-    LaunchedEffect(start, deepLinkProductId) {
-        if (start == Routes.HOME && deepLinkProductId != 0) {
-            navController.navigate("product/$deepLinkProductId") {
-                popUpTo(Routes.HOME) { inclusive = false }
-                launchSingleTop = true
-            }
         }
     }
 
@@ -123,10 +98,9 @@ fun AppNavHost(
                 pushProductId = pushProductId,
                 pushSellerName = pushSellerName,
                 pushProductTitle = pushProductTitle,
-                pushPrice = pushPrice
+                pushPrice = pushPrice,
+                deepLinkProductId = deepLinkProductId
             )
         }
-
-
     }
 }
