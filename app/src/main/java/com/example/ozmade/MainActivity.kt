@@ -3,6 +3,7 @@ package com.example.ozmade
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
@@ -17,12 +18,22 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        handleIntent(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent?) {
         setContent {
             OzMadeTheme {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     val navController = rememberNavController()
 
-                    // Push notifications data
+                    // Push notifications data (from Extras)
                     val openChat = intent?.getBooleanExtra("open_chat", false) ?: false
                     val chatId = intent?.getIntExtra("chat_id", 0) ?: 0
                     val sellerId = intent?.getIntExtra("seller_id", 0) ?: 0
@@ -31,19 +42,30 @@ class MainActivity : ComponentActivity() {
                     val productTitle = intent?.getStringExtra("product_title") ?: "Товар"
                     val price = intent?.getIntExtra("price", 0) ?: 0
 
-                    // App Link (Deep Link) data
+                    // App Link (Deep Link) data (from URI)
                     val data: Uri? = intent?.data
                     var deepLinkProductId = 0
+                    var deepLinkChatId = 0
+                    
                     data?.let { uri ->
-                        if (uri.pathSegments.size >= 2 && uri.pathSegments[0] == "products") {
-                            deepLinkProductId = uri.pathSegments[1].toIntOrNull() ?: 0
+                        Log.d("DeepLink", "URI: $uri")
+                        val segments = uri.pathSegments
+                        if (segments.size >= 2) {
+                            when (segments[0]) {
+                                "products" -> {
+                                    deepLinkProductId = segments[1].toIntOrNull() ?: 0
+                                }
+                                "chats" -> {
+                                    deepLinkChatId = segments[1].toIntOrNull() ?: 0
+                                }
+                            }
                         }
                     }
 
                     AppNavHost(
                         navController = navController,
-                        openChatFromPush = openChat,
-                        pushChatId = chatId,
+                        openChatFromPush = openChat || (deepLinkChatId != 0),
+                        pushChatId = if (deepLinkChatId != 0) deepLinkChatId else chatId,
                         pushSellerId = sellerId,
                         pushProductId = productId,
                         pushSellerName = sellerName,
@@ -54,10 +76,5 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-    }
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        setIntent(intent)
     }
 }
