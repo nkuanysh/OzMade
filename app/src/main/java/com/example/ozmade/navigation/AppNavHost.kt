@@ -28,7 +28,8 @@ fun AppNavHost(
     pushProductId: Int = 0,
     pushSellerName: String = "Продавец",
     pushProductTitle: String = "Товар",
-    pushPrice: Int = 0
+    pushPrice: Int = 0,
+    deepLinkProductId: Int = 0
 ) {
     val context = LocalContext.current
     val langStore = remember { LanguageStore(context) }
@@ -59,6 +60,15 @@ fun AppNavHost(
             navController.navigate(
                 "chat/$pushChatId/$pushSellerId/$pushProductId?sellerName=$encSellerName&productTitle=$encProductTitle&price=$pushPrice"
             )
+        }
+    }
+
+    LaunchedEffect(start, deepLinkProductId) {
+        if (start == Routes.HOME && deepLinkProductId != 0) {
+            navController.navigate("product/$deepLinkProductId") {
+                popUpTo(Routes.HOME) { inclusive = false }
+                launchSingleTop = true
+            }
         }
     }
 

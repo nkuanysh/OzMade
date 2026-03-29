@@ -1,6 +1,8 @@
 package com.example.ozmade.main.userHome.details
 
+import android.content.Intent
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
@@ -14,6 +16,7 @@ fun ProductDetailsRoute(
     viewModel: ProductDetailsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(productId) {
         viewModel.load(productId)
@@ -39,7 +42,15 @@ fun ProductDetailsRoute(
                 product = p,
                 liked = state.liked,
                 onToggleLike = { viewModel.toggleLike() },
-                onShare = { /* TODO: share */ },
+                onShare = {
+                    val shareLink = "http://34.178.41.41:8080/products/${p.id}"
+                    val shareIntent = Intent().apply {
+                        action = Intent.ACTION_SEND
+                        putExtra(Intent.EXTRA_TEXT, "Посмотрите этот товар на OzMade: $shareLink")
+                        type = "text/plain"
+                    }
+                    context.startActivity(Intent.createChooser(shareIntent, "Поделиться товаром"))
+                },
                 onChat = {
                     onChat(
                         p.seller.id,
