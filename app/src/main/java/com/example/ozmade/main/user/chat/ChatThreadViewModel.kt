@@ -22,6 +22,7 @@ sealed class ChatThreadUiState {
         val sellerName: String,
         val productTitle: String,
         val productPrice: Int,
+        val productImageUrl: String?,
         val messages: List<ChatMessageUi>
     ) : ChatThreadUiState()
 }
@@ -63,6 +64,7 @@ class ChatThreadViewModel @Inject constructor(
                     sellerName = sellerName,
                     productTitle = productTitle,
                     productPrice = productPrice,
+                    productImageUrl = productImageUrl,
                     messages = msgs
                 )
             }.onSuccess { 
@@ -78,7 +80,7 @@ class ChatThreadViewModel @Inject constructor(
         pollingJob?.cancel()
         pollingJob = viewModelScope.launch {
             while (isActive) {
-                delay(3000) // Poll every 3 seconds
+                delay(3000)
                 val state = _uiState.value
                 if (state is ChatThreadUiState.Data) {
                     runCatching { repo.getMessages(chatId) }
@@ -110,13 +112,15 @@ class ChatThreadViewModel @Inject constructor(
                 }
 
                 val msgs = repo.getMessages(newChatId)
-
-                state.copy(
+                
+                // Явно обновляем Data с новыми сообщениями и ID чата
+                _uiState.value = state.copy(
                     chatId = newChatId,
                     messages = msgs
                 )
-            }.onSuccess { _uiState.value = it }
-                .onFailure { _uiState.value = ChatThreadUiState.Error(it.message ?: "Ошибка отправки") }
+            }.onFailure { 
+                _uiState.value = ChatThreadUiState.Error(it.message ?: "Ошибка отправки") 
+            }
         }
     }
 

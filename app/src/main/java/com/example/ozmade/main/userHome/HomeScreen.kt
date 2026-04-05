@@ -1,373 +1,411 @@
 package com.example.ozmade.main.userHome
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import kotlinx.coroutines.delay
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.ozmade.R
 
-fun categoryIcon(id: String): ImageVector {
-    return when (id) {
-        "food" -> Icons.Default.Restaurant
-        "clothes" -> Icons.Default.Checkroom
-        "art" -> Icons.Default.Palette
-        "craft" -> Icons.Default.Handyman
-        "gifts" -> Icons.Default.CardGiftcard
-        "holiday" -> Icons.Default.Celebration
-        "home" -> Icons.Default.Chair
-        else -> Icons.Default.Category
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreen(
-    onOpenProduct: (Int) -> Unit,
-    onOpenCategory: (String) -> Unit,
-    viewModel: HomeViewModel = hiltViewModel()
+    uiState: HomeUiState = HomeUiState.Loading,
+    onSearchClick: () -> Unit = {},
+    onOpenCategory: (String) -> Unit = {},
+    onOpenProduct: (Int) -> Unit = {},
+    onFavoriteClick: (Int) -> Unit = {},
+    onSeeAllCategoriesClick: () -> Unit = {},
+    onSeeAllProductsClick: () -> Unit = {},
+    onRetry: () -> Unit = {}
 ) {
-    var search by rememberSaveable { mutableStateOf("") }
-    val uiState by viewModel.uiState.collectAsState()
-    val gridState = rememberLazyGridState()
+    val backgroundColor = Color(0xFFFBFBFB)
+    val orangeAccent = Color(0xFFFF9800) // Наш новый основной цвет
 
-    Box(Modifier.fillMaxSize()) {
-        when (val state = uiState) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = backgroundColor
+    ) { paddingValues ->
+        when (uiState) {
             is HomeUiState.Loading -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = orangeAccent)
                 }
             }
-
             is HomeUiState.Error -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Ошибка: ${state.message}")
-                }
+                ErrorContent(message = uiState.message, onRetry = onRetry, accentColor = orangeAccent)
             }
-
             is HomeUiState.Data -> {
-                val ads = state.ads
-                val categories = state.categories
-                val products = state.products
-
-                val filteredProducts = remember(search, products) {
-                    val q = search.trim()
-                    if (q.isEmpty()) products
-                    else products.filter {
-                        it.title.contains(q, ignoreCase = true) ||
-                                it.city.contains(q, ignoreCase = true)
-                    }
-                }
-
                 LazyVerticalGrid(
-                    state = gridState,
                     columns = GridCells.Fixed(2),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentPadding = PaddingValues(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    item(span = { GridItemSpan(2) }) { Spacer(Modifier.height(86.dp)) }
-
+                    // 1. Поиск
                     item(span = { GridItemSpan(2) }) {
-                        Text(
-                            text = "OzMade",
-                            style = MaterialTheme.typography.headlineSmall,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().padding(top = 6.dp)
+                        HomeSearchBar(onClick = onSearchClick)
+                    }
+
+                    // 2. Рекламный слайдер
+                    if (uiState.ads.isNotEmpty()) {
+                        item(span = { GridItemSpan(2) }) {
+                            ModernPromoSlider(ads = uiState.ads, accentColor = orangeAccent)
+                        }
+                    }
+
+                    // 3. Категории
+                    item(span = { GridItemSpan(2) }) {
+                        SectionHeader(
+                            title = "Все категории",
+                            actionText = "Смотреть все",
+                            onActionClick = onSeeAllCategoriesClick,
+                            accentColor = orangeAccent
                         )
                     }
 
                     item(span = { GridItemSpan(2) }) {
-                        if (ads.isNotEmpty()) {
-                            val pagerStateAds = rememberPagerState(
-                                initialPage = 0,
-                                pageCount = { ads.size }
-                            )
-
-                            LaunchedEffect(ads.size) {
-                                if (ads.size > 1) {
-                                    while (true) {
-                                        delay(4000)
-                                        val next = (pagerStateAds.currentPage + 1) % ads.size
-                                        pagerStateAds.animateScrollToPage(next)
-                                    }
-                                }
-                            }
-
-                            HorizontalPager(
-                                state = pagerStateAds,
-                                contentPadding = PaddingValues(horizontal = 8.dp),
-                                pageSpacing = 12.dp,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(160.dp)
-                            ) { page ->
-                                AdBannerCard(
-                                    ad = ads[page],
-                                    onClick = { /* TODO */ }
-                                )
-                            }
-                        }
+                        CategoriesHorizontalList(onCategoryClick = onOpenCategory, accentColor = orangeAccent)
                     }
 
+                    // 4. Товары
                     item(span = { GridItemSpan(2) }) {
-                        Text(
-                            text = "Категории",
-                            style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.padding(top = 12.dp)
+                        SectionHeader(
+                            title = "Товары для вас",
+                            actionText = "Смотреть все",
+                            onActionClick = onSeeAllProductsClick,
+                            accentColor = orangeAccent
                         )
                     }
 
-                    item(span = { GridItemSpan(2) }) {
-                        if (categories.isNotEmpty()) {
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(10.dp),
-                                contentPadding = PaddingValues(vertical = 10.dp)
-                            ) {
-                                items(categories) { cat ->
-                                    CategoryChip(
-                                        title = cat.title,
-                                        icon = categoryIcon(cat.id),
-                                        onClick = { onOpenCategory(cat.id) }
-                                    )
-                                }
-                            }
-                        }
-                    }
-
-                    items(filteredProducts, key = { it.id }) { product ->
-                        ProductCard(
+                    items(uiState.products) { product ->
+                        MarketProductCard(
                             product = product,
-                            liked = product.liked,
-                            onToggleLike = {
-                                viewModel.toggleLike(product.id)
-                            },
-                            onClick = { onOpenProduct(product.id) }
+                            onClick = { onOpenProduct(product.id) },
+                            onFavoriteClick = { onFavoriteClick(product.id) },
+                            accentColor = orangeAccent
                         )
                     }
                 }
             }
         }
+    }
+}
 
-        Surface(
-            tonalElevation = 8.dp,
-            shadowElevation = 8.dp,
-            shape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp),
+@Composable
+fun HomeSearchBar(onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(54.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(18.dp),
+        color = Color.White,
+        shadowElevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(Icons.Rounded.Search, contentDescription = null, tint = Color.LightGray)
+            Spacer(modifier = Modifier.width(12.dp))
+            Text("Поиск товаров и услуг", color = Color.Gray, fontSize = 15.sp)
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun ModernPromoSlider(ads: List<AdBanner>, accentColor: Color) {
+    val pagerState = rememberPagerState(pageCount = { ads.size })
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        HorizontalPager(
+            state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.TopCenter)
-        ) {
-            OutlinedTextField(
-                value = search,
-                onValueChange = { search = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .height(56.dp),
-                placeholder = { Text("Поиск товаров или города") },
-                singleLine = true,
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                trailingIcon = {
-                    if (search.isNotEmpty()) {
-                        IconButton(onClick = { search = "" }) {
-                            Icon(Icons.Default.Close, contentDescription = "Очистить")
-                        }
-                    }
-                },
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                .height(180.dp)
+                .clip(RoundedCornerShape(24.dp))
+        ) { page ->
+            val ad = ads[page]
+            Box(modifier = Modifier.fillMaxSize()) {
+                if (ad.imageUrl != null) {
+                    AsyncImage(
+                        model = ad.imageUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else if (ad.imageRes != null) {
+                    Image(
+                        painter = painterResource(id = ad.imageRes),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
+                                startY = 100f
+                            )
+                        )
                 )
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(20.dp)
+                ) {
+                    Surface(
+                        color = accentColor,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text(
+                            "АКЦИЯ",
+                            color = Color.White,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = ad.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        Row(horizontalArrangement = Arrangement.Center) {
+            repeat(ads.size) { iteration ->
+                val active = pagerState.currentPage == iteration
+                Box(
+                    modifier = Modifier
+                        .padding(3.dp)
+                        .clip(CircleShape)
+                        .background(if (active) accentColor else Color(0xFFE0E0E0))
+                        .size(if (active) 10.dp else 7.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoriesHorizontalList(onCategoryClick: (String) -> Unit, accentColor: Color) {
+    val categories = listOf(
+        Category("food", "Еда"),
+        Category("clothes", "Одежда"),
+        Category("art", "Искусство"),
+        Category("craft", "Ремесло"),
+        Category("gifts", "Подарки"),
+        Category("home", "Для дома")
+    )
+
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        contentPadding = PaddingValues(vertical = 4.dp)
+    ) {
+        items(categories) { category ->
+            MarketCategoryChip(
+                category = category,
+                onClick = { onCategoryClick(category.id) },
+                accentColor = accentColor
             )
         }
     }
 }
 
 @Composable
-private fun AdBannerCard(ad: AdBanner, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(160.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            if (ad.imageRes != null) {
-                Image(
-                    painter = painterResource(id = ad.imageRes),
-                    contentDescription = ad.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else if (ad.imageUrl != null) {
-                AsyncImage(
-                    model = ad.imageUrl,
-                    contentDescription = ad.title,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
+private fun MarketCategoryChip(category: Category, onClick: () -> Unit, accentColor: Color) {
+    val icon = when (category.id) {
+        "food" -> Icons.Rounded.Restaurant
+        "clothes" -> Icons.Rounded.Checkroom
+        "art" -> Icons.Rounded.Palette
+        "craft" -> Icons.Rounded.Handyman
+        "gifts" -> Icons.Rounded.CardGiftcard
+        "home" -> Icons.Rounded.Chair
+        else -> Icons.Rounded.Category
+    }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.Black.copy(alpha = 0.4f))
-                    .align(Alignment.BottomStart)
-                    .padding(12.dp)
-            ) {
-                Text(
-                    text = ad.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White
-                )
-            }
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp),
+        color = Color.White,
+        shadowElevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = accentColor
+            )
+            Text(
+                text = category.title,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF333333)
+            )
         }
     }
 }
 
 @Composable
-private fun CategoryChip(
-    title: String,
-    icon: ImageVector,
-    onClick: () -> Unit
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clip(RoundedCornerShape(20.dp))
-            .clickable(onClick = onClick)
-            .background(MaterialTheme.colorScheme.primaryContainer)
-            .padding(horizontal = 14.dp, vertical = 8.dp)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp)
-        )
-        Spacer(Modifier.width(6.dp))
-        Text(text = title)
-    }
-}
-
-@Composable
-private fun ProductCard(
-    product: Product,
-    liked: Boolean,
-    onToggleLike: () -> Unit,
-    onClick: () -> Unit
-) {
+fun MarketProductCard(product: Product, onClick: () -> Unit, onFavoriteClick: () -> Unit, accentColor: Color) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(6.dp)
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp)
-                    .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
+        Column {
+            Box(modifier = Modifier.fillMaxWidth().height(150.dp)) {
                 AsyncImage(
                     model = product.imageUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
-
-                IconButton(
-                    onClick = onToggleLike,
+                
+                Surface(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .size(36.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.85f))
+                        .padding(10.dp)
+                        .size(34.dp)
+                        .clickable { onFavoriteClick() },
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.9f)
                 ) {
-                    Icon(
-                        imageVector = if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = null,
-                        tint = if (liked) Color.Red else Color.Gray
-                    )
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = if (product.liked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                            contentDescription = null,
+                            tint = if (product.liked) Color(0xFFF44336) else Color.Gray,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
-
+            
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
-                    text = "${product.price} ₸",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
                     text = product.title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(Modifier.height(4.dp))
-                Text(
-                    text = "${product.city}, ${product.address}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color(0xFF222222)
                 )
-                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "${product.price.toInt()} ₽",
+                    color = accentColor,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+                
+                Spacer(modifier = Modifier.height(6.dp))
+                
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = null,
-                        tint = Color(0xFFFFC107),
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
+                    Icon(Icons.Rounded.Star, null, tint = Color(0xFFFFB300), modifier = Modifier.size(14.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${product.rating}",
-                        style = MaterialTheme.typography.bodySmall
+                        text = product.rating.toString(),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Gray
                     )
                 }
             }
         }
     }
+}
+
+@Composable
+fun SectionHeader(title: String, actionText: String, onActionClick: () -> Unit, accentColor: Color) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(title, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1A1A1A))
+        Text(
+            text = actionText,
+            color = accentColor,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.clickable { onActionClick() }
+        )
+    }
+}
+
+@Composable
+fun ErrorContent(message: String, onRetry: () -> Unit, accentColor: Color) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = message, color = Color.Red)
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = onRetry, colors = ButtonDefaults.buttonColors(containerColor = accentColor)) {
+            Text("Попробовать снова")
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    HomeScreen(uiState = HomeUiState.Data(
+        products = listOf(),
+        categories = listOf(),
+        ads = listOf(AdBanner("1", title = "Скидки дня"))
+    ))
 }

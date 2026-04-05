@@ -33,7 +33,7 @@ import com.example.ozmade.main.user.profile.EditProfileScreen
 import com.example.ozmade.main.user.profile.ProfileScreen
 import com.example.ozmade.main.user.profile.support.SupportChatScreen
 import com.example.ozmade.main.user.profile.support.SupportScreen
-import com.example.ozmade.main.userHome.HomeScreen
+import com.example.ozmade.main.userHome.HomeRoute
 import com.example.ozmade.main.userHome.category.CategoryRoute
 import com.example.ozmade.main.userHome.details.ProductDetailsRoute
 import com.example.ozmade.main.userHome.reviews.ReviewsRoute
@@ -129,15 +129,15 @@ fun MainScreen(
             }
         },
         containerColor = Color.White // Чистый фон для всего приложения
-    ) { padding ->
+    ) { paddingValues ->
         NavHost(
             navController = navController,
             startDestination = BottomItem.Home.route,
-            modifier = Modifier.padding(padding)
+            modifier = Modifier.padding(paddingValues)
         ) {
             // --- ГЛАВНАЯ И ТОВАРЫ ---
             composable(BottomItem.Home.route) {
-                HomeScreen(
+                HomeRoute(
                     onOpenProduct = { id -> navController.navigate("product/$id") },
                     onOpenCategory = { id -> navController.navigate("category/$id") }
                 )

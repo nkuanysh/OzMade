@@ -1,10 +1,12 @@
 package com.example.ozmade.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,10 +24,10 @@ fun LanguageScreen(
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Большой лого по центру
         Spacer(Modifier.weight(1f))
 
-        // большой лого по центру
-        Box(Modifier.size(160.dp), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(180.dp), contentAlignment = Alignment.Center) {
             logo()
         }
 
@@ -37,7 +39,7 @@ fun LanguageScreen(
             fontWeight = FontWeight.Medium
         )
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(24.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -63,13 +65,9 @@ fun LanguageScreen(
 
 @Composable
 private fun DefaultLogo() {
-    // Заглушка логотипа: потом заменишь на Image(painterResource(...))
-    Surface(
-        shape = MaterialTheme.shapes.extraLarge,
-        tonalElevation = 2.dp
-    ) {
-        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("OzMade", style = MaterialTheme.typography.titleLarge)
-        }
-    }
+    Image(
+        painter = painterResource(id = R.drawable.image_removebg_preview),
+        contentDescription = "OzMade Logo",
+        modifier = Modifier.fillMaxSize()
+    )
 }

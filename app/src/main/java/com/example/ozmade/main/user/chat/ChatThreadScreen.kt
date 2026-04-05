@@ -9,27 +9,22 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.ozmade.main.user.chat.data.ChatMessageUi
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Face
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.ui.platform.LocalFocusManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,10 +70,8 @@ private fun ChatThreadScreen(
 ) {
     var input by remember { mutableStateOf("") }
     var menuExpanded by remember { mutableStateOf(false) }
-    val focusManager = LocalFocusManager.current
     val listState = rememberLazyListState()
 
-    // Auto-scroll when new messages arrive
     LaunchedEffect(uiState) {
         if (uiState is ChatThreadUiState.Data && uiState.messages.isNotEmpty()) {
             listState.animateScrollToItem(uiState.messages.size - 1)
@@ -89,41 +82,55 @@ private fun ChatThreadScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    val seller = (uiState as? ChatThreadUiState.Data)?.sellerName ?: "Чат"
-                    Text(seller, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            modifier = Modifier.size(36.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                val name = (uiState as? ChatThreadUiState.Data)?.sellerName ?: "П"
+                                Text(
+                                    text = name.take(1).uppercase(),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+                        }
+                        Spacer(Modifier.width(10.dp))
+                        Column {
+                            val seller = (uiState as? ChatThreadUiState.Data)?.sellerName ?: "Чат"
+                            Text(
+                                seller,
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Text("Продавец", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) }
                 },
                 actions = {
-                    Box {
-                        IconButton(onClick = { menuExpanded = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = null)
-                        }
-
-                        DropdownMenu(
-                            expanded = menuExpanded,
-                            onDismissRequest = { menuExpanded = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text("Удалить чат") },
-                                onClick = { menuExpanded = false }
-                            )
-                        }
+                    IconButton(onClick = { menuExpanded = true }) { Icon(Icons.Default.MoreVert, null) }
+                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                        DropdownMenuItem(text = { Text("Удалить чат") }, onClick = { menuExpanded = false })
                     }
                 }
             )
         },
         bottomBar = {
-            Surface(tonalElevation = 8.dp) {
+            Surface(tonalElevation = 8.dp, shadowElevation = 16.dp, modifier = Modifier.navigationBarsPadding()) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                        .padding(horizontal = 8.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { focusManager.clearFocus() }) {
-                        Icon(Icons.Default.Face, contentDescription = null)
+                    IconButton(onClick = { /* Вложения */ }) {
+                        Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary)
                     }
 
                     TextField(
@@ -131,80 +138,72 @@ private fun ChatThreadScreen(
                         onValueChange = { input = it },
                         modifier = Modifier
                             .weight(1f)
-                            .heightIn(min = 44.dp),
+                            .padding(horizontal = 4.dp),
                         placeholder = { Text("Сообщение…") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(18.dp),
+                        maxLines = 4,
+                        shape = RoundedCornerShape(24.dp),
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                             focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            disabledIndicatorColor = Color.Transparent
+                            unfocusedIndicatorColor = Color.Transparent
                         )
                     )
 
-                    Spacer(Modifier.width(4.dp))
-
-                    IconButton(onClick = { focusManager.clearFocus() }) {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                    }
-
-                    val trimmed = input.trim()
-
-                    if (trimmed.isEmpty()) {
-                        IconButton(onClick = { focusManager.clearFocus() }) {
-                            Icon(Icons.Default.PlayArrow, contentDescription = null)
-                        }
-                    } else {
-                        FilledIconButton(
-                            onClick = {
-                                onSend(trimmed)
+                    val canSend = input.trim().isNotEmpty()
+                    IconButton(
+                        onClick = {
+                            if (canSend) {
+                                onSend(input.trim())
                                 input = ""
-                                focusManager.clearFocus()
-                            },
-                            shape = CircleShape
-                        ) {
-                            Icon(Icons.Default.Send, contentDescription = null)
-                        }
+                            }
+                        },
+                        enabled = canSend,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(if (canSend) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.Send,
+                            null,
+                            tint = if (canSend) Color.White else Color.Gray,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 }
             }
         }
     ) { padding ->
-
-        when (uiState) {
-            is ChatThreadUiState.Loading -> {
-                Box(
-                    Modifier.padding(padding).fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) { CircularProgressIndicator() }
-            }
-
-            is ChatThreadUiState.Error -> {
-                Box(
-                    Modifier.padding(padding).fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) { Text(uiState.message, color = MaterialTheme.colorScheme.error) }
-            }
-
-            is ChatThreadUiState.Data -> {
-                Column(Modifier.padding(padding).fillMaxSize()) {
-
-                    ProductContextBar(
-                        title = uiState.productTitle,
-                        price = uiState.productPrice,
-                        onClick = onOpenProduct
-                    )
-
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        items(uiState.messages, key = { it.id }) { msg ->
-                            Bubble(msg)
+        Box(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+        ) {
+            when (uiState) {
+                is ChatThreadUiState.Loading -> {
+                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                }
+                is ChatThreadUiState.Error -> {
+                    Text(uiState.message, Modifier.align(Alignment.Center), color = MaterialTheme.colorScheme.error)
+                }
+                is ChatThreadUiState.Data -> {
+                    Column(Modifier.fillMaxSize()) {
+                        ProductContextBar(
+                            title = uiState.productTitle,
+                            price = uiState.productPrice,
+                            imageUrl = uiState.productImageUrl,
+                            onClick = onOpenProduct
+                        )
+                        LazyColumn(
+                            state = listState,
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(uiState.messages, key = { it.id }) { msg ->
+                                Bubble(msg)
+                            }
                         }
                     }
                 }
@@ -217,53 +216,77 @@ private fun ChatThreadScreen(
 private fun ProductContextBar(
     title: String,
     price: Int,
+    imageUrl: String?,
     onClick: () -> Unit
 ) {
-    Surface(tonalElevation = 2.dp) {
+    Surface(
+        tonalElevation = 4.dp,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = 12.dp, vertical = 10.dp),
+            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
                 modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentScale = ContentScale.Crop
             )
-            Spacer(Modifier.width(10.dp))
-
+            Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
-                Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleSmall)
-                Text("$price ₸", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
+                Text("$price ₸", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
             }
-
-            Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
+            Icon(Icons.Default.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.outline)
         }
     }
 }
 
 @Composable
 private fun Bubble(msg: ChatMessageUi) {
+    val isMine = msg.isMine
+    val shape = if (isMine) {
+        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 2.dp)
+    } else {
+        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 2.dp, bottomEnd = 16.dp)
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (msg.isMine) Arrangement.End else Arrangement.Start
+        horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start
     ) {
         Column(
             modifier = Modifier
-                .widthIn(max = 300.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    if (msg.isMine) MaterialTheme.colorScheme.primaryContainer
-                    else MaterialTheme.colorScheme.surfaceVariant
-                )
-                .padding(12.dp)
+                .widthIn(max = 280.dp)
+                .clip(shape)
+                .background(if (isMine) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
-            Text(msg.text, style = MaterialTheme.typography.bodyLarge)
-            Spacer(Modifier.height(6.dp))
-            Text(msg.timeText, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                msg.text,
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (isMine) Color.White else MaterialTheme.colorScheme.onSurface
+            )
+            Row(
+                modifier = Modifier.align(Alignment.End),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    msg.timeText,
+                    fontSize = 10.sp,
+                    color = if (isMine) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (isMine) {
+                    Spacer(Modifier.width(4.dp))
+                    Icon(Icons.Default.DoneAll, null, modifier = Modifier.size(14.dp), tint = Color.White.copy(alpha = 0.8f))
+                }
+            }
         }
     }
 }

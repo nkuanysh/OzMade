@@ -4,6 +4,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
+import com.example.ozmade.SplashScreen
+import com.example.ozmade.RegistrationScreenPlaceholder
 import com.example.ozmade.auth.AuthNavHost
 import com.example.ozmade.auth.LanguageScreen
 import com.example.ozmade.main.MainScreen
@@ -13,6 +15,8 @@ import kotlinx.coroutines.launch
 import com.google.firebase.auth.FirebaseAuth
 
 private object Routes {
+    const val SPLASH = "splash"
+    const val REGISTRATION = "registration"
     const val LANG = "lang"
     const val AUTH = "auth"
     const val HOME = "home"
@@ -34,22 +38,40 @@ fun AppNavHost(
     val langStore = remember { LanguageStore(context) }
     val scope = rememberCoroutineScope()
 
-    var start by remember { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(Unit) {
-        val langChosen = langStore.isLangChosen()
-        val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
-
-        start = when {
-            !langChosen -> Routes.LANG
-            isLoggedIn -> Routes.HOME
-            else -> Routes.AUTH
+    NavHost(navController = navController, startDestination = Routes.SPLASH) {
+        
+        composable(Routes.SPLASH) {
+            SplashScreen(
+                onTimeout = {
+                    // Navigate to Registration as requested by user
+                    navController.navigate(Routes.REGISTRATION) {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    }
+                }
+            )
         }
-    }
 
-    if (start == null) return
-
-    NavHost(navController = navController, startDestination = start!!) {
+        composable(Routes.REGISTRATION) {
+            // This is the placeholder for Registration Screen
+            RegistrationScreenPlaceholder(
+                onNext = {
+                    // Logic to proceed after registration/placeholder
+                    scope.launch {
+                        val langChosen = langStore.isLangChosen()
+                        val isLoggedIn = FirebaseAuth.getInstance().currentUser != null
+                        
+                        val nextRoute = when {
+                            !langChosen -> Routes.LANG
+                            isLoggedIn -> Routes.HOME
+                            else -> Routes.AUTH
+                        }
+                        navController.navigate(nextRoute) {
+                            popUpTo(Routes.REGISTRATION) { inclusive = true }
+                        }
+                    }
+                }
+            )
+        }
 
         composable(Routes.LANG) {
             LanguageScreen(

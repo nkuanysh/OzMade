@@ -45,10 +45,18 @@ class RealChatRepository @Inject constructor(
         val myId = sessionStore.myUserId()
 
         resp.body().orEmpty().map { dto ->
+            // Для покупателя "мои" сообщения - те, что отправлены им самим (ID совпадает)
+            // или те, где роль явно указана как 'user' (на случай проблем с ID)
+            val isMine = if (myId != null && myId > 0) {
+                dto.senderId == myId
+            } else {
+                dto.senderRole == "user"
+            }
+
             ChatMessageUi(
                 id = dto.id,
                 text = dto.content,
-                isMine = (myId != null && dto.senderId == myId),
+                isMine = isMine,
                 timeText = dto.createdAt
             )
         }
