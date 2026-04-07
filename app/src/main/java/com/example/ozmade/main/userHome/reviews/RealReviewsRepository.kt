@@ -1,6 +1,7 @@
 package com.example.ozmade.main.userHome.reviews
 
 import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.network.model.ReviewItemDto
 import javax.inject.Inject
 
 class RealReviewsRepository @Inject constructor(
@@ -17,7 +18,7 @@ class RealReviewsRepository @Inject constructor(
             reviewsCount = dto.summary.reviewsCount
         )
 
-        val reviews = dto.reviews.map { r ->
+        val reviews = dto.reviews.map { r: ReviewItemDto ->
             ReviewUi(
                 id = r.id,
                 userName = r.userName,

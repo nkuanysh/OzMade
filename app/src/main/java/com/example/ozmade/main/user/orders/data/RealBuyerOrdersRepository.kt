@@ -2,6 +2,7 @@ package com.example.ozmade.main.user.orders.data
 
 import com.example.ozmade.main.orders.data.OrderUi
 import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -25,7 +26,7 @@ class RealBuyerOrdersRepository @Inject constructor(
 
                 productId = dto.productId,
                 productTitle = dto.productTitle ?: "Товар",
-                productImageUrl = dto.productImageUrl,
+                productImageUrl = ImageUtils.formatImageUrl(dto.productImageUrl),
                 price = dto.price ?: 0.0,
                 quantity = dto.quantity,
                 totalCost = dto.totalCost,

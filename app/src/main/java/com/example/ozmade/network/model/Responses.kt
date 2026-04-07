@@ -74,21 +74,10 @@ data class ProductDetailsDto(
     @SerializedName(value = "YouTubeUrl", alternate = ["youtube_url", "youtubeUrl", "YouTubeURL"])
     val youtubeUrl: String? = null,
     @SerializedName("AverageRating") val averageRating: Double? = null,
-    @SerializedName("Comments") val comments: List<CommentDto>? = null
-)
-
-data class ProductDetailsFullDto(
-    @SerializedName("id") val id: Int,
-    @SerializedName("title") val title: String,
-    @SerializedName("price") val price: Double,
-    @SerializedName("images") val images: List<String>,
-    @SerializedName("description") val description: String,
-    @SerializedName("specs") val specs: List<SpecDto>,
-    @SerializedName("rating") val rating: Double,
-    @SerializedName("reviews_count") val reviewsCount: Int,
-    @SerializedName("orders_count") val ordersCount: Int,
-    @SerializedName("delivery") val delivery: DeliveryInfoDto,
-    @SerializedName("seller") val seller: SellerInfoDto
+    @SerializedName("Comments") val comments: List<CommentDto>? = null,
+    @SerializedName("SellerName") val sellerName: String? = null,
+    @SerializedName("delivery") val delivery: DeliveryInfoDto? = null,
+    @SerializedName("seller") val seller: SellerInfoDto? = null
 )
 
 data class CommentDto(
@@ -145,7 +134,7 @@ data class ChatDto(
     @SerializedName(value="BuyerID", alternate=["buyer_id","buyerId"]) val buyerId: Int,
     @SerializedName(value="ProductID", alternate=["product_id","productId"]) val productId: Int? = null,
     @SerializedName(value="ProductName", alternate=["product_name","productName"]) val productName: String? = null,
-    @SerializedName(value="ProductImage", alternate=["product_image","productImage"]) val productImage: String? = null,
+    @SerializedName(value="ProductImage", alternate=["product_image", "productImage", "ImageName"]) val productImage: String? = null,
     @SerializedName(value="Messages", alternate=["messages"]) val messages: List<MessageDto>?
 )
 
@@ -172,7 +161,8 @@ data class SellerHeaderDto(
     @SerializedName("orders_count") val ordersCount: Int,
     @SerializedName("rating") val rating: Double,
     @SerializedName("reviews_count") val reviewsCount: Int,
-    @SerializedName("days_with_ozmade") val daysWithOzMade: Int
+    @SerializedName("days_with_ozmade") val daysWithOzMade: Int,
+    @SerializedName(value = "avatar_url", alternate = ["avatarUrl", "AvatarURL"]) val avatarUrl: String? = null
 )
 
 data class SellerProductDto(
@@ -181,57 +171,21 @@ data class SellerProductDto(
     @SerializedName("price") val price: Double,
     @SerializedName("city") val city: String,
     @SerializedName("address") val address: String,
-    @SerializedName("rating") val rating: Double
-)
-
-data class ChatThreadDto(
-    @SerializedName("thread_id") val threadId: Int,
-    @SerializedName("seller_id") val sellerId: Int,
-    @SerializedName("seller_name") val sellerName: String,
-    @SerializedName("product_id") val productId: Int,
-    @SerializedName("product_title") val productTitle: String,
-    @SerializedName("product_price") val productPrice: Int,
-    @SerializedName("product_image_url") val productImageUrl: String?,
-    @SerializedName("last_message") val lastMessage: String,
-    @SerializedName("last_time_text") val lastTimeText: String
-)
-
-data class ChatMessageItemDto(
-    @SerializedName("id") val id: Int,
-    @SerializedName("text") val text: String,
-    @SerializedName("is_mine") val isMine: Boolean,
-    @SerializedName("time_text") val timeText: String
-)
-
-data class SellerRegistrationResponseDto(
-    @SerializedName("seller_id") val sellerId: Int,
-    @SerializedName("status") val status: String
-)
-
-data class EnsureThreadResponse(
-    @SerializedName("thread_id") val threadId: Int
-)
-
-data class SpecDto(
-    @SerializedName("key") val key: String,
-    @SerializedName("value") val value: String
-)
-
-data class DeliveryInfoDto(
-    @SerializedName("pickup_enabled") val pickupEnabled: Boolean,
-    @SerializedName("pickup_time") val pickupTime: String,
-    @SerializedName("free_delivery_enabled") val freeDeliveryEnabled: Boolean,
-    @SerializedName("free_delivery_text") val freeDeliveryText: String,
-    @SerializedName("intercity_enabled") val intercityEnabled: Boolean
-)
-
-data class SellerInfoDto(
-    @SerializedName("id") val id: Int,
-    @SerializedName("name") val name: String,
-    @SerializedName("avatar_url") val avatarUrl: String,
-    @SerializedName("address") val address: String,
     @SerializedName("rating") val rating: Double,
-    @SerializedName("completed_orders") val completedOrders: Int
+    @SerializedName(value = "imageUrl", alternate = ["image_url", "ImageName"]) val imageUrl: String? = null
+)
+
+data class AdDto(
+    @SerializedName("id") val id: String,
+    @SerializedName("image_url") val imageUrl: String,
+    @SerializedName("title") val title: String,
+    @SerializedName("deeplink") val deeplink: String
+)
+
+data class CategoryDto(
+    @SerializedName("id") val id: String,
+    @SerializedName("title") val title: String,
+    @SerializedName("icon_url") val iconUrl: String
 )
 
 data class
@@ -255,17 +209,35 @@ data class ReviewItemDto(
     @SerializedName("text") val text: String
 )
 
-data class AdDto(
-    @SerializedName("id") val id: String,
-    @SerializedName("image_url") val imageUrl: String,
-    @SerializedName("title") val title: String,
-    @SerializedName("deeplink") val deeplink: String
+data class EnsureThreadResponse(
+    @SerializedName("thread_id") val threadId: Int
 )
 
-data class CategoryDto(
-    @SerializedName("id") val id: String,
-    @SerializedName("title") val title: String,
-    @SerializedName("icon_url") val iconUrl: String
+data class SpecDto(
+    @SerializedName("key") val key: String,
+    @SerializedName("value") val value: String
+)
+
+data class DeliveryInfoDto(
+    @SerializedName(value = "pickup_enabled", alternate = ["pickupEnabled"]) val pickupEnabled: Boolean,
+    @SerializedName(value = "pickup_time", alternate = ["pickupTime"]) val pickupTime: String?,
+    @SerializedName(value = "pickup_address", alternate = ["pickupAddress"]) val pickupAddress: String?,
+    @SerializedName(value = "free_delivery_enabled", alternate = ["freeDeliveryEnabled"]) val freeDeliveryEnabled: Boolean,
+    @SerializedName(value = "free_delivery_text", alternate = ["freeDeliveryText"]) val freeDeliveryText: String?,
+    @SerializedName(value = "intercity_enabled", alternate = ["intercityEnabled"]) val intercityEnabled: Boolean,
+    @SerializedName(value = "deliveryCenterLat") val centerLat: Double? = null,
+    @SerializedName(value = "deliveryCenterLng") val centerLng: Double? = null,
+    @SerializedName(value = "deliveryRadiusKm") val radiusKm: Double? = null,
+    @SerializedName(value = "deliveryCenterAddress", alternate = ["centerAddress"]) val centerAddress: String? = null
+)
+
+data class SellerInfoDto(
+    @SerializedName("id") val id: Int,
+    @SerializedName("name") val name: String?,
+    @SerializedName(value = "avatar_url", alternate = ["avatarUrl"]) val avatarUrl: String? = null,
+    @SerializedName("address") val address: String?,
+    @SerializedName("rating") val rating: Double? = null,
+    @SerializedName(value = "completed_orders", alternate = ["ordersCount"]) val completedOrders: Int? = null
 )
 
 data class SellerReviewsDto(

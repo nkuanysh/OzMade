@@ -14,6 +14,7 @@ import com.example.ozmade.network.model.SellerProfileDto
 import com.example.ozmade.network.model.UpdateSellerProfileRequest
 import com.example.ozmade.network.model.UploadUrlResponse
 import com.example.ozmade.network.upload.UploadService
+import com.example.ozmade.utils.ImageUtils
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import javax.inject.Inject
@@ -54,7 +55,7 @@ class SellerRepositoryImpl @Inject constructor(
                 id = dto.id,
                 title = dto.title ?: dto.name ?: "No Title",
                 price = (dto.price ?: 0.0).toInt(),
-                imageUrl = dto.imageUrl ?: dto.images?.firstOrNull() ?: "",
+                imageUrl = ImageUtils.formatImageUrl(dto.imageUrl ?: dto.images?.firstOrNull()),
                 status = SellerProductStatus.ON_SALE
             )
         } ?: emptyList()
@@ -245,8 +246,6 @@ class SellerRepositoryImpl @Inject constructor(
                 val lastSegment = path.substringAfterLast("/")
                 if (lastSegment.isNotBlank()) return lastSegment
             }
-            // Если путь пустой или битый, возвращаем пустую строку, 
-            // чтобы бэкенд не плодил вложенные ссылки
             return ""
         }
         

@@ -7,7 +7,8 @@ data class SellerHeaderUi(
     val ordersCount: Int,
     val rating: Double,
     val reviewsCount: Int,
-    val daysWithOzMade: Int
+    val daysWithOzMade: Int,
+    val avatarUrl: String? = null
 )
 
 data class SellerProductUi(
@@ -16,7 +17,8 @@ data class SellerProductUi(
     val price: Double,
     val city: String,
     val address: String,
-    val rating: Double
+    val rating: Double,
+    val imageUrl: String? = null
 )
 
 sealed class SellerUiState {

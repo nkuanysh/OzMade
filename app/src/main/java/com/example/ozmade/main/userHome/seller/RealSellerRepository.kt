@@ -1,6 +1,7 @@
 package com.example.ozmade.main.userHome.seller
 
 import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.utils.ImageUtils
 import javax.inject.Inject
 
 class RealSellerRepository @Inject constructor(
@@ -17,7 +18,8 @@ class RealSellerRepository @Inject constructor(
             ordersCount = dto.seller.ordersCount,
             rating = dto.seller.rating,
             reviewsCount = dto.seller.reviewsCount,
-            daysWithOzMade = dto.seller.daysWithOzMade
+            daysWithOzMade = dto.seller.daysWithOzMade,
+            avatarUrl = null // No avatar in SellerHeaderDto yet
         )
 
         val products = dto.products.map {
@@ -27,7 +29,8 @@ class RealSellerRepository @Inject constructor(
                 price = it.price,
                 city = it.city,
                 address = it.address,
-                rating = it.rating
+                rating = it.rating,
+                imageUrl = null // Product imageUrl not present in SellerProductDto, using default
             )
         }
 

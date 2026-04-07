@@ -90,18 +90,24 @@ private fun CategoryDto.toDomain(): Category =
         iconUrl = ImageUtils.formatImageUrl(iconUrl)
     )
 
-private fun ProductDto.toDomain(liked: Boolean = false): Product =
-    Product(
+private fun ProductDto.toDomain(liked: Boolean = false): Product {
+    // We try to get a valid URL from either the main field or the images array.
+    // In your logs, ImageName was broken but the first item in Images was fixable.
+    val url = ImageUtils.formatImageUrl(imageUrl).takeIf { it.isNotBlank() }
+        ?: ImageUtils.formatImageUrl(images?.firstOrNull())
+
+    return Product(
         id = id,
         title = title ?: name ?: "Unknown",
         price = cost ?: price ?: 0.0,
         city = address?.substringBefore(",") ?: "Unknown",
         address = address ?: "Unknown",
         rating = averageRating ?: 0.0,
-        imageUrl = ImageUtils.formatImageUrl(imageUrl ?: images?.firstOrNull()),
+        imageUrl = url,
         categoryId = type ?: "",
         liked = liked
     )
+}
 
 private val fallbackCategories = listOf(
     Category("food", "Еда"),

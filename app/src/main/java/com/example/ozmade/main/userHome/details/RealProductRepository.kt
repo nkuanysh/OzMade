@@ -20,8 +20,8 @@ class RealProductRepository @Inject constructor(
         if (!resp.isSuccessful) error("Не удалось загрузить товар (${resp.code()})")
         val dto = resp.body() ?: error("Пустой ответ от сервера")
 
-        // Prioritize the images list, as the main imageUrl (ImageName) 
-        // sometimes contains a bucket-level signed URL instead of an object URL.
+        // Prioritize the images list, as the main ImageName field 
+        // sometimes contains a broken bucket-level signed URL.
         val rawImages: List<String> =
             dto.images?.takeIf { it.isNotEmpty() }
                 ?: listOfNotNull(dto.imageUrl)
@@ -43,24 +43,27 @@ class RealProductRepository @Inject constructor(
             price = dto.price ?: 0.0,
             rating = dto.averageRating ?: 0.0,
             reviewsCount = dto.comments?.size ?: 0,
-            ordersCount = 0,
+            ordersCount = dto.seller?.completedOrders ?: 0,
             images = images,
             description = dto.description,
             specs = specs,
             delivery = DeliveryInfoUi(
-                pickupEnabled = false,
-                pickupTime = null,
-                freeDeliveryEnabled = false,
-                freeDeliveryText = null,
-                intercityEnabled = false
+                pickupEnabled = dto.delivery?.pickupEnabled ?: false,
+                pickupTime = dto.delivery?.pickupTime,
+                freeDeliveryEnabled = dto.delivery?.freeDeliveryEnabled ?: false,
+                freeDeliveryText = dto.delivery?.freeDeliveryText,
+                intercityEnabled = dto.delivery?.intercityEnabled ?: false,
+                pickupAddress = dto.delivery?.pickupAddress,
+                centerAddress = dto.delivery?.centerAddress,
+                radiusKm = dto.delivery?.radiusKm
             ),
             seller = SellerUi(
-                id = (dto.sellerId ?: 0),
-                name = "Продавец",
-                avatarUrl = null,
-                address = dto.address ?: "",
-                rating = 0.0,
-                completedOrders = 0
+                id = (dto.sellerId ?: dto.seller?.id ?: 0),
+                name = dto.sellerName?.takeIf { it.isNotBlank() } ?: dto.seller?.name?.takeIf { it.isNotBlank() } ?: "Мастер",
+                avatarUrl = ImageUtils.formatImageUrl(dto.seller?.avatarUrl),
+                address = dto.seller?.address ?: dto.address ?: "",
+                rating = dto.seller?.rating ?: 0.0,
+                completedOrders = dto.seller?.completedOrders ?: 0
             )
         )
     }
