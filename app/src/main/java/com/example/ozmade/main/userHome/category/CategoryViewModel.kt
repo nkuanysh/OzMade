@@ -20,28 +20,25 @@ class CategoryViewModel @Inject constructor(
     fun load(categoryId: String) {
         _uiState.value = CategoryUiState.Loading
         viewModelScope.launch {
-            runCatching { repo.getHome() }
-                .onSuccess { home ->
-                    val category = home.categories.firstOrNull { it.id == categoryId }
-                        ?: return@onSuccess run {
-                            _uiState.value = CategoryUiState.Error("Категория не найдена")
-                        }
+            try {
+                // 1. Get products filtered by category from backend
+                val products = repo.getProductsByCategory(categoryId)
+                
+                // 2. Get the category details (to show title/icon)
+                val homeData = repo.getHome()
+                val category = homeData.categories.firstOrNull { it.id == categoryId }
+                    ?: com.example.ozmade.main.userHome.Category(id = categoryId, title = categoryId.replaceFirstChar { it.uppercase() })
 
-                    val products = home.products.filter { it.categoryId == categoryId }
+                val quote = quoteForCategory(categoryId)
 
-                    // Заглушка цитаты/слогана (потом можно сделать полем на бэкенде)
-                    val quote = quoteForCategory(categoryId)
-
-                    _uiState.value = CategoryUiState.Data(
-                        category = category,
-                        headerQuote = quote,
-                        products = products
-                    )
-                }
-                .onFailure {
-                    _uiState.value =
-                        CategoryUiState.Error(it.message ?: "Ошибка загрузки категории")
-                }
+                _uiState.value = CategoryUiState.Data(
+                    category = category,
+                    headerQuote = quote,
+                    products = products
+                )
+            } catch (e: Exception) {
+                _uiState.value = CategoryUiState.Error(e.message ?: "Ошибка загрузки категории")
+            }
         }
     }
 

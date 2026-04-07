@@ -208,7 +208,7 @@ private fun CategoryHeader(
             contentDescription = null,
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(top = (-20).dp, end = (-20).dp)
+                .offset(x = 20.dp, y = (-20).dp)
                 .size(120.dp),
             tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.1f)
         )

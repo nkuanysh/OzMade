@@ -73,6 +73,18 @@ class RealHomeRepository @Inject constructor(
             }
         }
     }
+
+    override suspend fun getProductsByCategory(type: String): List<Product> {
+        val response = api.getProducts(type = type)
+        if (!response.isSuccessful) return emptyList()
+        
+        val favoriteResp = runCatching { api.getFavorites() }.getOrNull()
+        val favoriteIds = favoriteResp?.body().orEmpty().map { it.id }.toSet()
+
+        return response.body()?.map { dto ->
+            dto.toDomain(liked = favoriteIds.contains(dto.id))
+        } ?: emptyList()
+    }
 }
 
 private fun AdDto.toDomain(): AdBanner =
@@ -91,8 +103,6 @@ private fun CategoryDto.toDomain(): Category =
     )
 
 private fun ProductDto.toDomain(liked: Boolean = false): Product {
-    // We try to get a valid URL from either the main field or the images array.
-    // In your logs, ImageName was broken but the first item in Images was fixable.
     val url = ImageUtils.formatImageUrl(imageUrl).takeIf { it.isNotBlank() }
         ?: ImageUtils.formatImageUrl(images?.firstOrNull())
 
