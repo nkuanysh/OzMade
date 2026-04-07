@@ -20,7 +20,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -71,7 +70,8 @@ fun OtpCodeScreen(
                     color = darkNavy,
                     shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp)
                 )
-                .padding(24.dp)
+                .padding(horizontal = 24.dp)
+                .padding(top = 48.dp, bottom = 24.dp) // Added top padding to move content down
         ) {
             Column(
                 modifier = Modifier.fillMaxSize()
@@ -80,14 +80,14 @@ fun OtpCodeScreen(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(inputBg, CircleShape)
+                        .background(inputBg.copy(alpha = 0.2f), CircleShape)
                         .clickable { onBackClick() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = darkNavy,
+                        tint = Color.White,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -209,12 +209,13 @@ fun OtpCodeScreen(
                 }
             }
 
-            if (errorText != null) {
+            if (!errorText.isNullOrEmpty()) {
                 Text(
                     text = errorText,
                     color = Color.Red,
                     fontSize = 12.sp,
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
+                    textAlign = TextAlign.Start
                 )
             }
 
@@ -242,10 +243,4 @@ fun OtpCodeScreen(
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun VerificationScreenPreview() {
-    OtpCodeScreen(phone = "+7 777 123 45 67", onVerify = {}, onResend = {})
 }

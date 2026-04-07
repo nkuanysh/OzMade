@@ -71,6 +71,7 @@ private fun ChatThreadScreen(
     var input by remember { mutableStateOf("") }
     var menuExpanded by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
+    val orangeColor = Color(0xFFFF9800)
 
     LaunchedEffect(uiState) {
         if (uiState is ChatThreadUiState.Data && uiState.messages.isNotEmpty()) {
@@ -83,30 +84,52 @@ private fun ChatThreadScreen(
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            modifier = Modifier.size(36.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                val name = (uiState as? ChatThreadUiState.Data)?.sellerName ?: "П"
-                                Text(
-                                    text = name.take(1).uppercase(),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
+                        Box {
+                            Surface(
+                                modifier = Modifier.size(36.dp),
+                                shape = CircleShape,
+                                color = orangeColor.copy(alpha = 0.1f)
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    val name = (uiState as? ChatThreadUiState.Data)?.sellerName ?: "П"
+                                    Text(
+                                        text = name.take(1).uppercase(),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = orangeColor
+                                    )
+                                }
+                            }
+                            
+                            // Зеленая точка онлайн в шапке
+                            if ((uiState as? ChatThreadUiState.Data)?.isOnline == true) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomEnd)
+                                        .size(10.dp)
+                                        .background(Color.White, CircleShape)
+                                        .padding(1.5.dp)
+                                ) {
+                                    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF4CAF50), CircleShape))
+                                }
                             }
                         }
+                        
                         Spacer(Modifier.width(10.dp))
+                        
                         Column {
-                            val seller = (uiState as? ChatThreadUiState.Data)?.sellerName ?: "Чат"
+                            val data = uiState as? ChatThreadUiState.Data
                             Text(
-                                seller,
+                                text = data?.sellerName ?: "Чат",
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
-                            Text("Продавец", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            // Текст статуса
+                            Text(
+                                text = if (data?.isOnline == true) "В сети" else "Был(а) недавно",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (data?.isOnline == true) Color(0xFF4CAF50) else Color.Gray
+                            )
                         }
                     }
                 },
@@ -130,7 +153,7 @@ private fun ChatThreadScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { /* Вложения */ }) {
-                        Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.Add, null, tint = orangeColor)
                     }
 
                     TextField(
@@ -143,10 +166,11 @@ private fun ChatThreadScreen(
                         maxLines = 4,
                         shape = RoundedCornerShape(24.dp),
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                            focusedContainerColor = Color(0xFFF5F5F5),
+                            unfocusedContainerColor = Color(0xFFF5F5F5),
                             focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent
                         )
                     )
 
@@ -161,7 +185,7 @@ private fun ChatThreadScreen(
                         enabled = canSend,
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background(if (canSend) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
+                            .background(if (canSend) orangeColor else Color(0xFFE5E5E5))
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.Send,
@@ -178,11 +202,11 @@ private fun ChatThreadScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceContainerLowest)
+                .background(Color(0xFFFBFBFB))
         ) {
             when (uiState) {
                 is ChatThreadUiState.Loading -> {
-                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    CircularProgressIndicator(Modifier.align(Alignment.Center), color = orangeColor)
                 }
                 is ChatThreadUiState.Error -> {
                     Text(uiState.message, Modifier.align(Alignment.Center), color = MaterialTheme.colorScheme.error)
@@ -193,7 +217,8 @@ private fun ChatThreadScreen(
                             title = uiState.productTitle,
                             price = uiState.productPrice,
                             imageUrl = uiState.productImageUrl,
-                            onClick = onOpenProduct
+                            onClick = onOpenProduct,
+                            accentColor = orangeColor
                         )
                         LazyColumn(
                             state = listState,
@@ -217,13 +242,15 @@ private fun ProductContextBar(
     title: String,
     price: Int,
     imageUrl: String?,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    accentColor: Color
 ) {
     Surface(
-        tonalElevation = 4.dp,
+        tonalElevation = 2.dp,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
+        color = Color.White
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -235,15 +262,15 @@ private fun ProductContextBar(
                 modifier = Modifier
                     .size(48.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                    .background(Color(0xFFF5F5F5)),
                 contentScale = ContentScale.Crop
             )
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f)) {
                 Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold))
-                Text("$price ₸", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+                Text("$price ₽", style = MaterialTheme.typography.bodyMedium, color = accentColor, fontWeight = FontWeight.Bold)
             }
-            Icon(Icons.Default.KeyboardArrowRight, null, tint = MaterialTheme.colorScheme.outline)
+            Icon(Icons.Default.KeyboardArrowRight, null, tint = Color.Gray)
         }
     }
 }
@@ -262,29 +289,39 @@ private fun Bubble(msg: ChatMessageUi) {
         horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start
     ) {
         Column(
-            modifier = Modifier
-                .widthIn(max = 280.dp)
-                .clip(shape)
-                .background(if (isMine) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant)
-                .padding(horizontal = 12.dp, vertical = 8.dp)
+            modifier = Modifier.widthIn(max = 250.dp),
+            horizontalAlignment = if (isMine) Alignment.End else Alignment.Start
         ) {
-            Text(
-                msg.text,
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (isMine) Color.White else MaterialTheme.colorScheme.onSurface
-            )
+            Box(
+                modifier = Modifier
+                    .clip(shape)
+                    .background(if (isMine) Color(0xFFFF9800) else Color(0xFFE5E5E5))
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = msg.text,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (isMine) Color.White else Color.Black
+                )
+            }
+            
             Row(
-                modifier = Modifier.align(Alignment.End),
+                modifier = Modifier.padding(top = 2.dp, start = 4.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    msg.timeText,
+                    text = msg.timeText,
                     fontSize = 10.sp,
-                    color = if (isMine) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color.Gray
                 )
                 if (isMine) {
                     Spacer(Modifier.width(4.dp))
-                    Icon(Icons.Default.DoneAll, null, modifier = Modifier.size(14.dp), tint = Color.White.copy(alpha = 0.8f))
+                    Icon(
+                        imageVector = Icons.Default.DoneAll,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = Color(0xFFFF9800)
+                    )
                 }
             }
         }

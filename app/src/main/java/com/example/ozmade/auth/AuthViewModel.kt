@@ -11,6 +11,7 @@ import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -25,9 +26,17 @@ class AuthViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val uiState = _uiState.asStateFlow()
 
+    private var authJob: Job? = null
+
+    fun reset() {
+        authJob?.cancel()
+        _uiState.value = AuthUiState.Idle
+    }
+
     fun requestOtp(activity: Activity, phone: String) {
+        authJob?.cancel()
         _uiState.value = AuthUiState.Loading
-        viewModelScope.launch {
+        authJob = viewModelScope.launch {
             repo.requestOtp(activity, phone).collect { result ->
                 result.fold(
                     onSuccess = { sess ->
@@ -39,16 +48,17 @@ class AuthViewModel @Inject constructor(
                         }
                     },
                     onFailure = {
-                        _uiState.value = AuthUiState.Error(it.message ?: "OTP request failed")
+                        _uiState.value = AuthUiState.Error(it.message ?: "Ошибка запроса кода")
                     }
                 )
             }
         }
     }
 
-    fun verifyOtp(verificationId: String, code: String) {
+    fun verifyOtp(verificationId: String, code: String, phone: String) {
+        authJob?.cancel()
         _uiState.value = AuthUiState.Loading
-        viewModelScope.launch {
+        authJob = viewModelScope.launch {
             repo.verifyOtp(verificationId, code).collect { result ->
                 result.fold(
                     onSuccess = {
@@ -56,7 +66,11 @@ class AuthViewModel @Inject constructor(
                         sendFCMTokenToBackend(api)
                     },
                     onFailure = {
-                        _uiState.value = AuthUiState.Error(it.message ?: "Invalid code")
+                        _uiState.value = AuthUiState.Error(
+                            message = "Неверный код. Попробуйте еще раз",
+                            phone = phone,
+                            verificationId = verificationId
+                        )
                     }
                 )
             }
@@ -94,5 +108,9 @@ sealed class AuthUiState {
     object Loading : AuthUiState()
     data class OtpRequired(val phone: String, val verificationId: String) : AuthUiState()
     object Success : AuthUiState()
-    data class Error(val message: String) : AuthUiState()
+    data class Error(
+        val message: String,
+        val phone: String? = null,
+        val verificationId: String? = null
+    ) : AuthUiState()
 }

@@ -23,7 +23,8 @@ sealed class ChatThreadUiState {
         val productTitle: String,
         val productPrice: Int,
         val productImageUrl: String?,
-        val messages: List<ChatMessageUi>
+        val messages: List<ChatMessageUi>,
+        val isOnline: Boolean = false // Добавлено поле статуса
     ) : ChatThreadUiState()
 }
 
@@ -58,6 +59,10 @@ class ChatThreadViewModel @Inject constructor(
                     emptyList()
                 }
 
+                // В реальности статус должен приходить из репозитория/API
+                // Для примера ставим true, если sellerId четный
+                val mockOnline = sellerId % 2 == 0
+
                 ChatThreadUiState.Data(
                     chatId = chatId,
                     productId = productId,
@@ -65,7 +70,8 @@ class ChatThreadViewModel @Inject constructor(
                     productTitle = productTitle,
                     productPrice = productPrice,
                     productImageUrl = productImageUrl,
-                    messages = msgs
+                    messages = msgs,
+                    isOnline = mockOnline
                 )
             }.onSuccess { 
                 _uiState.value = it 
@@ -113,7 +119,6 @@ class ChatThreadViewModel @Inject constructor(
 
                 val msgs = repo.getMessages(newChatId)
                 
-                // Явно обновляем Data с новыми сообщениями и ID чата
                 _uiState.value = state.copy(
                     chatId = newChatId,
                     messages = msgs

@@ -50,7 +50,7 @@ fun ChatScreen(
         when (val state = uiState) {
             is ChatListUiState.Loading -> {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(color = Color(0xFFFF9800))
                 }
             }
 
@@ -105,14 +105,14 @@ private fun EmptyChatsPlaceholder(onNavigateToHome: () -> Unit) {
             Surface(
                 modifier = Modifier.size(100.dp),
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                color = Color(0xFFFF9800).copy(alpha = 0.1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = null,
                         modifier = Modifier.size(48.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = Color(0xFFFF9800)
                     )
                 }
             }
@@ -132,7 +132,8 @@ private fun EmptyChatsPlaceholder(onNavigateToHome: () -> Unit) {
             Spacer(Modifier.height(24.dp))
             Button(
                 onClick = onNavigateToHome,
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
             ) {
                 Text("Перейти к покупкам")
             }
@@ -169,6 +170,9 @@ private fun ChatSupportCard(onClick: () -> Unit) {
 
 @Composable
 private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit) {
+    // Теперь используем РЕАЛЬНОЕ поле isOnline из модели
+    val isOnline = thread.isOnline
+
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
         headlineContent = { 
@@ -188,24 +192,43 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit) {
             ) 
         },
         leadingContent = {
-            if (thread.productImageUrl != null) {
-                AsyncImage(
-                    model = thread.productImageUrl,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp).clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Surface(
-                    modifier = Modifier.size(48.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = thread.sellerName.take(1).uppercase(),
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+            Box {
+                if (thread.productImageUrl != null) {
+                    AsyncImage(
+                        model = thread.productImageUrl,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp).clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Surface(
+                        modifier = Modifier.size(48.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Text(
+                                text = thread.sellerName.take(1).uppercase(),
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFFFF9800)
+                            )
+                        }
+                    }
+                }
+                
+                // Индикатор ОНЛАЙН (Зеленая точка)
+                if (isOnline) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .size(14.dp)
+                            .background(Color.White, CircleShape)
+                            .padding(2.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFF4CAF50), CircleShape)
                         )
                     }
                 }

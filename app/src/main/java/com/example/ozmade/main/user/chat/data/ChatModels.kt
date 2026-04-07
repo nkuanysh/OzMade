@@ -9,7 +9,8 @@ data class ChatThreadUi(
     val productPrice: Int,
     val productImageUrl: String? = null,
     val lastMessage: String,
-    val lastTimeText: String
+    val lastTimeText: String,
+    val isOnline: Boolean = false // Добавили реальное поле статуса
 )
 
 data class ChatMessageUi(

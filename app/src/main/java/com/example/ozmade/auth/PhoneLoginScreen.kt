@@ -1,177 +1,176 @@
 package com.example.ozmade.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ozmade.R
 
 @Composable
 fun PhoneLoginScreen(
-    isLoading: Boolean,
-    errorText: String?,
+    isLoading: Boolean = false,
+    errorText: String? = null,
     onSendCode: (String) -> Unit,
-    onOpenPrivacy: () -> Unit,
-    onOpenTerms: () -> Unit,
+    onBackClick: () -> Unit = {},
+    onOpenPrivacy: () -> Unit = {},
+    onOpenTerms: () -> Unit = {}
 ) {
-    var phone by remember { mutableStateOf("+7") }
+    var phoneNumber by remember { mutableStateOf("+7") }
+
+    val darkNavy = Color(0xFF0D0F2C)
+    val lightGray = Color(0xFFF2F2F2)
+    val orangePrimary = Color(0xFFFF7A1A)
+    val secondaryText = Color(0xFFCFCFCF)
+    val inputBg = Color(0xFFE5E5E5)
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                        MaterialTheme.colorScheme.surface
-                    )
-                )
-            )
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .background(lightGray)
     ) {
-        Spacer(Modifier.height(60.dp))
-
-        // Иконка/Логотип
+        // Top Section
         Box(
             modifier = Modifier
-                .size(100.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .weight(1f)
+                .background(
+                    color = darkNavy,
+                    shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp)
+                )
+                .padding(horizontal = 24.dp)
+                .padding(top = 48.dp, bottom = 24.dp) // Added top padding to move content down
         ) {
-            Icon(
-                imageVector = Icons.Default.Phone,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(48.dp)
-            )
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .size(40.dp)
+                        .background(inputBg.copy(alpha = 0.2f), CircleShape)
+                        .clickable { onBackClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back",
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Image(
+                    painter = painterResource(id = R.drawable.image_removebg_preview),
+                    contentDescription = "Logo",
+                    modifier = Modifier.size(120.dp)
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Добро пожаловать!",
+                    color = Color.White,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = "Введите свой номер телефона, чтобы продолжить",
+                    color = secondaryText,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
-        Spacer(Modifier.height(32.dp))
-
-        Text(
-            text = "Добро пожаловать в OzMade",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        Text(
-            text = "Введите ваш номер телефона для входа или регистрации",
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Spacer(Modifier.height(40.dp))
-
-        OutlinedTextField(
-            value = phone,
-            onValueChange = { if (it.length <= 12) phone = it },
-            modifier = Modifier.fillMaxWidth(),
-            textStyle = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Medium),
-            singleLine = true,
-            label = { Text("Номер телефона") },
-            placeholder = { Text("+7 777 000 00 00") },
-            shape = RoundedCornerShape(16.dp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            leadingIcon = {
-                Icon(Icons.Default.Phone, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
-            )
-        )
-
-        if (!errorText.isNullOrBlank()) {
-            Text(
-                text = errorText,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(top = 8.dp).fillMaxWidth(),
-                textAlign = TextAlign.Start
-            )
-        }
-
-        Spacer(Modifier.height(32.dp))
-
-        Button(
-            onClick = { onSendCode(phone.trim()) },
+        // Bottom Section
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
-            enabled = !isLoading && phone.length >= 10,
-            shape = RoundedCornerShape(16.dp),
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                .weight(1.2f)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (isLoading) {
-                CircularProgressIndicator(
-                    strokeWidth = 3.dp,
-                    modifier = Modifier.size(24.dp),
-                    color = Color.White
-                )
-            } else {
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Text(
+                text = "НОМЕР ТЕЛЕФОНА",
+                modifier = Modifier.align(Alignment.Start),
+                color = Color.Gray,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            TextField(
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("+7 777 123 45 67", color = Color.Gray) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = inputBg,
+                    unfocusedContainerColor = inputBg,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                ),
+                shape = RoundedCornerShape(12.dp),
+                singleLine = true
+            )
+
+            if (!errorText.isNullOrEmpty()) {
                 Text(
-                    text = "Продолжить",
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    text = errorText,
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    modifier = Modifier.padding(top = 8.dp).fillMaxWidth(),
+                    textAlign = TextAlign.Start
                 )
             }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Button(
+                onClick = { onSendCode(phoneNumber) },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = orangePrimary),
+                shape = RoundedCornerShape(12.dp),
+                enabled = !isLoading && phoneNumber.length >= 10
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                } else {
+                    Text(text = "ОТПРАВИТЬ КОД", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Text("Политика конфиденциальности", modifier = Modifier.clickable { onOpenPrivacy() }, color = Color.Gray, fontSize = 12.sp)
+                Text(" | ", color = Color.Gray, fontSize = 12.sp)
+                Text("Условия использования", modifier = Modifier.clickable { onOpenTerms() }, color = Color.Gray, fontSize = 12.sp)
+            }
         }
-
-        Spacer(Modifier.weight(1f))
-
-        // Политика конфиденциальности
-        val annotatedString = buildAnnotatedString {
-            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)) {
-                append("Нажимая «Продолжить», вы соглашаетесь с ")
-            }
-            pushStringAnnotation(tag = "terms", annotation = "terms")
-            withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 12.sp)) {
-                append("Условиями использования")
-            }
-            pop()
-            withStyle(SpanStyle(color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)) {
-                append(" и ")
-            }
-            pushStringAnnotation(tag = "privacy", annotation = "privacy")
-            withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, fontSize = 12.sp)) {
-                append("Политикой конфиденциальности")
-            }
-            pop()
-        }
-
-        ClickableText(
-            text = annotatedString,
-            modifier = Modifier.padding(bottom = 24.dp),
-            style = TextStyle(textAlign = TextAlign.Center),
-            onClick = { offset ->
-                annotatedString.getStringAnnotations(tag = "terms", start = offset, end = offset).firstOrNull()?.let { onOpenTerms() }
-                annotatedString.getStringAnnotations(tag = "privacy", start = offset, end = offset).firstOrNull()?.let { onOpenPrivacy() }
-            }
-        )
     }
 }

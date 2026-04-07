@@ -33,7 +33,8 @@ class RealChatRepository @Inject constructor(
                 productPrice = 0,
                 productImageUrl = c.productImage,
                 lastMessage = last?.content ?: "",
-                lastTimeText = last?.createdAt ?: ""
+                lastTimeText = last?.createdAt ?: "",
+                isOnline = false // В будущем здесь будет c.sellerIsOnline или аналогичное поле от API
             )
         }
     }
@@ -45,8 +46,6 @@ class RealChatRepository @Inject constructor(
         val myId = sessionStore.myUserId()
 
         resp.body().orEmpty().map { dto ->
-            // Для покупателя "мои" сообщения - те, что отправлены им самим (ID совпадает)
-            // или те, где роль явно указана как 'user' (на случай проблем с ID)
             val isMine = if (myId != null && myId > 0) {
                 dto.senderId == myId
             } else {
