@@ -39,8 +39,10 @@ import com.example.ozmade.main.userHome.details.ProductDetailsRoute
 import com.example.ozmade.main.userHome.reviews.ReviewsRoute
 import com.example.ozmade.main.userHome.seller.SellerRoute
 import com.example.ozmade.main.userHome.seller.reviews.SellerReviewsRoute
+import com.example.ozmade.main.seller.data.SellerLocalStore
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
 
-// 1. Красивая структура для элементов меню
 private sealed class BottomItem(
     val route: String,
     val label: String,
@@ -65,6 +67,11 @@ fun MainScreen(
     pushPrice: Int = 0,
     deepLinkProductId: Int = 0
 ) {
+    val context = LocalContext.current
+    val sellerStore = remember { SellerLocalStore(context) }
+    val isSellerModePref by sellerStore.isSellerModeFlow.collectAsState(initial = null)
+    val scope = rememberCoroutineScope()
+
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
@@ -76,7 +83,6 @@ fun MainScreen(
             navController.navigate(
                 "chat/$pushChatId/$pushSellerId/$pushProductId?sellerName=$encSellerName&productTitle=$encProductTitle&price=$pushPrice"
             )
-            Log.d("PUSH", "OPEN CHAT: $pushChatId")
         }
     }
 
@@ -89,9 +95,11 @@ fun MainScreen(
         }
     }
 
+    // Wait until preference is loaded to avoid flickering
+    if (isSellerModePref == null) return
+
     val currentDestination = navBackStackEntry?.destination
 
-    // Список путей, где нужно СКРЫТЬ нижний бар
     val hideBottomBarRoutes = listOf(
         "chat/{chatId}/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
         "chat_new/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
@@ -107,19 +115,11 @@ fun MainScreen(
 
     val showBottomBar = currentDestination?.route !in hideBottomBarRoutes &&
             currentDestination?.route?.startsWith("chat/") == false &&
-            currentDestination?.route?.startsWith("chat_new/") == false
-
-    // Функция для глубокой навигации
-    fun openProductFromDeep(productId: Int) {
-        navController.navigate("product/$productId") {
-            popUpTo(BottomItem.Home.route) { inclusive = false }
-            launchSingleTop = true
-        }
-    }
+            currentDestination?.route?.startsWith("chat_new/") == false &&
+            currentDestination?.route != "seller_main"
 
     Scaffold(
         bottomBar = {
-            // Плавная анимация появления/исчезновения бара
             AnimatedVisibility(
                 visible = showBottomBar,
                 enter = slideInVertically(initialOffsetY = { it }),
@@ -128,14 +128,13 @@ fun MainScreen(
                 CustomNavigationBar(navController, currentDestination)
             }
         },
-        containerColor = Color.White // Чистый фон для всего приложения
+        containerColor = Color.White
     ) { paddingValues ->
         NavHost(
             navController = navController,
-            startDestination = BottomItem.Home.route,
+            startDestination = if (isSellerModePref == true) "seller_main" else BottomItem.Home.route,
             modifier = Modifier.padding(paddingValues)
         ) {
-            // --- ГЛАВНАЯ И ТОВАРЫ ---
             composable(BottomItem.Home.route) {
                 HomeRoute(
                     onOpenProduct = { id -> navController.navigate("product/$id") },
@@ -175,7 +174,7 @@ fun MainScreen(
                     onOpenSeller = { sid -> navController.navigate("seller/$sid") }
                 )
             }
-            //ORDER
+
             composable(
                 route = "delivery/{productId}/{qty}",
                 arguments = listOf(
@@ -224,18 +223,15 @@ fun MainScreen(
                 )
             }
 
+            composable(BottomItem.Favorites.route) { 
+                FavoritesRoute(
+                    onBuyClick = {
+                        navController.navigate("home")
+                    },
+                    onOpenProduct = { id -> navController.navigate("product/$id") }
+                ) 
+            }
 
-
-            // --- ИЗБРАННОЕ ---
-            composable(BottomItem.Favorites.route) { FavoritesRoute(
-                onBuyClick = {
-                    navController.navigate("home")
-                },
-                onOpenProduct = { id -> navController.navigate("product/$id")
-                }
-            ) }
-
-            // --- ЧАТЫ ---
             composable(BottomItem.Chat.route) {
                 ChatScreen(
                     onOpenThread = { t ->
@@ -248,31 +244,31 @@ fun MainScreen(
                 )
             }
 
+            composable(
+                route = "chat/{chatId}/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
+                arguments = listOf(
+                    navArgument("chatId") { type = NavType.IntType },
+                    navArgument("sellerId") { type = NavType.IntType },
+                    navArgument("productId") { type = NavType.IntType },
+                    navArgument("sellerName") { defaultValue = "" },
+                    navArgument("productTitle") { defaultValue = "" },
+                    navArgument("price") { type = NavType.IntType; defaultValue = 0 }
+                )
+            ) { backStackEntry ->
+                ChatThreadRoute(
+                    chatId = backStackEntry.arguments?.getInt("chatId"),
+                    sellerId = backStackEntry.arguments?.getInt("sellerId") ?: 0,
+                    productId = backStackEntry.arguments?.getInt("productId") ?: 0,
+                    sellerName = backStackEntry.arguments?.getString("sellerName") ?: "Продавец",
+                    productTitle = backStackEntry.arguments?.getString("productTitle") ?: "Товар",
+                    productPrice = backStackEntry.arguments?.getInt("price") ?: 0,
+                    onBack = { navController.popBackStack() },
+                    onOpenProduct = { pid -> navController.navigate("product/$pid") }
+                )
+            }
 
-                composable(
-                    route = "chat/{chatId}/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
-                    arguments = listOf(
-                        navArgument("chatId") { type = NavType.IntType },
-                        navArgument("sellerId") { type = NavType.IntType },
-                        navArgument("productId") { type = NavType.IntType },
-                        navArgument("sellerName") { defaultValue = "" },
-                        navArgument("productTitle") { defaultValue = "" },
-                        navArgument("price") { type = NavType.IntType; defaultValue = 0 }
-                    )
-                ) { backStackEntry ->
-                    ChatThreadRoute(
-                        chatId = backStackEntry.arguments?.getInt("chatId"),
-                        sellerId = backStackEntry.arguments?.getInt("sellerId") ?: 0,
-                        productId = backStackEntry.arguments?.getInt("productId") ?: 0,
-                        sellerName = backStackEntry.arguments?.getString("sellerName") ?: "Продавец",
-                        productTitle = backStackEntry.arguments?.getString("productTitle") ?: "Товар",
-                        productPrice = backStackEntry.arguments?.getInt("price") ?: 0,
-                        onBack = { navController.popBackStack() },
-                        onOpenProduct = { pid -> openProductFromDeep(pid) }
-                    )
-                }
-                        composable(
-                        route = "chat_new/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
+            composable(
+                route = "chat_new/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
                 arguments = listOf(
                     navArgument("sellerId") { type = NavType.IntType },
                     navArgument("productId") { type = NavType.IntType },
@@ -289,11 +285,10 @@ fun MainScreen(
                     productTitle = backStackEntry.arguments?.getString("productTitle") ?: "Товар",
                     productPrice = backStackEntry.arguments?.getInt("price") ?: 0,
                     onBack = { navController.popBackStack() },
-                    onOpenProduct = { pid -> openProductFromDeep(pid) }
+                    onOpenProduct = { pid -> navController.navigate("product/$pid") }
                 )
             }
 
-            // --- ПРОФИЛЬ И ПОДДЕРЖКА ---
             composable(BottomItem.Profile.route) {
                 ProfileScreen(
                     onLogout = onLogout,
@@ -309,19 +304,25 @@ fun MainScreen(
             }
             composable("support_chat") { SupportChatScreen(onBack = { navController.popBackStack() }) }
 
-            // --- ПРОДАВЕЦ ---
             composable("seller/{sellerId}") { b ->
                 SellerRoute(
                     sellerId = b.arguments?.getInt("sellerId") ?: 0,
                     onBack = { navController.popBackStack() },
-                    onOpenProduct = { pid -> openProductFromDeep(pid) },
+                    onOpenProduct = { pid -> navController.navigate("product/$pid") },
                     onOpenSellerReviews = { sid -> navController.navigate("seller_reviews/$sid") }
                 )
             }
 
             composable("seller_gate") {
                 SellerGateRoute(
-                    onOpenSellerHome = { navController.navigate("seller_main") },
+                    onOpenSellerHome = {
+                        scope.launch {
+                            sellerStore.setSellerMode(true)
+                            navController.navigate("seller_main") {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    },
                     onOpenOnboarding = { navController.navigate("seller_onboarding") },
                     onBack = { navController.popBackStack() }
                 )
@@ -340,29 +341,37 @@ fun MainScreen(
                     onOpenSellerTerms = {},
                     onOpenPrivacy = {},
                     onSuccess = {
-                        navController.navigate("seller_main") { popUpTo("seller_registration") { inclusive = true } }
+                        scope.launch {
+                            sellerStore.setSellerMode(true)
+                            navController.navigate("seller_main") {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
                     }
                 )
             }
 
             composable("seller_main") {
                 SellerMainScreen(onExitSeller = {
-                    navController.navigate(BottomItem.Profile.route) { launchSingleTop = true }
+                    scope.launch {
+                        sellerStore.setSellerMode(false)
+                        navController.navigate(BottomItem.Home.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
                 })
             }
 
-            // Доп. экраны
             composable("reviews/{productId}") { b ->
                 ReviewsRoute(productId = b.arguments?.getInt("productId") ?: 0, onBack = { navController.popBackStack() })
             }
             composable("seller_reviews/{sellerId}") { b ->
-                SellerReviewsRoute(sellerId = b.arguments?.getInt("sellerId") ?: 0, onBack = { navController.popBackStack() }, onOpenProduct = { pid -> openProductFromDeep(pid) })
+                SellerReviewsRoute(sellerId = b.arguments?.getInt("sellerId") ?: 0, onBack = { navController.popBackStack() }, onOpenProduct = { pid -> navController.navigate("product/$pid") })
             }
         }
     }
 }
 
-// Отдельный UI компонент для нижнего бара, чтобы не перегружать MainScreen
 @Composable
 private fun CustomNavigationBar(
     navController: androidx.navigation.NavHostController,
@@ -372,7 +381,7 @@ private fun CustomNavigationBar(
 
     NavigationBar(
         modifier = Modifier
-            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)), // Скругленные углы
+            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
         containerColor = Color.White,
         tonalElevation = 8.dp
     ) {
