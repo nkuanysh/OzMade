@@ -110,6 +110,8 @@ data class ProfileDto(
     @SerializedName("FirebaseUID") val firebaseUid: String,
     @SerializedName("PhoneNumber") val phoneNumber: String,
     @SerializedName("Email") val email: String?,
+    @SerializedName(value = "Name", alternate = ["name"]) val name: String? = null,
+    @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl"]) val avatarUrl: String? = null,
     @SerializedName("Address") val address: String?,
     @SerializedName("Role") val role: String,
     @SerializedName("IsSeller") val isSeller: Boolean,
@@ -232,7 +234,8 @@ data class SellerInfoDto(
     @SerializedName("completed_orders") val completedOrders: Int
 )
 
-data class ProductReviewsDto(
+data class
+ProductReviewsDto(
     @SerializedName("summary") val summary: ReviewsSummaryDto,
     @SerializedName("reviews") val reviews: List<ReviewItemDto>
 )

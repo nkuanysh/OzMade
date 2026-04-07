@@ -39,6 +39,7 @@ import com.example.ozmade.R
 fun HomeScreen(
     uiState: HomeUiState = HomeUiState.Loading,
     onSearchClick: () -> Unit = {},
+    onSearchQueryChange: (String) -> Unit = {},
     onOpenCategory: (String) -> Unit = {},
     onOpenProduct: (Int) -> Unit = {},
     onFavoriteClick: (Int) -> Unit = {},
@@ -47,7 +48,7 @@ fun HomeScreen(
     onRetry: () -> Unit = {}
 ) {
     val backgroundColor = Color(0xFFFBFBFB)
-    val orangeAccent = Color(0xFFFF9800) // Наш новый основной цвет
+    val orangeAccent = Color(0xFFFF9800)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -63,6 +64,16 @@ fun HomeScreen(
                 ErrorContent(message = uiState.message, onRetry = onRetry, accentColor = orangeAccent)
             }
             is HomeUiState.Data -> {
+                val filteredProducts = remember(uiState.searchQuery, uiState.products) {
+                    if (uiState.searchQuery.isBlank()) {
+                        uiState.products
+                    } else {
+                        uiState.products.filter {
+                            it.title.contains(uiState.searchQuery, ignoreCase = true)
+                        }
+                    }
+                }
+
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier
@@ -72,43 +83,59 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // 1. Поиск
+                    // 1. Поиск (теперь это поле ввода)
                     item(span = { GridItemSpan(2) }) {
-                        HomeSearchBar(onClick = onSearchClick)
+                        HomeSearchBar(
+                            query = uiState.searchQuery,
+                            onQueryChange = onSearchQueryChange
+                        )
                     }
 
-                    // 2. Рекламный слайдер
-                    if (uiState.ads.isNotEmpty()) {
+                    if (uiState.searchQuery.isBlank()) {
+                        // 2. Рекламный слайдер
+                        if (uiState.ads.isNotEmpty()) {
+                            item(span = { GridItemSpan(2) }) {
+                                ModernPromoSlider(ads = uiState.ads, accentColor = orangeAccent)
+                            }
+                        }
+
+                        // 3. Категории
                         item(span = { GridItemSpan(2) }) {
-                            ModernPromoSlider(ads = uiState.ads, accentColor = orangeAccent)
+                            SectionHeader(
+                                title = "Все категории",
+                                actionText = "Смотреть все",
+                                onActionClick = onSeeAllCategoriesClick,
+                                accentColor = orangeAccent
+                            )
+                        }
+
+                        item(span = { GridItemSpan(2) }) {
+                            CategoriesHorizontalList(onCategoryClick = onOpenCategory, accentColor = orangeAccent)
+                        }
+
+                        // 4. Заголовок для товаров
+                        item(span = { GridItemSpan(2) }) {
+                            SectionHeader(
+                                title = "Товары для вас",
+                                actionText = "Смотреть все",
+                                onActionClick = onSeeAllProductsClick,
+                                accentColor = orangeAccent
+                            )
+                        }
+                    } else {
+                        // Заголовок для результатов поиска
+                        item(span = { GridItemSpan(2) }) {
+                            Text(
+                                text = "Результаты поиска: \"${uiState.searchQuery}\"",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
                         }
                     }
 
-                    // 3. Категории
-                    item(span = { GridItemSpan(2) }) {
-                        SectionHeader(
-                            title = "Все категории",
-                            actionText = "Смотреть все",
-                            onActionClick = onSeeAllCategoriesClick,
-                            accentColor = orangeAccent
-                        )
-                    }
-
-                    item(span = { GridItemSpan(2) }) {
-                        CategoriesHorizontalList(onCategoryClick = onOpenCategory, accentColor = orangeAccent)
-                    }
-
-                    // 4. Товары
-                    item(span = { GridItemSpan(2) }) {
-                        SectionHeader(
-                            title = "Товары для вас",
-                            actionText = "Смотреть все",
-                            onActionClick = onSeeAllProductsClick,
-                            accentColor = orangeAccent
-                        )
-                    }
-
-                    items(uiState.products) { product ->
+                    // Список товаров
+                    items(filteredProducts) { product ->
                         MarketProductCard(
                             product = product,
                             onClick = { onOpenProduct(product.id) },
@@ -116,31 +143,56 @@ fun HomeScreen(
                             accentColor = orangeAccent
                         )
                     }
+
+                    if (filteredProducts.isEmpty() && uiState.searchQuery.isNotBlank()) {
+                        item(span = { GridItemSpan(2) }) {
+                            Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                                Text("Ничего не найдено", color = Color.Gray)
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeSearchBar(onClick: () -> Unit) {
+fun HomeSearchBar(
+    query: String,
+    onQueryChange: (String) -> Unit
+) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .height(54.dp)
-            .clickable { onClick() },
+            .height(56.dp),
         shape = RoundedCornerShape(18.dp),
         color = Color.White,
         shadowElevation = 1.dp
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(Icons.Rounded.Search, contentDescription = null, tint = Color.LightGray)
-            Spacer(modifier = Modifier.width(12.dp))
-            Text("Поиск товаров и услуг", color = Color.Gray, fontSize = 15.sp)
-        }
+        TextField(
+            value = query,
+            onValueChange = onQueryChange,
+            modifier = Modifier.fillMaxSize(),
+            placeholder = { Text("Поиск товаров и услуг", color = Color.Gray, fontSize = 15.sp) },
+            leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null, tint = Color.LightGray) },
+            trailingIcon = {
+                if (query.isNotEmpty()) {
+                    IconButton(onClick = { onQueryChange("") }) {
+                        Icon(Icons.Rounded.Close, contentDescription = null, tint = Color.Gray)
+                    }
+                }
+            },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+            ),
+            singleLine = true
+        )
     }
 }
 
@@ -344,7 +396,7 @@ fun MarketProductCard(product: Product, onClick: () -> Unit, onFavoriteClick: ()
                     color = Color(0xFF222222)
                 )
                 Text(
-                    text = "${product.price.toInt()} ₽",
+                    text = "${product.price.toInt()} ₸",
                     color = accentColor,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp

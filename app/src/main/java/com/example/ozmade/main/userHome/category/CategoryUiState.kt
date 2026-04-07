@@ -4,12 +4,11 @@ import com.example.ozmade.main.userHome.Category
 import com.example.ozmade.main.userHome.Product
 
 sealed class CategoryUiState {
-    object Loading : CategoryUiState()
-    data class Error(val message: String) : CategoryUiState()
-
+    data object Loading : CategoryUiState()
     data class Data(
         val category: Category,
         val headerQuote: String,
         val products: List<Product>
     ) : CategoryUiState()
+    data class Error(val message: String) : CategoryUiState()
 }

@@ -1,7 +1,7 @@
 package com.example.ozmade.main.user.profile
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -17,10 +17,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.ozmade.main.user.profile.data.EditProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -63,15 +65,22 @@ fun EditProfileScreen(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                 ) {
-                    // В будущем здесь будет Coil: AsyncImage(model = state.avatarUrl, ...)
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.padding(32.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+                    if (state.avatarUrl.isNotBlank()) {
+                        AsyncImage(
+                            model = state.avatarUrl,
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize().clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.padding(32.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
-                // Кнопка-индикатор камеры
                 Surface(
                     modifier = Modifier.size(36.dp),
                     shape = CircleShape,
@@ -173,11 +182,10 @@ private fun EditFieldCard(content: @Composable ColumnScope.() -> Unit) {
         color = Color.White,
         shadowElevation = 0.5.dp
     ) {
-        // Убрали content = content из параметров Column
         Column(
             modifier = Modifier.padding(20.dp)
         ) {
-            content() // Вызываем контент здесь
+            content()
         }
     }
 }

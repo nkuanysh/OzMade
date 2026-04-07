@@ -7,12 +7,20 @@ import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.model.FCMTokenRequest
 import com.example.ozmade.network.model.UpdateProfileRequest
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class RealProfileRepository @Inject constructor(
     private val api: OzMadeApi,
     @ApplicationContext private val context: Context
 ) : ProfileRepository {
+
+    private val _profileFlow = MutableStateFlow<UserProfile?>(null)
+    override val profileFlow: StateFlow<UserProfile?> = _profileFlow.asStateFlow()
 
     override suspend fun getMyProfile(): UserProfile {
         // ✅ FIRST: Sync user with backend (create/update user record)
@@ -24,7 +32,9 @@ class RealProfileRepository @Inject constructor(
         // ✅ THEN: Get profile from backend
         val response = api.getProfile()
         if (response.isSuccessful) {
-            return response.body()?.toDomain() ?: throw Exception("Empty body")
+            val profile = response.body()?.toDomain() ?: throw Exception("Empty body")
+            _profileFlow.value = profile
+            return profile
         } else {
             throw Exception("Error ${response.code()}")
         }
@@ -37,11 +47,15 @@ class RealProfileRepository @Inject constructor(
     ): UserProfile {
         val response = api.updateProfile(
             UpdateProfileRequest(
-                address = address
+                name = name,
+                address = address,
+                avatarUrl = avatarUrl
             )
         )
         if (response.isSuccessful) {
-            return response.body()?.toDomain() ?: throw Exception("Empty body")
+            val profile = response.body()?.toDomain() ?: throw Exception("Empty body")
+            _profileFlow.value = profile
+            return profile
         } else {
             throw Exception("Error ${response.code()}")
         }
@@ -59,6 +73,7 @@ class RealProfileRepository @Inject constructor(
 
     @OptIn(ExperimentalCoilApi::class)
     override suspend fun logout() {
+        _profileFlow.value = null
         // 1. Clear FCM token on backend
         runCatching {
             api.updateFCMToken(FCMTokenRequest(""))
@@ -85,9 +100,9 @@ class RealProfileRepository @Inject constructor(
 private fun com.example.ozmade.network.model.ProfileDto.toDomain(): UserProfile {
     return UserProfile(
         id = id.toString(),
-        name = email ?: phoneNumber,
+        name = name ?: email ?: phoneNumber,
         phone = phoneNumber,
-        avatarUrl = null,
+        avatarUrl = avatarUrl,
         address = address ?: ""
     )
 }

@@ -22,6 +22,9 @@ fun HomeRoute(
             viewModel.toggleLike(productId.toInt())
         },
         onSearchClick = onSearchClick,
+        onSearchQueryChange = { query ->
+            viewModel.onSearchQueryChange(query)
+        },
         onRetry = { viewModel.load() }
     )
 }

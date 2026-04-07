@@ -2,10 +2,10 @@ package com.example.ozmade.main.userHome
 
 data class AdBanner(
     val id: String,
-    val imageUrl: String? = null,
     val title: String,
-    val deeplink: String? = null,
-    val imageRes: Int? = null  // ресурс картинки, например R.drawable.banner1
+    val imageUrl: String? = null,
+    val imageRes: Int? = null,
+    val deeplink: String? = null
 )
 
 data class Category(
@@ -23,26 +23,26 @@ val categories = listOf(
     Category("holiday", "Праздники"),
     Category("home", "Для дома")
 )
+
 data class Product(
     val id: Int,
     val title: String,
     val price: Double,
-    val city: String,
-    val address: String,
-    val rating: Double,
-    val categoryId: String,
     val imageUrl: String? = null,
+    val city: String = "",
+    val address: String = "",
+    val rating: Double = 4.5,
+    val categoryId: String = "",
     val liked: Boolean = false
-
 )
 
 sealed class HomeUiState {
     data object Loading : HomeUiState()
     data class Data(
-        val ads: List<AdBanner> = emptyList(),
+        val products: List<Product>,
         val categories: List<Category>,
-        val products: List<Product>
+        val ads: List<AdBanner>,
+        val searchQuery: String = ""
     ) : HomeUiState()
-
     data class Error(val message: String) : HomeUiState()
 }

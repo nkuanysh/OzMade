@@ -18,8 +18,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,6 +27,8 @@ import com.example.ozmade.main.user.profile.data.ProfileUiState
 import com.example.ozmade.main.user.profile.data.ProfileViewModel
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import coil.compose.AsyncImage
+
 private enum class AppLang { KAZ, RUS }
 
 @Composable
@@ -56,9 +58,8 @@ fun ProfileScreen(
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
-                .padding(bottom = 16.dp) // чтобы низ не прилипал
+                .padding(bottom = 16.dp)
         ) {
-            // --- ВЕРХНЯЯ ПАНЕЛЬ (Язык) ---
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -68,14 +69,16 @@ fun ProfileScreen(
                 LanguageSelector(selectedLang = lang, onLangSelected = { lang = it })
             }
 
-            // --- БЛОК ПОЛЬЗОВАТЕЛЯ ---
             when (val state = uiState) {
                 is ProfileUiState.Loading -> ProfileHeaderLoading()
-                is ProfileUiState.Error -> Text(state.message, color = MaterialTheme.colorScheme.error)
+                is ProfileUiState.Error -> Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Text(state.message, color = MaterialTheme.colorScheme.error)
+                }
                 is ProfileUiState.Data -> {
                     ProfileHeader(
                         name = state.user.name,
                         phone = state.user.phone,
+                        avatarUrl = state.user.avatarUrl,
                         onEdit = onEditProfile
                     )
                 }
@@ -83,7 +86,6 @@ fun ProfileScreen(
 
             Spacer(Modifier.height(32.dp))
 
-            // --- МЕНЮ РАЗДЕЛОВ ---
             Text(
                 text = "Личное",
                 style = MaterialTheme.typography.labelLarge,
@@ -134,12 +136,10 @@ fun ProfileScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // --- СПЕЦИАЛЬНАЯ КНОПКА (СТАТЬ ПРОДАВЦОМ) ---
             BecomeSellerCard(onClick = onBecomeSeller)
 
-            Spacer(Modifier.weight(1f))
+            Spacer(Modifier.height(32.dp))
 
-            // --- КНОПКА ВЫХОДА ---
             TextButton(
                 onClick = {
                     viewModel.logout()
@@ -159,7 +159,7 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun ProfileHeader(name: String, phone: String, onEdit: () -> Unit) {
+private fun ProfileHeader(name: String, phone: String, avatarUrl: String?, onEdit: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -170,16 +170,26 @@ private fun ProfileHeader(name: String, phone: String, onEdit: () -> Unit) {
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier.padding(24.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
+                if (!avatarUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = avatarUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize().clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.padding(24.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
-            // Кнопка быстрого редактирования прямо на фото
             Surface(
-                modifier = Modifier.size(32.dp).offset(x = (-4).dp, y = (-4).dp)
+                modifier = Modifier
+                    .size(32.dp)
+                    .offset(x = 4.dp, y = 4.dp)
                     .clickable { onEdit() },
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primary,
@@ -258,14 +268,14 @@ private fun BecomeSellerCard(onClick: () -> Unit) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp)) // Сначала обрезаем форму
+            .clip(RoundedCornerShape(24.dp))
             .background(
                 brush = Brush.linearGradient(
                     colors = listOf(Color(0xFF6A1B9A), Color(0xFF8E24AA))
                 )
             )
-            .clickable { onClick() }, // Обработка нажатия
-        color = Color.Transparent, // Делаем саму поверхность прозрачной, чтобы был виден фон
+            .clickable { onClick() },
+        color = Color.Transparent,
     ) {
         Row(
             modifier = Modifier.padding(20.dp),
@@ -303,10 +313,10 @@ private fun LanguageSelector(selectedLang: AppLang, onLangSelected: (AppLang) ->
         border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
     ) {
         Row {
-            AppLang.values().forEach { lang ->
+            AppLang.entries.forEach { lang ->
                 val isSelected = selectedLang == lang
-                val bgColor by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-                val contentColor by animateColorAsState(if (isSelected) Color.White else Color.Gray)
+                val bgColor by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent, label = "")
+                val contentColor by animateColorAsState(if (isSelected) Color.White else Color.Gray, label = "")
 
                 Box(
                     modifier = Modifier.weight(1f).fillMaxHeight()

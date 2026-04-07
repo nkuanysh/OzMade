@@ -1,9 +1,8 @@
 package com.example.ozmade.main.userHome
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ozmade.R
+import com.example.ozmade.network.api.OzMadeApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +11,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repo: HomeRepository
+    private val api: OzMadeApi
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -22,63 +21,71 @@ class HomeViewModel @Inject constructor(
         load()
     }
 
-    private fun loadTestData() {
-        val myAds = listOf(
-            AdBanner(id = "1", title = "Супер скидки!", imageRes = R.drawable.banner1),
-        )
+    fun load() {
+        viewModelScope.launch {
+            _uiState.value = HomeUiState.Loading
+            try {
+                val productsResp = api.getProducts()
+                val adsResp = api.getAds()
+                // val catsResp = api.getCategories() // If needed
 
-        val categoriesList = listOf<Category>()
-        val productsList = listOf<Product>()
+                if (productsResp.isSuccessful) {
+                    val products = productsResp.body()?.map { dto ->
+                        Product(
+                            id = dto.id,
+                            title = dto.title ?: "Без названия",
+                            price = dto.price ?: 0.0,
+                            imageUrl = dto.imageUrl ?: ""
+                        )
+                    } ?: emptyList()
 
-        _uiState.value = HomeUiState.Data(
-            ads = myAds,
-            categories = categoriesList,
-            products = productsList
-        )
+                    val ads = adsResp.body()?.map { dto ->
+                        AdBanner(id = dto.id, title = dto.title, imageUrl = dto.imageUrl)
+                    } ?: emptyList()
+
+                    _uiState.value = HomeUiState.Data(
+                        products = products,
+                        categories = listOf(
+                            Category("food", "Еда"),
+                            Category("clothes", "Одежда"),
+                            Category("art", "Искусство"),
+                            Category("craft", "Ремесло"),
+                            Category("gifts", "Подарки"),
+                            Category("home", "Для дома")
+                        ),
+                        ads = ads
+                    )
+                } else {
+                    _uiState.value = HomeUiState.Error("Ошибка сервера: ${productsResp.code()}")
+                }
+            } catch (e: Exception) {
+                _uiState.value = HomeUiState.Error(e.message ?: "Неизвестная ошибка")
+            }
+        }
     }
 
-    fun load() {
-        val myAds = listOf(
-            AdBanner(id = "1", title = "Супер скидки!", imageRes = R.drawable.banner1),
-        )
-
-        _uiState.value = HomeUiState.Loading
-        viewModelScope.launch {
-            runCatching { repo.getHome() }
-                .onSuccess { resp ->
-                    _uiState.value = HomeUiState.Data(
-                        ads = if (resp.ads.isNotEmpty()) resp.ads else myAds,
-                        categories = resp.categories,
-                        products = resp.products
-                    )
-                }
-                .onFailure { e ->
-                    Log.e("HomeViewModel", "Home load failed", e)
-                    _uiState.value = HomeUiState.Error(e.message ?: "Ошибка загрузки Home")
-                }
+    fun onSearchQueryChange(query: String) {
+        val currentState = _uiState.value
+        if (currentState is HomeUiState.Data) {
+            _uiState.value = currentState.copy(searchQuery = query)
+            // Здесь можно добавить логику фильтрации или запроса к API
         }
-        Log.d("HomeViewModel", "Repo impl = ${repo::class.java.name}")
     }
 
     fun toggleLike(productId: Int) {
-        val currentState = _uiState.value
-        if (currentState !is HomeUiState.Data) return
-
         viewModelScope.launch {
-            runCatching {
-                repo.toggleFavorite(productId)
-            }.onSuccess { newLiked ->
-                val updatedProducts = currentState.products.map { product ->
-                    if (product.id == productId) {
-                        product.copy(liked = newLiked)
-                    } else {
-                        product
+            try {
+                api.toggleFavorite(productId)
+                // Обновляем локальное состояние
+                val currentState = _uiState.value
+                if (currentState is HomeUiState.Data) {
+                    val newProducts = currentState.products.map {
+                        if (it.id == productId) it.copy(liked = !it.liked) else it
                     }
+                    _uiState.value = currentState.copy(products = newProducts)
                 }
-
-                _uiState.value = currentState.copy(products = updatedProducts)
-            }.onFailure { e ->
-                Log.e("HomeViewModel", "toggleLike failed", e)
+            } catch (e: Exception) {
+                // ignore
             }
         }
     }

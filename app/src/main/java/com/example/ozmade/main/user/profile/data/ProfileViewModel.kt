@@ -7,8 +7,7 @@ import com.example.ozmade.main.user.profile.locale.LanguageStore
 import com.example.ozmade.network.auth.SessionStore
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -21,20 +20,28 @@ class ProfileViewModel @Inject constructor(
     private val languageStore: LanguageStore
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
-    val uiState = _uiState.asStateFlow()
+    private val _error = MutableStateFlow<String?>(null)
+
+    val uiState: StateFlow<ProfileUiState> = combine(repo.profileFlow, _error) { user, error ->
+        when {
+            user != null -> ProfileUiState.Data(user)
+            error != null -> ProfileUiState.Error(error)
+            else -> ProfileUiState.Loading
+        }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ProfileUiState.Loading)
 
     init {
         load()
     }
 
     fun load() {
-        _uiState.value = ProfileUiState.Loading
+        _error.value = null
         viewModelScope.launch {
             runCatching { repo.getMyProfile() }
-                .onSuccess { _uiState.value = ProfileUiState.Data(it) }
-                .onFailure { _uiState.value =
-                    ProfileUiState.Error(it.message ?: "Ошибка загрузки профиля")
+                .onFailure {
+                    if (repo.profileFlow.value == null) {
+                        _error.value = it.message ?: "Ошибка загрузки профиля"
+                    }
                 }
         }
     }

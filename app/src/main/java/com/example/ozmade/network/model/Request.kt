@@ -12,8 +12,10 @@ data class ReportRequest(
 )
 
 data class UpdateProfileRequest(
-    val email: String? = null,
-    val address: String? = null
+    @SerializedName("Name") val name: String? = null,
+    @SerializedName("Email") val email: String? = null,
+    @SerializedName("Address") val address: String? = null,
+    @SerializedName("AvatarURL") val avatarUrl: String? = null
 )
 
 data class ProductRequest(
