@@ -2,6 +2,7 @@ package com.example.ozmade.main.userHome
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ozmade.R
 import com.example.ozmade.network.api.OzMadeApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,8 +27,7 @@ class HomeViewModel @Inject constructor(
             _uiState.value = HomeUiState.Loading
             try {
                 val productsResp = api.getProducts()
-                val adsResp = api.getAds()
-                // val catsResp = api.getCategories() // If needed
+                // val adsResp = api.getAds() // Используем локальные баннеры
 
                 if (productsResp.isSuccessful) {
                     val products = productsResp.body()?.map { dto ->
@@ -39,9 +39,12 @@ class HomeViewModel @Inject constructor(
                         )
                     } ?: emptyList()
 
-                    val ads = adsResp.body()?.map { dto ->
-                        AdBanner(id = dto.id, title = dto.title, imageUrl = dto.imageUrl)
-                    } ?: emptyList()
+                    // Локальные рекламные баннеры
+                    val localAds = listOf(
+                        AdBanner(id = "1", title = "Присоединяйся к клубу творцов!", imageRes = R.drawable.banner1),
+                        AdBanner(id = "2", title = "Лучшие товары ручной работы", imageRes = R.drawable.banner2),
+                        AdBanner(id = "3", title = "Скидки для мастеров", imageRes = R.drawable.banner3)
+                    )
 
                     _uiState.value = HomeUiState.Data(
                         products = products,
@@ -53,7 +56,7 @@ class HomeViewModel @Inject constructor(
                             Category("gifts", "Подарки"),
                             Category("home", "Для дома")
                         ),
-                        ads = ads
+                        ads = localAds
                     )
                 } else {
                     _uiState.value = HomeUiState.Error("Ошибка сервера: ${productsResp.code()}")
@@ -68,7 +71,6 @@ class HomeViewModel @Inject constructor(
         val currentState = _uiState.value
         if (currentState is HomeUiState.Data) {
             _uiState.value = currentState.copy(searchQuery = query)
-            // Здесь можно добавить логику фильтрации или запроса к API
         }
     }
 
@@ -76,7 +78,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 api.toggleFavorite(productId)
-                // Обновляем локальное состояние
                 val currentState = _uiState.value
                 if (currentState is HomeUiState.Data) {
                     val newProducts = currentState.products.map {

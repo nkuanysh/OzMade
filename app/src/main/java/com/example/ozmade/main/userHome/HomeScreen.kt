@@ -22,9 +22,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,7 +45,7 @@ fun HomeScreen(
     onSeeAllProductsClick: () -> Unit = {},
     onRetry: () -> Unit = {}
 ) {
-    val backgroundColor = Color(0xFFFBFBFB)
+    val backgroundColor = MaterialTheme.colorScheme.background
     val orangeAccent = Color(0xFFFF9800)
 
     Scaffold(
@@ -83,7 +81,6 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(14.dp),
                     verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    // 1. Поиск (теперь это поле ввода)
                     item(span = { GridItemSpan(2) }) {
                         HomeSearchBar(
                             query = uiState.searchQuery,
@@ -92,14 +89,12 @@ fun HomeScreen(
                     }
 
                     if (uiState.searchQuery.isBlank()) {
-                        // 2. Рекламный слайдер
                         if (uiState.ads.isNotEmpty()) {
                             item(span = { GridItemSpan(2) }) {
                                 ModernPromoSlider(ads = uiState.ads, accentColor = orangeAccent)
                             }
                         }
 
-                        // 3. Категории
                         item(span = { GridItemSpan(2) }) {
                             SectionHeader(
                                 title = "Все категории",
@@ -113,7 +108,6 @@ fun HomeScreen(
                             CategoriesHorizontalList(onCategoryClick = onOpenCategory, accentColor = orangeAccent)
                         }
 
-                        // 4. Заголовок для товаров
                         item(span = { GridItemSpan(2) }) {
                             SectionHeader(
                                 title = "Товары для вас",
@@ -123,7 +117,6 @@ fun HomeScreen(
                             )
                         }
                     } else {
-                        // Заголовок для результатов поиска
                         item(span = { GridItemSpan(2) }) {
                             Text(
                                 text = "Результаты поиска: \"${uiState.searchQuery}\"",
@@ -134,7 +127,6 @@ fun HomeScreen(
                         }
                     }
 
-                    // Список товаров
                     items(filteredProducts) { product ->
                         MarketProductCard(
                             product = product,
@@ -168,7 +160,7 @@ fun HomeSearchBar(
             .fillMaxWidth()
             .height(56.dp),
         shape = RoundedCornerShape(18.dp),
-        color = Color.White,
+        color = MaterialTheme.colorScheme.surface,
         shadowElevation = 1.dp
     ) {
         TextField(
@@ -206,8 +198,8 @@ fun ModernPromoSlider(ads: List<AdBanner>, accentColor: Color) {
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(180.dp)
-                .clip(RoundedCornerShape(24.dp))
+                .aspectRatio(2.1f) // Пропорции баннера (примерно 2:1 или 2.1:1)
+                .clip(RoundedCornerShape(16.dp))
         ) { page ->
             val ad = ads[page]
             Box(modifier = Modifier.fillMaxSize()) {
@@ -215,68 +207,31 @@ fun ModernPromoSlider(ads: List<AdBanner>, accentColor: Color) {
                     AsyncImage(
                         model = ad.imageUrl,
                         contentDescription = null,
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.FillWidth,
                         modifier = Modifier.fillMaxSize()
                     )
                 } else if (ad.imageRes != null) {
                     Image(
                         painter = painterResource(id = ad.imageRes),
                         contentDescription = null,
-                        contentScale = ContentScale.Crop,
+                        contentScale = ContentScale.FillWidth,
                         modifier = Modifier.fillMaxSize()
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.7f)),
-                                startY = 100f
-                            )
-                        )
-                )
-
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(20.dp)
-                ) {
-                    Surface(
-                        color = accentColor,
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text(
-                            "АКЦИЯ",
-                            color = Color.White,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = ad.title,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color.White
                     )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(horizontalArrangement = Arrangement.Center) {
             repeat(ads.size) { iteration ->
                 val active = pagerState.currentPage == iteration
                 Box(
                     modifier = Modifier
-                        .padding(3.dp)
+                        .padding(2.dp)
                         .clip(CircleShape)
-                        .background(if (active) accentColor else Color(0xFFE0E0E0))
-                        .size(if (active) 10.dp else 7.dp)
+                        .background(if (active) accentColor else Color.LightGray.copy(alpha = 0.5f))
+                        .size(if (active) 8.dp else 6.dp)
                 )
             }
         }
@@ -323,7 +278,7 @@ private fun MarketCategoryChip(category: Category, onClick: () -> Unit, accentCo
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        color = Color.White,
+        color = MaterialTheme.colorScheme.surface,
         shadowElevation = 1.dp
     ) {
         Row(
@@ -341,7 +296,7 @@ private fun MarketCategoryChip(category: Category, onClick: () -> Unit, accentCo
                 text = category.title,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF333333)
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -354,7 +309,7 @@ fun MarketProductCard(product: Product, onClick: () -> Unit, onFavoriteClick: ()
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
@@ -373,7 +328,7 @@ fun MarketProductCard(product: Product, onClick: () -> Unit, onFavoriteClick: ()
                         .size(34.dp)
                         .clickable { onFavoriteClick() },
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -393,7 +348,7 @@ fun MarketProductCard(product: Product, onClick: () -> Unit, onFavoriteClick: ()
                     fontSize = 15.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = Color(0xFF222222)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = "${product.price.toInt()} ₸",
@@ -426,7 +381,7 @@ fun SectionHeader(title: String, actionText: String, onActionClick: () -> Unit, 
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(title, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color(0xFF1A1A1A))
+        Text(title, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
         Text(
             text = actionText,
             color = accentColor,
