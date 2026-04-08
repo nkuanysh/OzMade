@@ -40,6 +40,9 @@ import com.example.ozmade.main.userHome.reviews.ReviewsRoute
 import com.example.ozmade.main.userHome.seller.SellerRoute
 import com.example.ozmade.main.userHome.seller.reviews.SellerReviewsRoute
 import com.example.ozmade.main.seller.data.SellerLocalStore
+import com.example.ozmade.main.user.profile.notification.NotificationsScreen
+import com.example.ozmade.main.user.profile.orders.OrdersHistoryScreen
+import com.example.ozmade.main.user.profile.about.AboutAppScreen
 import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 
@@ -111,6 +114,9 @@ fun MainScreen(
         "delivery/{productId}/{qty}",
         "buyer_orders",
         "buyer_order/{orderId}",
+        "notifications",
+        "orders_history",
+        "about_app",
     )
 
     val showBottomBar = currentDestination?.route !in hideBottomBarRoutes &&
@@ -293,12 +299,18 @@ fun MainScreen(
                 ProfileScreen(
                     onLogout = onLogout,
                     onEditProfile = { navController.navigate("edit_profile") },
+                    onNotifications = { navController.navigate("notifications") },
+                    onOrderHistory = { navController.navigate("orders_history") },
                     onSupport = { navController.navigate("support") },
+                    onAbout = { navController.navigate("about_app") },
                     onBecomeSeller = { navController.navigate("seller_gate") }
                 )
             }
 
             composable("edit_profile") { EditProfileScreen(onBack = { navController.popBackStack() }) }
+            composable("notifications") { NotificationsScreen(onBack = { navController.popBackStack() }) }
+            composable("orders_history") { OrdersHistoryScreen(onBack = { navController.popBackStack() }) }
+            composable("about_app") { AboutAppScreen(onBack = { navController.popBackStack() }) }
             composable("support") {
                 SupportScreen(onClose = { navController.popBackStack() }, onOpenSupportChat = { navController.navigate("support_chat") })
             }
