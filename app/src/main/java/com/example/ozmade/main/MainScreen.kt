@@ -196,7 +196,16 @@ fun MainScreen(
 
             composable(BottomItem.Favorites.route) {
                 FavoritesRoute(
-                    onOpenProduct = { id -> navController.navigate("product/$id") }
+                    onOpenProduct = { id -> navController.navigate("product/$id") },
+                    onBuyClick = {
+                        navController.navigate(BottomItem.Home.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
 
@@ -210,7 +219,15 @@ fun MainScreen(
                         )
                     },
                     onOpenSupportChat = { navController.navigate("support_chat") },
-                    onNavigateToHome = { navController.navigate(BottomItem.Home.route) }
+                    onNavigateToHome = {
+                        navController.navigate(BottomItem.Home.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
                 )
             }
 

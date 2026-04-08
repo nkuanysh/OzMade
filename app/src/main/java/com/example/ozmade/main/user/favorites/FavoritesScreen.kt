@@ -243,7 +243,7 @@ private fun FavoriteProductCard(
                 )
                 
                 Text(
-                    text = "${product.price.toInt()} ₽",
+                    text = "${product.price.toInt()} ₸",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                     color = accentColor,
                     modifier = Modifier.padding(top = 2.dp)
