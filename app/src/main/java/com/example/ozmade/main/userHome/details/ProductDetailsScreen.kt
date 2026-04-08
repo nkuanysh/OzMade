@@ -334,7 +334,7 @@ fun ProductDetailsScreen(
     if (showOrderSheet) {
         OrderBottomSheet(
             title = product.title,
-            price = product.price.toString().toDoubleOrNull() ?: 0.0,
+            price = product.price,
             quantity = orderQuantity,
             onMinus = {
                 if (orderQuantity > 1) orderQuantity--
@@ -471,6 +471,9 @@ private fun DeliveryBlock(delivery: DeliveryInfoUi) {
                     value = delivery.pickupTime ?: "Бесплатно"
                 )
             }
+            if (delivery.pickupEnabled || delivery.freeDeliveryEnabled || delivery.intercityEnabled) {
+                // ... logic
+            }
             if (delivery.intercityEnabled) {
                 DeliveryRow(
                     icon = Icons.Default.Public,
@@ -506,10 +509,10 @@ private fun SellerBlock(seller: SellerUi, onClick: () -> Unit) {
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.secondaryContainer
             ) {
-                val hasAvatarUrl = runCatching { seller.avatarUrl.isNotEmpty() }.getOrDefault(false)
-                if (hasAvatarUrl) {
+                val avatarUrl = seller.avatarUrl
+                if (!avatarUrl.isNullOrBlank()) {
                     AsyncImage(
-                        model = seller.avatarUrl,
+                        model = avatarUrl,
                         contentDescription = null,
                         contentScale = ContentScale.Crop
                     )
