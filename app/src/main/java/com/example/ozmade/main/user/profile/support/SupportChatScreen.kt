@@ -4,19 +4,23 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
-// ✅ модель сообщения (готово для бэкенда)
+// Модель сообщения для техподдержки
 data class ChatMessageUi(
     val id: String,
     val text: String,
@@ -28,112 +32,134 @@ data class ChatMessageUi(
 @Composable
 fun SupportChatScreen(
     onBack: () -> Unit,
-    // ✅ когда будет бэкенд: прокинешь реальные сообщения
     messages: List<ChatMessageUi> = demoSupportMessages(),
-    // ✅ когда будет бэкенд: отправка будет дергать POST /support/messages
     onSendMessage: (String) -> Unit = {}
 ) {
     var input by remember { mutableStateOf("") }
+    val orangeAccent = Color(0xFFFF9800)
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Column {
-                        Text("Служба поддержки", maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Служба поддержки", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
                         Text(
                             "Онлайн 8:00–22:00",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
             )
         },
         bottomBar = {
-            Surface(tonalElevation = 8.dp) {
+            Surface(
+                color = Color.White,
+                tonalElevation = 8.dp,
+                shadowElevation = 8.dp
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(10.dp),
+                        .navigationBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedTextField(
                         value = input,
                         onValueChange = { input = it },
                         modifier = Modifier.weight(1f),
-                        placeholder = { Text("Напишите сообщение…") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(14.dp)
+                        placeholder = { Text("Напишите сообщение…", color = Color.Gray) },
+                        singleLine = false,
+                        maxLines = 4,
+                        shape = RoundedCornerShape(24.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = orangeAccent,
+                            unfocusedBorderColor = Color(0xFFEEEEEE),
+                            focusedContainerColor = Color(0xFFFBFBFB),
+                            unfocusedContainerColor = Color(0xFFFBFBFB)
+                        )
                     )
-                    Spacer(Modifier.width(10.dp))
-                    IconButton(
+                    Spacer(Modifier.width(12.dp))
+                    FloatingActionButton(
                         onClick = {
                             val text = input.trim()
                             if (text.isNotEmpty()) {
                                 onSendMessage(text)
                                 input = ""
                             }
-                        }
+                        },
+                        containerColor = orangeAccent,
+                        contentColor = Color.White,
+                        shape = CircleShape,
+                        modifier = Modifier.size(48.dp),
+                        elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp)
                     ) {
-                        Icon(Icons.Default.Send, contentDescription = "Отправить")
+                        Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Отправить", modifier = Modifier.size(20.dp))
                     }
                 }
             }
-        }
+        },
+        containerColor = Color(0xFFFBFBFB)
     ) { padding ->
         LazyColumn(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(messages, key = { it.id }) { msg ->
-                MessageBubble(msg)
+                MessageBubble(msg, orangeAccent)
             }
         }
     }
 }
 
 @Composable
-private fun MessageBubble(msg: ChatMessageUi) {
+private fun MessageBubble(msg: ChatMessageUi, accentColor: Color) {
+    val isMine = msg.isMine
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = if (msg.isMine) Arrangement.End else Arrangement.Start
+        horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start
     ) {
         Column(
             modifier = Modifier
-                .widthIn(max = 300.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    if (msg.isMine) MaterialTheme.colorScheme.primaryContainer
-                    else MaterialTheme.colorScheme.surfaceVariant
+                .widthIn(max = 280.dp)
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 18.dp,
+                        topEnd = 18.dp,
+                        bottomStart = if (isMine) 18.dp else 2.dp,
+                        bottomEnd = if (isMine) 2.dp else 18.dp
+                    )
                 )
-                .padding(12.dp)
+                .background(if (isMine) accentColor else Color.White)
+                .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
             Text(
                 text = msg.text,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (isMine) Color.White else Color(0xFF1A1A1A),
+                lineHeight = 20.sp
             )
-            if (msg.timeText.isNotBlank()) {
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = msg.timeText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            Text(
+                text = msg.timeText,
+                style = MaterialTheme.typography.labelSmall,
+                color = if (isMine) Color.White.copy(0.7f) else Color.Gray,
+                modifier = Modifier.align(Alignment.End).padding(top = 4.dp)
+            )
         }
     }
 }
 
-// ✅ временные сообщения-заглушки
 private fun demoSupportMessages(): List<ChatMessageUi> = listOf(
     ChatMessageUi("1", "Здравствуйте! Чем можем помочь?", isMine = false, timeText = "09:12"),
     ChatMessageUi("2", "Привет! Хочу узнать про доставку.", isMine = true, timeText = "09:13"),

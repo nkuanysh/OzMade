@@ -231,6 +231,11 @@ interface OzMadeApi {
     @GET("chats")
     suspend fun getBuyerChats(): Response<List<ChatDto>>
 
+    @DELETE("chats/{chat_id}")
+    suspend fun deleteBuyerChat(
+        @Path("chat_id") chatId: Int
+    ): Response<Unit>
+
     @GET("chats/{chat_id}/messages")
     suspend fun getBuyerChatMessages(
         @Path("chat_id") chatId: Int

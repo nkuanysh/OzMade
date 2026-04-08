@@ -24,7 +24,7 @@ fun SellerRegistrationRoute(
         onBack = onBack,
         onOpenSellerTerms = onOpenSellerTerms,
         onOpenPrivacy = onOpenPrivacy,
-        onSubmit = { viewModel.submit() },
+        onSubmit = { _ -> viewModel.submit() }, // Исправлено: игнорируем аргумент, так как ViewModel его не ждет
         isLoading = state is SellerRegState.Loading,
         errorText = (state as? SellerRegState.Error)?.message
     )

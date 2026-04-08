@@ -8,6 +8,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ozmade.main.seller.data.SellerLocalStore
+import androidx.compose.ui.platform.LocalContext
+import kotlinx.coroutines.launch
 
 @Composable
 fun SellerGateRoute(
@@ -17,6 +20,9 @@ fun SellerGateRoute(
     viewModel: SellerGateViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
+    val sellerStore = remember { SellerLocalStore(context) }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) { viewModel.checkAndRoute() }
 
@@ -24,7 +30,10 @@ fun SellerGateRoute(
         when (state) {
             SellerGateState.OpenSellerHome -> {
                 viewModel.reset()
-                onOpenSellerHome()
+                scope.launch {
+                    sellerStore.setSellerMode(true)
+                    onOpenSellerHome()
+                }
             }
             SellerGateState.OpenOnboarding -> {
                 viewModel.reset()

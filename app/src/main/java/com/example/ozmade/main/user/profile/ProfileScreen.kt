@@ -50,7 +50,7 @@ fun ProfileScreen(
     }
 
     Scaffold(
-        containerColor = Color(0xFFF8F9FA)
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -89,7 +89,7 @@ fun ProfileScreen(
             Text(
                 text = "Личное",
                 style = MaterialTheme.typography.labelLarge,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
             )
 
@@ -114,7 +114,7 @@ fun ProfileScreen(
             Text(
                 text = "Поддержка и инфо",
                 style = MaterialTheme.typography.labelLarge,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
             )
 
@@ -146,7 +146,7 @@ fun ProfileScreen(
                     onLogout()
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFE53935))
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
             ) {
                 Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
@@ -195,7 +195,7 @@ private fun ProfileHeader(name: String, phone: String, avatarUrl: String?, onEdi
                 color = MaterialTheme.colorScheme.primary,
                 tonalElevation = 4.dp
             ) {
-                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.padding(8.dp), tint = Color.White)
+                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.padding(8.dp), tint = MaterialTheme.colorScheme.onPrimary)
             }
         }
 
@@ -204,12 +204,13 @@ private fun ProfileHeader(name: String, phone: String, avatarUrl: String?, onEdi
         Text(
             text = name.ifBlank { "Ваше имя" },
             style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = phone,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -219,7 +220,7 @@ private fun ProfileSectionCard(content: @Composable ColumnScope.() -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
     ) {
         Column(content = content)
@@ -257,9 +258,10 @@ private fun ProfileMenuItem(
             text = title,
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.Medium,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            color = MaterialTheme.colorScheme.onSurface
         )
-        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.LightGray)
+        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outlineVariant)
     }
 }
 
@@ -308,15 +310,15 @@ private fun BecomeSellerCard(onClick: () -> Unit) {
 private fun LanguageSelector(selectedLang: AppLang, onLangSelected: (AppLang) -> Unit) {
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = Color.White,
+        color = MaterialTheme.colorScheme.surface,
         modifier = Modifier.height(36.dp).width(110.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFEEEEEE))
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row {
             AppLang.entries.forEach { lang ->
                 val isSelected = selectedLang == lang
                 val bgColor by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent, label = "")
-                val contentColor by animateColorAsState(if (isSelected) Color.White else Color.Gray, label = "")
+                val contentColor by animateColorAsState(if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, label = "")
 
                 Box(
                     modifier = Modifier.weight(1f).fillMaxHeight()
@@ -339,14 +341,14 @@ private fun LanguageSelector(selectedLang: AppLang, onLangSelected: (AppLang) ->
 
 @Composable
 private fun MenuDivider() {
-    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = Color(0xFFF1F1F1))
+    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant)
 }
 
 @Composable
 private fun ProfileHeaderLoading() {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        Box(Modifier.size(100.dp).clip(CircleShape).background(Color.LightGray.copy(0.3f)))
+        Box(Modifier.size(100.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant))
         Spacer(Modifier.height(16.dp))
-        Box(Modifier.width(150.dp).height(24.dp).background(Color.LightGray.copy(0.3f)))
+        Box(Modifier.width(150.dp).height(24.dp).background(MaterialTheme.colorScheme.surfaceVariant))
     }
 }

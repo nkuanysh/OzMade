@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,60 +34,95 @@ fun ChatScreen(
     viewModel: ChatListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val orangeColor = MaterialTheme.colorScheme.primary
 
     LaunchedEffect(Unit) { viewModel.load() }
 
-    Column(
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-    ) {
-        Text(
-            text = "Чаты",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(16.dp)
-        )
-
-        when (val state = uiState) {
-            is ChatListUiState.Loading -> {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = Color(0xFFFF9800))
-                }
+    Scaffold(
+        topBar = {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .statusBarsPadding()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = "Чаты",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
-
-            is ChatListUiState.Error -> {
-                Column(
-                    modifier = Modifier.fillMaxSize().padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(state.message, color = MaterialTheme.colorScheme.error)
-                    Spacer(Modifier.height(12.dp))
-                    Button(onClick = { viewModel.load() }) { Text("Повторить") }
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
+        Box(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            when (val state = uiState) {
+                is ChatListUiState.Loading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = orangeColor
+                    )
                 }
-            }
 
-            is ChatListUiState.Data -> {
-                if (state.threads.isEmpty()) {
-                    EmptyChatsPlaceholder(onNavigateToHome)
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 16.dp)
+                is ChatListUiState.Error -> {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        item {
-                            ChatSupportCard(onClick = onOpenSupportChat)
+                        Text(state.message, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
+                        Spacer(Modifier.height(12.dp))
+                        Button(
+                            onClick = { viewModel.load() },
+                            colors = ButtonDefaults.buttonColors(containerColor = orangeColor)
+                        ) {
+                            Text("Повторить")
                         }
+                    }
+                }
 
-                        items(state.threads) { t ->
-                            ThreadCard(
-                                thread = t,
-                                onClick = { onOpenThread(t) }
-                            )
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 72.dp),
-                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                            )
+                is ChatListUiState.Data -> {
+                    if (state.threads.isEmpty()) {
+                        EmptyChatsPlaceholder(onNavigateToHome, orangeColor)
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(bottom = 16.dp)
+                        ) {
+                            // Техподдержка всегда сверху
+                            item {
+                                ChatSupportCard(onClick = onOpenSupportChat, accentColor = orangeColor)
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant
+                                )
+                            }
+
+                            items(state.threads) { t ->
+                                ThreadCard(
+                                    thread = t,
+                                    onClick = { onOpenThread(t) },
+                                    accentColor = orangeColor
+                                )
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(horizontal = 72.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                                )
+                            }
+
+                            // Отступ снизу для системной навигации
+                            item { Spacer(Modifier.navigationBarsPadding()) }
                         }
                     }
                 }
@@ -96,7 +132,7 @@ fun ChatScreen(
 }
 
 @Composable
-private fun EmptyChatsPlaceholder(onNavigateToHome: () -> Unit) {
+private fun EmptyChatsPlaceholder(onNavigateToHome: () -> Unit, accentColor: Color) {
     Box(
         modifier = Modifier.fillMaxSize().padding(32.dp),
         contentAlignment = Alignment.Center
@@ -105,14 +141,14 @@ private fun EmptyChatsPlaceholder(onNavigateToHome: () -> Unit) {
             Surface(
                 modifier = Modifier.size(100.dp),
                 shape = CircleShape,
-                color = Color(0xFFFF9800).copy(alpha = 0.1f)
+                color = accentColor.copy(alpha = 0.1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = null,
                         modifier = Modifier.size(48.dp),
-                        tint = Color(0xFFFF9800)
+                        tint = accentColor
                     )
                 }
             }
@@ -120,20 +156,22 @@ private fun EmptyChatsPlaceholder(onNavigateToHome: () -> Unit) {
             Text(
                 "У вас пока нет активных диалогов",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(8.dp))
             Text(
                 "Задайте вопрос продавцу на странице любого товара.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(24.dp))
             Button(
                 onClick = onNavigateToHome,
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
+                colors = ButtonDefaults.buttonColors(containerColor = accentColor)
             ) {
                 Text("Перейти к покупкам")
             }
@@ -142,87 +180,86 @@ private fun EmptyChatsPlaceholder(onNavigateToHome: () -> Unit) {
 }
 
 @Composable
-private fun ChatSupportCard(onClick: () -> Unit) {
+private fun ChatSupportCard(onClick: () -> Unit, accentColor: Color) {
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
-        headlineContent = { Text("Служба поддержки", fontWeight = FontWeight.SemiBold) },
-        supportingContent = { Text("Напишите нам, если возникли вопросы", maxLines = 1) },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        headlineContent = { Text("Служба поддержки", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface) },
+        supportingContent = { Text("Напишите нам, если возникли вопросы", maxLines = 1, color = MaterialTheme.colorScheme.onSurfaceVariant) },
         leadingContent = {
             Surface(
                 modifier = Modifier.size(48.dp),
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.secondaryContainer
+                color = accentColor.copy(alpha = 0.1f)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         Icons.Default.SupportAgent,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                        tint = accentColor
                     )
                 }
             }
         },
         trailingContent = {
-            Text("8:00–22:00", style = MaterialTheme.typography.labelSmall)
+            Text("8:00–22:00", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     )
 }
 
 @Composable
-private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit) {
-    // Теперь используем РЕАЛЬНОЕ поле isOnline из модели
-    val isOnline = thread.isOnline
-
+private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit, accentColor: Color) {
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
-        headlineContent = { 
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        headlineContent = {
             Text(
-                text = thread.sellerName, 
+                text = thread.sellerName,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            ) 
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         },
-        supportingContent = { 
+        supportingContent = {
             Text(
                 text = thread.lastMessage,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
-            ) 
+            )
         },
         leadingContent = {
             Box {
-                if (thread.productImageUrl != null) {
+                if (!thread.productImageUrl.isNullOrEmpty()) {
                     AsyncImage(
                         model = thread.productImageUrl,
                         contentDescription = null,
-                        modifier = Modifier.size(48.dp).clip(CircleShape),
+                        modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant),
                         contentScale = ContentScale.Crop
                     )
                 } else {
                     Surface(
                         modifier = Modifier.size(48.dp),
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surfaceVariant
+                        color = accentColor.copy(alpha = 0.1f)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Text(
                                 text = thread.sellerName.take(1).uppercase(),
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFFF9800)
+                                color = accentColor
                             )
                         }
                     }
                 }
-                
-                // Индикатор ОНЛАЙН (Зеленая точка)
-                if (isOnline) {
+
+                if (thread.isOnline) {
                     Box(
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .size(14.dp)
-                            .background(Color.White, CircleShape)
+                            .background(MaterialTheme.colorScheme.surface, CircleShape)
                             .padding(2.dp)
                     ) {
                         Box(
@@ -238,7 +275,7 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit) {
             Text(
                 text = thread.lastTimeText,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     )

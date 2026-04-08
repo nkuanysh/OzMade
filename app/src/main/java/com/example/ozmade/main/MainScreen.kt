@@ -1,7 +1,6 @@
 package com.example.ozmade.main
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -16,21 +15,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.ozmade.main.seller.SellerMainScreen
+import com.example.ozmade.main.seller.data.SellerLocalStore
 import com.example.ozmade.main.seller.onboarding.SellerGateRoute
 import com.example.ozmade.main.seller.onboarding.SellerOnboardingScreen
+import com.example.ozmade.main.seller.registration.SellerRegistrationRoute
 import com.example.ozmade.main.user.chat.ChatScreen
 import com.example.ozmade.main.user.chat.ChatThreadRoute
 import com.example.ozmade.main.user.favorites.FavoritesRoute
-import com.example.ozmade.main.user.favorites.FavoritesScreen
 import com.example.ozmade.main.user.profile.EditProfileScreen
 import com.example.ozmade.main.user.profile.ProfileScreen
+import com.example.ozmade.main.user.profile.about.AboutAppScreen
+import com.example.ozmade.main.user.profile.notification.NotificationsScreen
+import com.example.ozmade.main.user.profile.orders.OrdersHistoryScreen
 import com.example.ozmade.main.user.profile.support.SupportChatScreen
 import com.example.ozmade.main.user.profile.support.SupportScreen
 import com.example.ozmade.main.userHome.HomeRoute
@@ -39,8 +45,6 @@ import com.example.ozmade.main.userHome.details.ProductDetailsRoute
 import com.example.ozmade.main.userHome.reviews.ReviewsRoute
 import com.example.ozmade.main.userHome.seller.SellerRoute
 import com.example.ozmade.main.userHome.seller.reviews.SellerReviewsRoute
-import com.example.ozmade.main.seller.data.SellerLocalStore
-import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 
 private sealed class BottomItem(
@@ -111,6 +115,9 @@ fun MainScreen(
         "delivery/{productId}/{qty}",
         "buyer_orders",
         "buyer_order/{orderId}",
+        "notifications",
+        "orders_history",
+        "about_app",
     )
 
     val showBottomBar = currentDestination?.route !in hideBottomBarRoutes &&
@@ -175,6 +182,7 @@ fun MainScreen(
                 )
             }
 
+            // Buyer Flow components from file 1
             composable(
                 route = "delivery/{productId}/{qty}",
                 arguments = listOf(
@@ -223,23 +231,60 @@ fun MainScreen(
                 )
             }
 
-            composable(BottomItem.Favorites.route) { 
+            composable(
+                route = "reviews/{productId}",
+                arguments = listOf(navArgument("productId") { type = NavType.IntType })
+            ) { b ->
+                ReviewsRoute(
+                    productId = b.arguments?.getInt("productId") ?: 0,
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = "seller_reviews/{sellerId}",
+                arguments = listOf(navArgument("sellerId") { type = NavType.IntType })
+            ) { b ->
+                SellerReviewsRoute(
+                    sellerId = b.arguments?.getInt("sellerId") ?: 0,
+                    onBack = { navController.popBackStack() },
+                    onOpenProduct = { pid -> navController.navigate("product/$pid") }
+                )
+            }
+
+            composable(BottomItem.Favorites.route) {
                 FavoritesRoute(
+                    onOpenProduct = { id -> navController.navigate("product/$id") },
                     onBuyClick = {
-                        navController.navigate("home")
-                    },
-                    onOpenProduct = { id -> navController.navigate("product/$id") }
-                ) 
+                        navController.navigate(BottomItem.Home.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
 
             composable(BottomItem.Chat.route) {
                 ChatScreen(
-                    onOpenThread = { t ->
-                        val encS = Uri.encode(t.sellerName)
-                        val encT = Uri.encode(t.productTitle)
+                    onOpenThread = { thread ->
+                        val encS = Uri.encode(thread.sellerName)
+                        val encT = Uri.encode(thread.productTitle)
                         navController.navigate(
-                            "chat/${t.chatId}/${t.sellerId}/${t.productId}?sellerName=$encS&productTitle=$encT&price=${t.productPrice}"
+                            "chat/${thread.chatId}/${thread.sellerId}/${thread.productId}?sellerName=$encS&productTitle=$encT&price=${thread.productPrice}"
                         )
+                    },
+                    onOpenSupportChat = { navController.navigate("support_chat") },
+                    onNavigateToHome = {
+                        navController.navigate(BottomItem.Home.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 )
             }
@@ -293,12 +338,18 @@ fun MainScreen(
                 ProfileScreen(
                     onLogout = onLogout,
                     onEditProfile = { navController.navigate("edit_profile") },
+                    onNotifications = { navController.navigate("notifications") },
+                    onOrderHistory = { navController.navigate("orders_history") },
                     onSupport = { navController.navigate("support") },
+                    onAbout = { navController.navigate("about_app") },
                     onBecomeSeller = { navController.navigate("seller_gate") }
                 )
             }
 
             composable("edit_profile") { EditProfileScreen(onBack = { navController.popBackStack() }) }
+            composable("notifications") { NotificationsScreen(onBack = { navController.popBackStack() }) }
+            composable("orders_history") { OrdersHistoryScreen(onBack = { navController.popBackStack() }) }
+            composable("about_app") { AboutAppScreen(onBack = { navController.popBackStack() }) }
             composable("support") {
                 SupportScreen(onClose = { navController.popBackStack() }, onOpenSupportChat = { navController.navigate("support_chat") })
             }
@@ -326,7 +377,11 @@ fun MainScreen(
                             }
                         }
                     },
-                    onOpenOnboarding = { navController.navigate("seller_onboarding") },
+                    onOpenOnboarding = {
+                        navController.navigate("seller_onboarding") {
+                            popUpTo("seller_gate") { inclusive = true }
+                        }
+                    },
                     onBack = { navController.popBackStack() }
                 )
             }
@@ -339,7 +394,7 @@ fun MainScreen(
             }
 
             composable("seller_registration") {
-                com.example.ozmade.main.seller.registration.SellerRegistrationRoute(
+                SellerRegistrationRoute(
                     onBack = { navController.popBackStack() },
                     onOpenSellerTerms = {},
                     onOpenPrivacy = {},
@@ -355,31 +410,15 @@ fun MainScreen(
             }
 
             composable("seller_main") {
-                SellerMainScreen(onExitSeller = {
-                    scope.launch {
-                        sellerStore.setSellerMode(false)
-                        navController.navigate(BottomItem.Home.route) {
-                            popUpTo(0) { inclusive = true }
+                SellerMainScreen(
+                    onExitSeller = {
+                        scope.launch {
+                            sellerStore.setSellerMode(false)
+                            navController.navigate(BottomItem.Home.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
                         }
                     }
-                })
-            }
-
-            composable(
-                route = "reviews/{productId}",
-                arguments = listOf(navArgument("productId") { type = NavType.IntType })
-            ) { b ->
-                ReviewsRoute(productId = b.arguments?.getInt("productId") ?: 0, onBack = { navController.popBackStack() })
-            }
-
-            composable(
-                route = "seller_reviews/{sellerId}",
-                arguments = listOf(navArgument("sellerId") { type = NavType.IntType })
-            ) { b ->
-                SellerReviewsRoute(
-                    sellerId = b.arguments?.getInt("sellerId") ?: 0,
-                    onBack = { navController.popBackStack() },
-                    onOpenProduct = { pid -> navController.navigate("product/$pid") }
                 )
             }
         }
@@ -394,8 +433,7 @@ private fun CustomNavigationBar(
     val items = listOf(BottomItem.Home, BottomItem.Favorites, BottomItem.Chat, BottomItem.Profile)
 
     NavigationBar(
-        modifier = Modifier
-            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
+        modifier = Modifier.clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
         containerColor = Color.White,
         tonalElevation = 8.dp
     ) {
@@ -404,12 +442,17 @@ private fun CustomNavigationBar(
 
             NavigationBarItem(
                 selected = isSelected,
-                label = { Text(item.label, fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else null) },
+                label = {
+                    Text(
+                        text = item.label,
+                        fontSize = 12.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else null
+                    )
+                },
                 icon = {
                     Icon(
                         imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
-                        contentDescription = item.label,
-                        tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray
+                        contentDescription = item.label
                     )
                 },
                 onClick = {
@@ -420,7 +463,11 @@ private fun CustomNavigationBar(
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                    selectedIconColor = Color(0xFFFF9800),
+                    selectedTextColor = Color(0xFFFF9800),
+                    unselectedIconColor = Color.Gray,
+                    unselectedTextColor = Color.Gray,
+                    indicatorColor = Color(0xFFFFF3E0)
                 )
             )
         }

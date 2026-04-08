@@ -39,14 +39,15 @@ fun SupportScreen(
     val context = LocalContext.current
     val phoneNumber = "+77077077070"
     val faqSections = remember { buildFaq() }
+    val orangeAccent = Color(0xFFFF9800)
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Помощь", fontWeight = FontWeight.Bold) },
+                title = { Text("Помощь", fontWeight = FontWeight.ExtraBold) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.Default.Close, contentDescription = "Закрыть")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -54,7 +55,7 @@ fun SupportScreen(
                 )
             )
         },
-        containerColor = Color(0xFFF8F9FA) // Мягкий фон
+        containerColor = Color(0xFFFBFBFB)
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -66,27 +67,31 @@ fun SupportScreen(
             // Приветственный блок
             item {
                 Column(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Surface(
-                        modifier = Modifier.size(64.dp),
+                        modifier = Modifier.size(80.dp),
                         shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(0.4f)
+                        color = orangeAccent.copy(0.1f)
                     ) {
-                        Icon(
-                            Icons.Outlined.HeadsetMic,
-                            contentDescription = null,
-                            modifier = Modifier.padding(16.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                Icons.Outlined.HeadsetMic,
+                                contentDescription = null,
+                                modifier = Modifier.size(36.dp),
+                                tint = orangeAccent
+                            )
+                        }
                     }
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(20.dp))
                     Text(
                         text = "Как мы можем помочь?",
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF1A1A1A)
                     )
+                    Spacer(Modifier.height(4.dp))
                     Text(
                         text = "Отвечаем ежедневно с 8:00 до 22:00",
                         style = MaterialTheme.typography.bodyMedium,
@@ -103,7 +108,7 @@ fun SupportScreen(
                         subtitle = "Быстрый ответ",
                         icon = Icons.Outlined.PhoneInTalk,
                         modifier = Modifier.weight(1f),
-                        containerColor = MaterialTheme.colorScheme.primary,
+                        containerColor = orangeAccent,
                         contentColor = Color.White,
                         onClick = {
                             val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
@@ -116,7 +121,7 @@ fun SupportScreen(
                         icon = Icons.Outlined.ChatBubbleOutline,
                         modifier = Modifier.weight(1f),
                         containerColor = Color.White,
-                        contentColor = MaterialTheme.colorScheme.primary,
+                        contentColor = orangeAccent,
                         onClick = onOpenSupportChat
                     )
                 }
@@ -126,7 +131,8 @@ fun SupportScreen(
                 Text(
                     text = "Частые вопросы",
                     style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF1A1A1A),
                     modifier = Modifier.padding(top = 8.dp)
                 )
             }
@@ -152,19 +158,28 @@ private fun SupportActionCard(
     onClick: () -> Unit
 ) {
     Surface(
-        modifier = modifier.height(120.dp),
+        modifier = modifier.height(130.dp),
         shape = RoundedCornerShape(24.dp),
         color = containerColor,
         onClick = onClick,
-        shadowElevation = if (containerColor == Color.White) 2.dp else 0.dp
+        shadowElevation = 2.dp,
+        tonalElevation = 2.dp
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(icon, contentDescription = null, tint = contentColor)
+            Surface(
+                modifier = Modifier.size(40.dp),
+                shape = CircleShape,
+                color = if (containerColor == Color.White) Color(0xFFFFF3E0) else Color.White.copy(0.2f)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, contentDescription = null, tint = contentColor, modifier = Modifier.size(20.dp))
+                }
+            }
             Column {
-                Text(title, fontWeight = FontWeight.Bold, color = contentColor, fontSize = 16.sp)
+                Text(title, fontWeight = FontWeight.ExtraBold, color = contentColor, fontSize = 17.sp)
                 Text(subtitle, color = contentColor.copy(0.7f), fontSize = 12.sp)
             }
         }
@@ -178,21 +193,22 @@ private fun FaqSectionCard(section: FaqSection) {
             text = section.title.uppercase(),
             style = MaterialTheme.typography.labelLarge,
             color = Color.Gray,
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 4.dp, bottom = 10.dp)
         )
         Card(
-            shape = RoundedCornerShape(20.dp),
+            shape = RoundedCornerShape(24.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
         ) {
             Column {
                 section.items.forEachIndexed { index, item ->
                     FaqQuestionRow(item = item)
                     if (index != section.items.lastIndex) {
                         HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            thickness = 0.5.dp,
-                            color = Color(0xFFF1F1F1)
+                            modifier = Modifier.padding(horizontal = 20.dp),
+                            thickness = 1.dp,
+                            color = Color(0xFFF5F5F5)
                         )
                     }
                 }
@@ -210,14 +226,15 @@ private fun FaqQuestionRow(item: FaqItem) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable { expanded = !expanded }
-            .padding(16.dp)
+            .padding(20.dp)
             .animateContentSize()
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = item.question,
                 style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2D2D2D),
                 modifier = Modifier.weight(1f)
             )
             Icon(
@@ -228,18 +245,17 @@ private fun FaqQuestionRow(item: FaqItem) {
             )
         }
         if (expanded) {
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(14.dp))
             Text(
                 text = item.answer,
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.DarkGray,
-                lineHeight = 20.sp
+                color = Color(0xFF666666),
+                lineHeight = 22.sp
             )
         }
     }
 }
 
-// Данные остаются те же (FaqSection, FaqItem, buildFaq)
 private data class FaqSection(val title: String, val items: List<FaqItem>)
 private data class FaqItem(val question: String, val answer: String)
 

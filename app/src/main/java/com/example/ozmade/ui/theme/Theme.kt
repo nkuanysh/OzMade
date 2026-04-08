@@ -16,21 +16,37 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = OrangePrimary,
+    secondary = OrangeSecondary,
+    tertiary = OrangeTertiary,
+    background = DarkBackground,
+    surface = DarkSurface,
+    onPrimary = DarkOnSurface,
+    onSecondary = DarkOnSurface,
+    onTertiary = DarkOnSurface,
+    onBackground = DarkOnSurface,
+    onSurface = DarkOnSurface,
+    onSurfaceVariant = DarkOnSurfaceVariant
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = OrangePrimary,
+    secondary = OrangeSecondary,
+    tertiary = OrangeTertiary,
+    background = LightBackground,
+    surface = LightSurface,
+    onPrimary = LightSurface,
+    onSecondary = LightSurface,
+    onTertiary = LightSurface,
+    onBackground = LightOnSurface,
+    onSurface = LightOnSurface,
+    onSurfaceVariant = LightOnSurfaceVariant
 )
 
 @Composable
 fun OzMadeTheme(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false, // Disabled to maintain consistent branding
     content: @Composable () -> Unit
 ) {
     val darkTheme = when (themeMode) {

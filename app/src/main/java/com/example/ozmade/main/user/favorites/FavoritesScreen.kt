@@ -32,14 +32,14 @@ fun FavoritesScreen(
     onOpenProduct: (Int) -> Unit,
     onRemoveFavorite: (Int) -> Unit
 ) {
-    val orangeAccent = Color(0xFFFF9800)
-    val backgroundColor = Color(0xFFFBFBFB)
+    val orangeAccent = MaterialTheme.colorScheme.primary
+    val backgroundColor = MaterialTheme.colorScheme.background
 
     Scaffold(
         containerColor = backgroundColor,
         topBar = {
             Surface(
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 shadowElevation = 1.dp
             ) {
                 Box(
@@ -51,7 +51,7 @@ fun FavoritesScreen(
                     Text(
                         text = "Избранное",
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
-                        color = Color(0xFF1A1A1A)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
@@ -74,7 +74,7 @@ fun FavoritesScreen(
                         Text(
                             text = uiState.message, 
                             textAlign = TextAlign.Center,
-                            color = Color.Red
+                            color = MaterialTheme.colorScheme.error
                         )
                         Button(
                             onClick = onBuyClick, 
@@ -82,7 +82,7 @@ fun FavoritesScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = orangeAccent),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Попробовать снова")
+                            Text("Попробуйте снова")
                         }
                     }
                 }
@@ -140,13 +140,13 @@ private fun EmptyFavoritesView(onAction: () -> Unit, accentColor: Color) {
             "В списке пока пусто",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.ExtraBold,
-            color = Color(0xFF1A1A1A)
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(12.dp))
         Text(
             "Нажимайте на сердечко у товаров, которые вам понравились, чтобы не потерять их.",
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             lineHeight = 20.sp
         )
@@ -176,7 +176,7 @@ private fun FavoriteProductCard(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
@@ -196,7 +196,7 @@ private fun FavoriteProductCard(
                         .size(34.dp)
                         .clickable { onToggleLike() },
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.9f)
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
@@ -213,7 +213,7 @@ private fun FavoriteProductCard(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .padding(8.dp),
-                    color = Color.White.copy(alpha = 0.9f),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Row(
@@ -226,7 +226,7 @@ private fun FavoriteProductCard(
                             text = String.format("%.1f", product.rating),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF616161)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -239,11 +239,11 @@ private fun FavoriteProductCard(
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    color = Color(0xFF222222)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 
                 Text(
-                    text = "${product.price.toInt()} ₽",
+                    text = "${product.price.toInt()} ₸",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                     color = accentColor,
                     modifier = Modifier.padding(top = 2.dp)
@@ -252,7 +252,7 @@ private fun FavoriteProductCard(
                 Text(
                     text = product.address,
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.padding(top = 4.dp)

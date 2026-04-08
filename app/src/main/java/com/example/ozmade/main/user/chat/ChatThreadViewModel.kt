@@ -7,7 +7,9 @@ import com.example.ozmade.main.user.chat.data.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -24,7 +26,7 @@ sealed class ChatThreadUiState {
         val productPrice: Int,
         val productImageUrl: String?,
         val messages: List<ChatMessageUi>,
-        val isOnline: Boolean = false // Добавлено поле статуса
+        val isOnline: Boolean = false
     ) : ChatThreadUiState()
 }
 
@@ -36,8 +38,16 @@ class ChatThreadViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<ChatThreadUiState>(ChatThreadUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
+    private val _events = MutableSharedFlow<ChatEvent>()
+    val events = _events.asSharedFlow()
+
     private var currentChatId: Int? = null
     private var pollingJob: Job? = null
+
+    sealed class ChatEvent {
+        object ChatDeleted : ChatEvent()
+        data class ActionError(val message: String) : ChatEvent()
+    }
 
     fun openChat(
         chatId: Int?,
@@ -48,22 +58,22 @@ class ChatThreadViewModel @Inject constructor(
         productPrice: Int,
         productImageUrl: String? = null
     ) {
+        if (currentChatId == chatId && _uiState.value is ChatThreadUiState.Data) return
+
         currentChatId = chatId
         _uiState.value = ChatThreadUiState.Loading
 
         viewModelScope.launch {
-            runCatching {
+            try {
                 val msgs = if (chatId != null) {
                     repo.getMessages(chatId)
                 } else {
                     emptyList()
                 }
 
-                // В реальности статус должен приходить из репозитория/API
-                // Для примера ставим true, если sellerId четный
                 val mockOnline = sellerId % 2 == 0
 
-                ChatThreadUiState.Data(
+                _uiState.value = ChatThreadUiState.Data(
                     chatId = chatId,
                     productId = productId,
                     sellerName = sellerName,
@@ -73,11 +83,10 @@ class ChatThreadViewModel @Inject constructor(
                     messages = msgs,
                     isOnline = mockOnline
                 )
-            }.onSuccess { 
-                _uiState.value = it 
+
                 if (chatId != null) startPolling(chatId)
-            }.onFailure { 
-                _uiState.value = ChatThreadUiState.Error(it.message ?: "Ошибка") 
+            } catch (e: Exception) {
+                _uiState.value = ChatThreadUiState.Error(e.message ?: "Ошибка загрузки")
             }
         }
     }
@@ -101,11 +110,10 @@ class ChatThreadViewModel @Inject constructor(
     }
 
     fun send(text: String) {
-        val state = _uiState.value
-        if (state !is ChatThreadUiState.Data) return
+        val state = _uiState.value as? ChatThreadUiState.Data ?: return
 
         viewModelScope.launch {
-            runCatching {
+            try {
                 val newChatId = repo.sendMessageOrCreate(
                     productId = state.productId,
                     content = text,
@@ -117,14 +125,27 @@ class ChatThreadViewModel @Inject constructor(
                     startPolling(newChatId)
                 }
 
-                val msgs = repo.getMessages(newChatId)
-                
+                val updatedMsgs = repo.getMessages(newChatId)
+
                 _uiState.value = state.copy(
                     chatId = newChatId,
-                    messages = msgs
+                    messages = updatedMsgs
                 )
-            }.onFailure { 
-                _uiState.value = ChatThreadUiState.Error(it.message ?: "Ошибка отправки") 
+            } catch (e: Exception) {
+                _events.emit(ChatEvent.ActionError("Не удалось отправить сообщение"))
+            }
+        }
+    }
+
+    fun deleteCurrentChat() {
+        val chatId = currentChatId ?: return
+        viewModelScope.launch {
+            try {
+                repo.deleteChat(chatId)
+                _events.emit(ChatEvent.ChatDeleted)
+            } catch (e: Exception) {
+                // Если бэкенд вернул 404 или другую ошибку, не ломаем UI, а уведомляем
+                _events.emit(ChatEvent.ActionError("Сервер вернул ошибку при удалении. Возможно, функция еще не реализована на бэкенде."))
             }
         }
     }

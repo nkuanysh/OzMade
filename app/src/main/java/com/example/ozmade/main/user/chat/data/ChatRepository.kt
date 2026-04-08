@@ -9,4 +9,6 @@ interface ChatRepository {
         content: String,
         existingChatId: Int?
     ): Int
+
+    suspend fun deleteChat(chatId: Int)
 }

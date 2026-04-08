@@ -98,7 +98,7 @@ fun HomeScreen(
                         item(span = { GridItemSpan(2) }) {
                             SectionHeader(
                                 title = "Все категории",
-                                actionText = "Смотреть все",
+                                actionText = null, // Убрали "Смотреть все"
                                 onActionClick = onSeeAllCategoriesClick,
                                 accentColor = orangeAccent
                             )
@@ -111,7 +111,7 @@ fun HomeScreen(
                         item(span = { GridItemSpan(2) }) {
                             SectionHeader(
                                 title = "Товары для вас",
-                                actionText = "Смотреть все",
+                                actionText = null, // Убрали "Смотреть все"
                                 onActionClick = onSeeAllProductsClick,
                                 accentColor = orangeAccent
                             )
@@ -375,20 +375,22 @@ fun MarketProductCard(product: Product, onClick: () -> Unit, onFavoriteClick: ()
 }
 
 @Composable
-fun SectionHeader(title: String, actionText: String, onActionClick: () -> Unit, accentColor: Color) {
+fun SectionHeader(title: String, actionText: String?, onActionClick: () -> Unit, accentColor: Color) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(title, fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
-        Text(
-            text = actionText,
-            color = accentColor,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.clickable { onActionClick() }
-        )
+        if (actionText != null) {
+            Text(
+                text = actionText,
+                color = accentColor,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.clickable { onActionClick() }
+            )
+        }
     }
 }
 

@@ -34,15 +34,15 @@ fun PhoneLoginScreen(
     var phoneNumber by remember { mutableStateOf("+7") }
 
     val darkNavy = Color(0xFF0D0F2C)
-    val lightGray = Color(0xFFF2F2F2)
+    val background = MaterialTheme.colorScheme.background
     val orangePrimary = Color(0xFFFF7A1A)
     val secondaryText = Color(0xFFCFCFCF)
-    val inputBg = Color(0xFFE5E5E5)
+    val inputBg = MaterialTheme.colorScheme.surfaceVariant
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(lightGray)
+            .background(background)
     ) {
         // Top Section
         Box(
@@ -54,7 +54,7 @@ fun PhoneLoginScreen(
                     shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp)
                 )
                 .padding(horizontal = 24.dp)
-                .padding(top = 48.dp, bottom = 24.dp) // Added top padding to move content down
+                .padding(top = 48.dp, bottom = 24.dp) 
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -64,7 +64,7 @@ fun PhoneLoginScreen(
                     modifier = Modifier
                         .align(Alignment.Start)
                         .size(40.dp)
-                        .background(inputBg.copy(alpha = 0.2f), CircleShape)
+                        .background(Color.White.copy(alpha = 0.2f), CircleShape)
                         .clickable { onBackClick() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -111,11 +111,11 @@ fun PhoneLoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Text(
                 text = "НОМЕР ТЕЛЕФОНА",
                 modifier = Modifier.align(Alignment.Start),
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -126,13 +126,15 @@ fun PhoneLoginScreen(
                 value = phoneNumber,
                 onValueChange = { phoneNumber = it },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("+7 777 123 45 67", color = Color.Gray) },
+                placeholder = { Text("+7 777 123 45 67", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = inputBg,
                     unfocusedContainerColor = inputBg,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 ),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true
@@ -141,7 +143,7 @@ fun PhoneLoginScreen(
             if (!errorText.isNullOrEmpty()) {
                 Text(
                     text = errorText,
-                    color = Color.Red,
+                    color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 8.dp).fillMaxWidth(),
                     textAlign = TextAlign.Start
@@ -163,13 +165,13 @@ fun PhoneLoginScreen(
                     Text(text = "ОТПРАВИТЬ КОД", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
-            
+
             Spacer(modifier = Modifier.weight(1f))
-            
+
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                Text("Политика конфиденциальности", modifier = Modifier.clickable { onOpenPrivacy() }, color = Color.Gray, fontSize = 12.sp)
-                Text(" | ", color = Color.Gray, fontSize = 12.sp)
-                Text("Условия использования", modifier = Modifier.clickable { onOpenTerms() }, color = Color.Gray, fontSize = 12.sp)
+                Text("Политика конфиденциальности", modifier = Modifier.clickable { onOpenPrivacy() }, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                Text(" | ", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+                Text("Условиями использования", modifier = Modifier.clickable { onOpenTerms() }, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
             }
         }
     }

@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.Storefront
@@ -48,7 +47,7 @@ fun ProductDetailsScreen(
     onToggleLike: () -> Unit,
     onShare: () -> Unit,
     onChat: () -> Unit,
-    onOpenDelivery: (Int) -> Unit, // qty
+    onOpenDelivery: (Int) -> Unit,
     onOpenReviews: (Int) -> Unit,
     onOpenSeller: (Int) -> Unit,
     onBack: () -> Unit,
@@ -59,6 +58,13 @@ fun ProductDetailsScreen(
 
     var showOrderSheet by remember { mutableStateOf(false) }
     var orderQuantity by remember { mutableIntStateOf(1) }
+
+    val topBarAlpha by remember {
+        derivedStateOf {
+            val threshold = 400f
+            (scrollState.value / threshold).coerceIn(0f, 1f)
+        }
+    }
 
     Scaffold(
         bottomBar = {
@@ -75,7 +81,7 @@ fun ProductDetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(Color(0xFFF8F9FA))
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
                 modifier = Modifier
@@ -107,7 +113,7 @@ fun ProductDetailsScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     onLoading = { Log.d("ProductDetailsScreen", "Image loading: $imageUrl") },
                                     onSuccess = { Log.d("ProductDetailsScreen", "Image success: $imageUrl") },
-                                    onError = { 
+                                    onError = {
                                         Log.e("ProductDetailsScreen", "Image error: $imageUrl", it.result.throwable)
                                     }
                                 )
@@ -167,7 +173,7 @@ fun ProductDetailsScreen(
                     modifier = Modifier
                         .offset(y = (-20).dp)
                         .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                        .background(Color.White)
+                        .background(MaterialTheme.colorScheme.surface)
                         .padding(top = 24.dp)
                 ) {
                     Row(
@@ -188,11 +194,11 @@ fun ProductDetailsScreen(
                             Icon(
                                 if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = null,
-                                tint = if (liked) Color.Red else Color.Gray
+                                tint = if (liked) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         IconButton(onClick = onShare) {
-                            Icon(Icons.Default.Share, contentDescription = null, tint = Color.Gray)
+                            Icon(Icons.Default.Share, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
 
@@ -215,14 +221,14 @@ fun ProductDetailsScreen(
                         Text(" ${formatRating(product.rating)} ", fontWeight = FontWeight.Bold)
                         Text(
                             text = "· ${product.reviewsCount} отзывов",
-                            color = Color.Blue,
+                            color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.clickable { onOpenReviews(product.id) }
                         )
                         Spacer(Modifier.width(12.dp))
                         Text(
                             "· ${product.ordersCount} заказов",
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -235,7 +241,7 @@ fun ProductDetailsScreen(
                             .padding(horizontal = 20.dp)
                             .height(48.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFF1F3F5))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     ) {
                         TabButton(
                             text = "Описание",
@@ -261,7 +267,7 @@ fun ProductDetailsScreen(
                             Text(
                                 text = product.description,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = Color.DarkGray
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         } else {
                             SpecsBlock(product.specs)
@@ -280,22 +286,46 @@ fun ProductDetailsScreen(
                 }
             }
 
-            // Top Bar with back button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .alpha(topBarAlpha)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
+                    .shadow(if (topBarAlpha > 0.8f) 4.dp else 0.dp)
+            )
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .height(64.dp)
+                    .padding(horizontal = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Surface(
+                IconButton(
                     onClick = onBack,
-                    shape = CircleShape,
-                    color = Color.Black.copy(alpha = 0.3f),
-                    modifier = Modifier.size(40.dp)
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = if (topBarAlpha < 0.5f) Color.Black.copy(0.3f) else Color.Transparent,
+                        contentColor = if (topBarAlpha < 0.5f) Color.White else MaterialTheme.colorScheme.onSurface
+                    )
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null, tint = Color.White)
-                    }
+                    Icon(
+                        Icons.Default.KeyboardArrowLeft,
+                        contentDescription = null,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+
+                if (topBarAlpha > 0.7f) {
+                    Text(
+                        text = product.title,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .weight(1f)
+                    )
                 }
             }
         }
@@ -304,12 +334,18 @@ fun ProductDetailsScreen(
     if (showOrderSheet) {
         OrderBottomSheet(
             title = product.title,
-            price = product.price.toDouble(),
+            price = product.price.toString().toDoubleOrNull() ?: 0.0,
             quantity = orderQuantity,
-            onMinus = { if (orderQuantity > 1) orderQuantity-- },
-            onPlus = { orderQuantity++ },
-            onClose = { showOrderSheet = false },
-            onChooseDelivery = { 
+            onMinus = {
+                if (orderQuantity > 1) orderQuantity--
+            },
+            onPlus = {
+                orderQuantity++
+            },
+            onClose = {
+                showOrderSheet = false
+            },
+            onChooseDelivery = {
                 showOrderSheet = false
                 onOpenDelivery(orderQuantity)
             }
@@ -318,95 +354,141 @@ fun ProductDetailsScreen(
 }
 
 @Composable
-private fun TabButton(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+private fun InfoSection(title: String, icon: ImageVector, content: @Composable () -> Unit) {
+    Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(Modifier.width(8.dp))
+            Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        }
+        Spacer(Modifier.height(12.dp))
+        content()
+    }
+}
+
+@Composable
+private fun BottomActionsBar(
+    onChat: () -> Unit,
+    onOrder: () -> Unit
 ) {
-    val alpha by animateFloatAsState(if (selected) 1f else 0.4f)
+    Surface(modifier = Modifier.shadow(16.dp), color = MaterialTheme.colorScheme.surface) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .navigationBarsPadding(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = onChat,
+                modifier = Modifier
+                    .weight(0.4f)
+                    .height(54.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Icon(Icons.Default.ChatBubbleOutline, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Чат", fontWeight = FontWeight.Bold)
+            }
+
+            Button(
+                onClick = onOrder,
+                modifier = Modifier
+                    .weight(0.6f)
+                    .height(54.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("Купить сейчас", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+        }
+    }
+}
+
+@Composable
+private fun TabButton(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val alpha by animateFloatAsState(if (selected) 1f else 0.6f)
     Box(
         modifier = modifier
             .fillMaxHeight()
-            .clip(RoundedCornerShape(12.dp))
-            .background(if (selected) Color.White else Color.Transparent)
-            .clickable { onClick() }
-            .padding(horizontal = 12.dp),
+            .padding(4.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (selected) MaterialTheme.colorScheme.surface else Color.Transparent)
+            .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = Color.Black,
+            color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.alpha(alpha)
         )
     }
 }
 
 @Composable
-private fun InfoSection(
-    title: String,
-    icon: ImageVector,
-    content: @Composable () -> Unit
-) {
-    Column(modifier = Modifier.padding(top = 32.dp)) {
-        Row(
-            modifier = Modifier.padding(horizontal = 20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(22.dp), tint = Color.Gray)
-            Spacer(Modifier.width(12.dp))
-            Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        }
-        Spacer(Modifier.height(16.dp))
-        content()
-    }
-}
-
-@Composable
 private fun SpecsBlock(specs: List<Pair<String, String>>) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        specs.forEach { (key, value) ->
+        specs.forEach { (k, v) ->
             Row(modifier = Modifier.fillMaxWidth()) {
-                Text(key, modifier = Modifier.weight(1f), color = Color.Gray)
-                Text(value, modifier = Modifier.weight(1f), fontWeight = FontWeight.Medium)
+                Text(text = k, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = v,
+                    modifier = Modifier.weight(1f),
+                    fontWeight = FontWeight.SemiBold,
+                    textAlign = TextAlign.End,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
         }
     }
 }
 
 @Composable
 private fun DeliveryBlock(delivery: DeliveryInfoUi) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFFF1F3F5))
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        if (delivery.freeDeliveryEnabled) {
-            DeliveryItem(Icons.Default.Done, delivery.freeDeliveryText ?: "Бесплатная доставка")
-        }
-        if (delivery.pickupEnabled) {
-            DeliveryItem(Icons.Default.LocationOn, "Самовывоз: ${delivery.pickupAddress ?: "не указан"}")
-            if (!delivery.pickupTime.isNullOrBlank()) {
-                DeliveryItem(Icons.Default.AccessTime, "Время: ${delivery.pickupTime}")
+        Column(
+            Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            if (delivery.freeDeliveryEnabled) {
+                DeliveryRow(
+                    icon = Icons.Default.Done,
+                    label = "Доставка курьером",
+                    value = delivery.freeDeliveryText ?: "Бесплатно"
+                )
             }
-        }
-        if (delivery.intercityEnabled) {
-            DeliveryItem(Icons.Default.Public, "Межгород доступен")
+            if (delivery.pickupEnabled) {
+                DeliveryRow(
+                    icon = Icons.Default.LocationOn,
+                    label = "Самовывоз: ${delivery.pickupAddress ?: "не указан"}",
+                    value = delivery.pickupTime ?: "Бесплатно"
+                )
+            }
+            if (delivery.intercityEnabled) {
+                DeliveryRow(
+                    icon = Icons.Default.Public,
+                    label = "Межгород",
+                    value = "Доступно"
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun DeliveryItem(icon: ImageVector, text: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.DarkGray)
+private fun DeliveryRow(icon: ImageVector, label: String, value: String) {
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(Modifier.width(8.dp))
-        Text(text, style = MaterialTheme.typography.bodyMedium)
+        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
+        Text(value, fontWeight = FontWeight.Bold, color = Color(0xFF4CAF50), textAlign = TextAlign.End)
     }
 }
 
@@ -414,72 +496,53 @@ private fun DeliveryItem(icon: ImageVector, text: String) {
 private fun SellerBlock(seller: SellerUi, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-        color = Color.Transparent
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
             Surface(
-                modifier = Modifier.size(56.dp),
+                modifier = Modifier.size(50.dp),
                 shape = CircleShape,
-                color = Color(0xFFE9ECEF)
+                color = MaterialTheme.colorScheme.secondaryContainer
             ) {
-                AsyncImage(
-                    model = seller.avatarUrl,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop
-                )
+                val hasAvatarUrl = runCatching { seller.avatarUrl.isNotEmpty() }.getOrDefault(false)
+                if (hasAvatarUrl) {
+                    AsyncImage(
+                        model = seller.avatarUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(contentAlignment = Alignment.Center) {
+                        Text(
+                            text = seller.name.take(1).uppercase(),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
             }
             Spacer(Modifier.width(16.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(seller.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text(seller.address, color = Color.Gray, fontSize = 14.sp)
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = seller.name,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = seller.address,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1
+                )
             }
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.LightGray)
-        }
-    }
-}
-
-@Composable
-private fun BottomActionsBar(onChat: () -> Unit, onOrder: () -> Unit) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .shadow(16.dp),
-        color = Color.White
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(horizontal = 20.dp, vertical = 12.dp)
-                .navigationBarsPadding(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            OutlinedButton(
-                onClick = onChat,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(52.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Чат")
-            }
-            Button(
-                onClick = onOrder,
-                modifier = Modifier
-                    .weight(1f)
-                    .height(52.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-            ) {
-                Text("Заказать", fontWeight = FontWeight.Bold)
-            }
+            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline)
         }
     }
 }
 
 private fun formatRating(rating: Double): String {
-    return if (rating == 0.0) "Новый" else "%.1f".format(rating)
+    return if (rating == 0.0) "Новый" else String.format("%.1f", rating)
 }
