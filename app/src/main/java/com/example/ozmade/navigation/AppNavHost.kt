@@ -102,7 +102,13 @@ fun AppNavHost(
                     }
                 },
                 onOpenPrivacy = { },
-                onOpenTerms = { }
+                onOpenTerms = { },
+                onBack = {
+                    navController.navigate(Routes.LANG) {
+                        popUpTo(Routes.AUTH) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                }
             )
         }
 
