@@ -304,7 +304,10 @@ fun MainScreen(
             }
             composable("support_chat") { SupportChatScreen(onBack = { navController.popBackStack() }) }
 
-            composable("seller/{sellerId}") { b ->
+            composable(
+                route = "seller/{sellerId}",
+                arguments = listOf(navArgument("sellerId") { type = NavType.IntType })
+            ) { b ->
                 SellerRoute(
                     sellerId = b.arguments?.getInt("sellerId") ?: 0,
                     onBack = { navController.popBackStack() },
@@ -362,11 +365,22 @@ fun MainScreen(
                 })
             }
 
-            composable("reviews/{productId}") { b ->
+            composable(
+                route = "reviews/{productId}",
+                arguments = listOf(navArgument("productId") { type = NavType.IntType })
+            ) { b ->
                 ReviewsRoute(productId = b.arguments?.getInt("productId") ?: 0, onBack = { navController.popBackStack() })
             }
-            composable("seller_reviews/{sellerId}") { b ->
-                SellerReviewsRoute(sellerId = b.arguments?.getInt("sellerId") ?: 0, onBack = { navController.popBackStack() }, onOpenProduct = { pid -> navController.navigate("product/$pid") })
+
+            composable(
+                route = "seller_reviews/{sellerId}",
+                arguments = listOf(navArgument("sellerId") { type = NavType.IntType })
+            ) { b ->
+                SellerReviewsRoute(
+                    sellerId = b.arguments?.getInt("sellerId") ?: 0,
+                    onBack = { navController.popBackStack() },
+                    onOpenProduct = { pid -> navController.navigate("product/$pid") }
+                )
             }
         }
     }

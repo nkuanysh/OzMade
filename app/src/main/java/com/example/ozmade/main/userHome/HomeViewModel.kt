@@ -7,6 +7,8 @@ import com.example.ozmade.R
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.utils.ImageUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -21,6 +23,8 @@ class HomeViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState = _uiState.asStateFlow()
+
+    private var searchJob: Job? = null
 
     init {
         load()
@@ -82,6 +86,35 @@ class HomeViewModel @Inject constructor(
         val currentState = _uiState.value
         if (currentState is HomeUiState.Data) {
             _uiState.value = currentState.copy(searchQuery = query)
+            
+            searchJob?.cancel()
+            if (query.isBlank()) {
+                load()
+            } else {
+                searchJob = viewModelScope.launch {
+                    delay(500) // Debounce
+                    try {
+                        val response = api.searchProducts(query = query)
+                        if (response.isSuccessful) {
+                            val searchedProducts = response.body()?.map { dto ->
+                                Product(
+                                    id = dto.id,
+                                    title = dto.title ?: "Без названия",
+                                    price = dto.price ?: 0.0,
+                                    imageUrl = ImageUtils.formatImageUrl(dto.images?.firstOrNull() ?: dto.imageUrl)
+                                )
+                            } ?: emptyList()
+                            
+                            val updatedState = _uiState.value
+                            if (updatedState is HomeUiState.Data) {
+                                _uiState.value = updatedState.copy(products = searchedProducts)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "search error", e)
+                    }
+                }
+            }
         }
     }
 

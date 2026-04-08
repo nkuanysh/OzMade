@@ -46,6 +46,17 @@ interface OzMadeApi {
         @Query("limit") limit: Int? = 10
     ): Response<List<ProductDto>>
 
+    @GET("products/search")
+    suspend fun searchProducts(
+        @Query("q") query: String? = null,
+        @Query("type") type: String? = null,
+        @Query("category") category: String? = null,
+        @Query("min_cost") minCost: Double? = null,
+        @Query("max_cost") maxCost: Double? = null,
+        @Query("page") page: Int? = 1,
+        @Query("limit") limit: Int? = 20
+    ): Response<List<ProductDto>>
+
     @GET("ads")
     suspend fun getAds(): Response<List<AdDto>>
 
