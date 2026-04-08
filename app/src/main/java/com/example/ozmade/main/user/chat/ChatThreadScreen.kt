@@ -73,16 +73,20 @@ private fun ChatThreadScreen(
     val listState = rememberLazyListState()
     val orangeColor = Color(0xFFFF9800)
 
-    LaunchedEffect(uiState) {
-        if (uiState is ChatThreadUiState.Data && uiState.messages.isNotEmpty()) {
-            listState.animateScrollToItem(uiState.messages.size - 1)
+    // Автоматический скролл вниз при новых сообщениях
+    val messages = (uiState as? ChatThreadUiState.Data)?.messages ?: emptyList()
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
         }
     }
 
     Scaffold(
+        modifier = Modifier.imePadding(), // Чтобы UI поднимался при открытии клавиатуры
         topBar = {
             TopAppBar(
                 title = {
+                    val data = uiState as? ChatThreadUiState.Data
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box {
                             Surface(
@@ -91,7 +95,7 @@ private fun ChatThreadScreen(
                                 color = orangeColor.copy(alpha = 0.1f)
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    val name = (uiState as? ChatThreadUiState.Data)?.sellerName ?: "П"
+                                    val name = data?.sellerName ?: "Ч"
                                     Text(
                                         text = name.take(1).uppercase(),
                                         style = MaterialTheme.typography.titleSmall,
@@ -99,9 +103,8 @@ private fun ChatThreadScreen(
                                     )
                                 }
                             }
-                            
-                            // Зеленая точка онлайн в шапке
-                            if ((uiState as? ChatThreadUiState.Data)?.isOnline == true) {
+
+                            if (data?.isOnline == true) {
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.BottomEnd)
@@ -113,18 +116,16 @@ private fun ChatThreadScreen(
                                 }
                             }
                         }
-                        
+
                         Spacer(Modifier.width(10.dp))
-                        
+
                         Column {
-                            val data = uiState as? ChatThreadUiState.Data
                             Text(
                                 text = data?.sellerName ?: "Чат",
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
-                            // Текст статуса
                             Text(
                                 text = if (data?.isOnline == true) "В сети" else "Был(а) недавно",
                                 style = MaterialTheme.typography.bodySmall,
@@ -145,7 +146,11 @@ private fun ChatThreadScreen(
             )
         },
         bottomBar = {
-            Surface(tonalElevation = 8.dp, shadowElevation = 16.dp, modifier = Modifier.navigationBarsPadding()) {
+            Surface(
+                tonalElevation = 8.dp,
+                shadowElevation = 16.dp,
+                modifier = Modifier.navigationBarsPadding()
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -184,6 +189,7 @@ private fun ChatThreadScreen(
                         },
                         enabled = canSend,
                         modifier = Modifier
+                            .size(48.dp)
                             .clip(CircleShape)
                             .background(if (canSend) orangeColor else Color(0xFFE5E5E5))
                     ) {
@@ -223,7 +229,7 @@ private fun ChatThreadScreen(
                         LazyColumn(
                             state = listState,
                             modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             items(uiState.messages, key = { it.id }) { msg ->
@@ -278,24 +284,28 @@ private fun ProductContextBar(
 @Composable
 private fun Bubble(msg: ChatMessageUi) {
     val isMine = msg.isMine
-    val shape = if (isMine) {
-        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 16.dp, bottomEnd = 2.dp)
-    } else {
-        RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp, bottomStart = 2.dp, bottomEnd = 16.dp)
-    }
+
+    // Определяем форму: у своих сообщений "хвостик" справа снизу, у чужих - слева снизу
+    val shape = RoundedCornerShape(
+        topStart = 16.dp,
+        topEnd = 16.dp,
+        bottomStart = if (isMine) 16.dp else 2.dp,
+        bottomEnd = if (isMine) 2.dp else 16.dp
+    )
 
     Row(
         modifier = Modifier.fillMaxWidth(),
+        // МОЯ ЛОГИКА: Свои (isMine) - вправо (End), чужие - влево (Start)
         horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start
     ) {
         Column(
-            modifier = Modifier.widthIn(max = 250.dp),
+            modifier = Modifier.widthIn(max = 280.dp),
             horizontalAlignment = if (isMine) Alignment.End else Alignment.Start
         ) {
             Box(
                 modifier = Modifier
                     .clip(shape)
-                    .background(if (isMine) Color(0xFFFF9800) else Color(0xFFE5E5E5))
+                    .background(if (isMine) Color(0xFFFF9800) else Color(0xFFE9E9EB))
                     .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 Text(
@@ -304,7 +314,7 @@ private fun Bubble(msg: ChatMessageUi) {
                     color = if (isMine) Color.White else Color.Black
                 )
             }
-            
+
             Row(
                 modifier = Modifier.padding(top = 2.dp, start = 4.dp, end = 4.dp),
                 verticalAlignment = Alignment.CenterVertically

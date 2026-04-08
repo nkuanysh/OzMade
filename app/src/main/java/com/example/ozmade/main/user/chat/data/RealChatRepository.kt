@@ -33,8 +33,8 @@ class RealChatRepository @Inject constructor(
                 productPrice = 0,
                 productImageUrl = c.productImage,
                 lastMessage = last?.content ?: "",
-                lastTimeText = last?.createdAt ?: "",
-                isOnline = false // В будущем здесь будет c.sellerIsOnline или аналогичное поле от API
+                lastTimeText = formatTime(last?.createdAt ?: ""),
+                isOnline = false 
             )
         }
     }
@@ -46,17 +46,20 @@ class RealChatRepository @Inject constructor(
         val myId = sessionStore.myUserId()
 
         resp.body().orEmpty().map { dto ->
+            // ЛОГИКА ДЛЯ ПОКУПАТЕЛЯ:
+            // "Моё" сообщение, если роль НЕ "SELLER" (так как мы покупатель)
+            val role = dto.senderRole?.uppercase()
             val isMine = if (myId != null && myId > 0) {
                 dto.senderId == myId
             } else {
-                dto.senderRole == "user"
+                role != "SELLER"
             }
 
             ChatMessageUi(
                 id = dto.id,
                 text = dto.content,
                 isMine = isMine,
-                timeText = dto.createdAt
+                timeText = formatTime(dto.createdAt)
             )
         }
     }
@@ -86,6 +89,22 @@ class RealChatRepository @Inject constructor(
             if (!resp.isSuccessful) error("Не удалось отправить (${resp.code()})")
 
             return@withContext existingChatId
+        }
+    }
+
+    override suspend fun deleteChat(chatId: Int) = withContext(Dispatchers.IO) {
+        val resp = api.deleteBuyerChat(chatId)
+        if (!resp.isSuccessful) error("Не удалось удалить чат (${resp.code()})")
+    }
+
+    private fun formatTime(isoString: String): String {
+        if (isoString.isBlank()) return ""
+        return try {
+            val parts = isoString.split("T")
+            if (parts.size < 2) return isoString
+            parts[1].take(5) 
+        } catch (e: Exception) {
+            isoString
         }
     }
 }
