@@ -27,11 +27,12 @@ import androidx.compose.ui.unit.sp
 import com.example.ozmade.network.model.SellerRegistrationRequestDto
 
 private val categoryOptions = listOf(
-    "Еда (выпечка/десерты)",
-    "Одежда (аксессуары ручной работы)",
-    "Ремесло/хендмейд",
-    "Искусство (арт/декор)",
-    "Другое"
+    "Еда",
+    "Одежда",
+    "Искусство",
+    "Ремесло",
+    "Подарки",
+    "Для дома"
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
