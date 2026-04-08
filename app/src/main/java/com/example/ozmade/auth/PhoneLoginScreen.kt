@@ -54,7 +54,7 @@ fun PhoneLoginScreen(
                     shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp)
                 )
                 .padding(horizontal = 24.dp)
-                .padding(top = 48.dp, bottom = 24.dp) 
+                .padding(top = 48.dp, bottom = 24.dp)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),

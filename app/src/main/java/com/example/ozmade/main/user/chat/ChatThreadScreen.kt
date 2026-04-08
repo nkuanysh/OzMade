@@ -41,6 +41,14 @@ fun ChatThreadRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(viewModel.events) {
+        viewModel.events.collect { event ->
+            if (event is ChatThreadViewModel.ChatEvent.ChatDeleted) {
+                onBack()
+            }
+        }
+    }
+
     LaunchedEffect(chatId, sellerId, productId) {
         viewModel.openChat(
             chatId = chatId,
@@ -56,6 +64,7 @@ fun ChatThreadRoute(
         uiState = uiState,
         onBack = onBack,
         onSend = { viewModel.send(it) },
+        onDelete = { viewModel.deleteCurrentChat() },
         onOpenProduct = { onOpenProduct(productId) }
     )
 }
@@ -66,6 +75,7 @@ private fun ChatThreadScreen(
     uiState: ChatThreadUiState,
     onBack: () -> Unit,
     onSend: (String) -> Unit,
+    onDelete: () -> Unit,
     onOpenProduct: () -> Unit
 ) {
     var input by remember { mutableStateOf("") }
@@ -140,7 +150,13 @@ private fun ChatThreadScreen(
                 actions = {
                     IconButton(onClick = { menuExpanded = true }) { Icon(Icons.Default.MoreVert, null) }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                        DropdownMenuItem(text = { Text("Удалить чат") }, onClick = { menuExpanded = false })
+                        DropdownMenuItem(
+                            text = { Text("Удалить чат") },
+                            onClick = {
+                                menuExpanded = false
+                                onDelete()
+                            }
+                        )
                     }
                 }
             )
@@ -295,7 +311,6 @@ private fun Bubble(msg: ChatMessageUi) {
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        // МОЯ ЛОГИКА: Свои (isMine) - вправо (End), чужие - влево (Start)
         horizontalArrangement = if (isMine) Arrangement.End else Arrangement.Start
     ) {
         Column(

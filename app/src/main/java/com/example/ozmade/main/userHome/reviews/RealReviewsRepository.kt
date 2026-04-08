@@ -9,24 +9,27 @@ class RealReviewsRepository @Inject constructor(
 ) : ReviewsRepository {
 
     override suspend fun getReviews(productId: Int): ReviewsResponse {
-        val dto = api.getProductReviews(productId)
+        val resp = api.getProductReviews(productId)
+        if (!resp.isSuccessful) error("Не удалось загрузить отзывы (${resp.code()})")
+        
+        val dto = resp.body() ?: error("Пустой ответ от сервера")
 
         val summary = ReviewsSummaryUi(
-            productId = dto.summary.productId,
-            averageRating = dto.summary.averageRating,
-            ratingsCount = dto.summary.ratingsCount,
-            reviewsCount = dto.summary.reviewsCount
+            productId = dto.summary?.productId ?: productId,
+            averageRating = dto.summary?.averageRating ?: 0.0,
+            ratingsCount = dto.summary?.ratingsCount ?: 0,
+            reviewsCount = dto.summary?.reviewsCount ?: 0
         )
 
-        val reviews = dto.reviews.map { r: ReviewItemDto ->
+        val reviews = dto.reviews?.map { r: ReviewItemDto ->
             ReviewUi(
                 id = r.id,
                 userName = r.userName,
                 rating = r.rating,
-                dateText = r.createdAt, // пока просто показываем как текст
+                dateText = r.createdAt,
                 text = r.text
             )
-        }
+        } ?: emptyList()
 
         return ReviewsResponse(summary = summary, reviews = reviews)
     }

@@ -161,7 +161,7 @@ interface OzMadeApi {
 
 
     @GET("products/{id}/reviews")
-    suspend fun getProductReviews(@Path("id") productId: Int): ProductReviewsDto
+    suspend fun getProductReviews(@Path("id") productId: Int): Response<ProductReviewsDto>
 
     @GET("seller/profile")
     suspend fun getSellerProfile(): Response<SellerProfileDto>
@@ -172,10 +172,10 @@ interface OzMadeApi {
     ): Response<MessageResponse>
 
     @GET("sellers/{id}")
-    suspend fun getSellerPage(@Path("id") sellerId: Int): SellerPageDto
+    suspend fun getSellerPage(@Path("id") sellerId: Int): Response<SellerPageDto>
 
     @GET("sellers/{id}/reviews")
-    suspend fun getSellerReviews(@Path("id") sellerId: Int): SellerReviewsDto
+    suspend fun getSellerReviews(@Path("id") sellerId: Int): Response<SellerReviewsDto>
 
     @GET("seller/quality")
     suspend fun getSellerQuality(): Response<SellerQualityDto>
@@ -232,7 +232,7 @@ interface OzMadeApi {
     suspend fun getBuyerChats(): Response<List<ChatDto>>
 
     @DELETE("chats/{chat_id}")
-    suspend fun deleteBuyerChat(
+    suspend fun deleteChat(
         @Path("chat_id") chatId: Int
     ): Response<Unit>
 

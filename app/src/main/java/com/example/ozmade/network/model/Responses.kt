@@ -96,23 +96,23 @@ data class AuthSyncResponse(
 
 data class ProfileDto(
     @SerializedName("ID") val id: Int,
-    @SerializedName(value = "FirebaseUID", alternate = ["firebase_uid", "firebaseUid"]) 
+    @SerializedName(value = "FirebaseUID", alternate = ["firebase_uid", "firebaseUid"])
     val firebaseUid: String? = null,
-    @SerializedName(value = "PhoneNumber", alternate = ["phone_number", "phoneNumber"]) 
+    @SerializedName(value = "PhoneNumber", alternate = ["phone_number", "phoneNumber"])
     val phoneNumber: String? = null,
-    @SerializedName(value = "Email", alternate = ["email"]) 
+    @SerializedName(value = "Email", alternate = ["email"])
     val email: String? = null,
-    @SerializedName(value = "Name", alternate = ["name"]) 
+    @SerializedName(value = "Name", alternate = ["name"])
     val name: String? = null,
-    @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl"]) 
+    @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl"])
     val avatarUrl: String? = null,
-    @SerializedName(value = "Address", alternate = ["address"]) 
+    @SerializedName(value = "Address", alternate = ["address"])
     val address: String? = null,
-    @SerializedName(value = "Role", alternate = ["role"]) 
+    @SerializedName(value = "Role", alternate = ["role"])
     val role: String? = null,
-    @SerializedName(value = "IsSeller", alternate = ["is_seller", "isSeller"]) 
+    @SerializedName(value = "IsSeller", alternate = ["is_seller", "isSeller"])
     val isSeller: Boolean? = null,
-    @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) 
+    @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"])
     val createdAt: String? = null
 )
 
@@ -144,7 +144,11 @@ data class ChatDto(
     @SerializedName(value="ProductID", alternate=["product_id","productId"]) val productId: Int? = null,
     @SerializedName(value="ProductName", alternate=["product_name","productName"]) val productName: String? = null,
     @SerializedName(value="ProductImage", alternate=["product_image", "productImage", "ImageName"]) val productImage: String? = null,
-    @SerializedName(value="Messages", alternate=["messages"]) val messages: List<MessageDto>?
+    @SerializedName(value="Messages", alternate=["messages"]) val messages: List<MessageDto>?,
+    @SerializedName("deleted_by_buyer") val deletedByBuyer: Boolean = false,
+    @SerializedName("deleted_by_seller") val deletedBySeller: Boolean = false,
+    @SerializedName("buyer_cleared_at") val buyerClearedAt: String? = null,
+    @SerializedName("seller_cleared_at") val sellerClearedAt: String? = null
 )
 
 data class MessageDto(
@@ -159,8 +163,8 @@ data class MessageDto(
 )
 
 data class SellerPageDto(
-    @SerializedName("seller") val seller: SellerHeaderDto,
-    @SerializedName("products") val products: List<SellerProductDto>
+    @SerializedName("seller") val seller: SellerHeaderDto?,
+    @SerializedName("products") val products: List<SellerProductDto>?
 )
 
 data class SellerHeaderDto(
@@ -199,8 +203,8 @@ data class CategoryDto(
 
 data class
 ProductReviewsDto(
-    @SerializedName("summary") val summary: ReviewsSummaryDto,
-    @SerializedName("reviews") val reviews: List<ReviewItemDto>
+    @SerializedName("summary") val summary: ReviewsSummaryDto?,
+    @SerializedName("reviews") val reviews: List<ReviewItemDto>?
 )
 
 data class ReviewsSummaryDto(
@@ -250,8 +254,8 @@ data class SellerInfoDto(
 )
 
 data class SellerReviewsDto(
-    @SerializedName("header") val header: SellerReviewsHeaderDto,
-    @SerializedName("reviews") val reviews: List<SellerReviewItemDto>
+    @SerializedName("header") val header: SellerReviewsHeaderDto?,
+    @SerializedName("reviews") val reviews: List<SellerReviewItemDto>?
 )
 
 data class SellerReviewsHeaderDto(

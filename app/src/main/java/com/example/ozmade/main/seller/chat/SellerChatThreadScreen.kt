@@ -11,7 +11,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
@@ -37,6 +36,14 @@ fun SellerChatThreadRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    LaunchedEffect(viewModel.events) {
+        viewModel.events.collect { event ->
+            if (event is SellerChatThreadViewModel.SellerChatEvent.ChatDeleted) {
+                onBack()
+            }
+        }
+    }
+
     LaunchedEffect(chatId) {
         viewModel.open(chatId, buyerName)
     }
@@ -44,7 +51,8 @@ fun SellerChatThreadRoute(
     SellerChatThreadScreen(
         uiState = uiState,
         onBack = onBack,
-        onSend = { viewModel.send(it) }
+        onSend = { viewModel.send(it) },
+        onDelete = { viewModel.deleteChat() }
     )
 }
 
@@ -53,7 +61,8 @@ fun SellerChatThreadRoute(
 private fun SellerChatThreadScreen(
     uiState: SellerChatThreadUiState,
     onBack: () -> Unit,
-    onSend: (String) -> Unit
+    onSend: (String) -> Unit,
+    onDelete: () -> Unit
 ) {
     var input by remember { mutableStateOf("") }
     var menuExpanded by remember { mutableStateOf(false) }
@@ -70,7 +79,6 @@ private fun SellerChatThreadScreen(
             TopAppBar(
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Аватар
                         Surface(
                             modifier = Modifier.size(40.dp),
                             shape = CircleShape,
@@ -85,9 +93,9 @@ private fun SellerChatThreadScreen(
                                 )
                             }
                         }
-                        
+
                         Spacer(Modifier.width(12.dp))
-                        
+
                         Column {
                             Text(
                                 text = (uiState as? SellerChatThreadUiState.Data)?.buyerName ?: "Чат",
@@ -111,14 +119,16 @@ private fun SellerChatThreadScreen(
                         Icon(Icons.Default.MoreVert, null)
                     }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-                        DropdownMenuItem(text = { Text("Очистить историю") }, onClick = { menuExpanded = false })
+                        DropdownMenuItem(
+                            text = { Text("Очистить историю") },
+                            onClick = {
+                                menuExpanded = false
+                                onDelete()
+                            }
+                        )
                         DropdownMenuItem(text = { Text("Пожаловаться") }, onClick = { menuExpanded = false })
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
-                )
+                }
             )
         },
         bottomBar = {
@@ -184,7 +194,6 @@ private fun SellerChatThreadScreen(
             }
         }
     ) { padding ->
-        // Фон чата с очень легким оттенком
         Box(
             modifier = Modifier
                 .padding(padding)
@@ -218,7 +227,7 @@ private fun SellerChatThreadScreen(
 @Composable
 private fun SellerBubble(msg: SellerChatMessageUi) {
     val isMine = msg.isMine
-    
+
     val bubbleShape = if (isMine) {
         RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 20.dp, bottomEnd = 4.dp)
     } else {
@@ -244,7 +253,7 @@ private fun SellerBubble(msg: SellerChatMessageUi) {
                 style = MaterialTheme.typography.bodyLarge,
                 color = contentColor
             )
-            
+
             Row(
                 modifier = Modifier.align(Alignment.End),
                 verticalAlignment = Alignment.CenterVertically
@@ -254,7 +263,7 @@ private fun SellerBubble(msg: SellerChatMessageUi) {
                     fontSize = 11.sp,
                     color = if (isMine) Color.White.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
-                
+
                 if (isMine) {
                     Spacer(Modifier.width(4.dp))
                     Icon(

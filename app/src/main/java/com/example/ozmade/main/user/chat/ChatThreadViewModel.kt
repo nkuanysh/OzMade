@@ -141,11 +141,11 @@ class ChatThreadViewModel @Inject constructor(
         val chatId = currentChatId ?: return
         viewModelScope.launch {
             try {
+                // Вызываем API для удаления (очистки истории для текущего пользователя)
                 repo.deleteChat(chatId)
                 _events.emit(ChatEvent.ChatDeleted)
             } catch (e: Exception) {
-                // Если бэкенд вернул 404 или другую ошибку, не ломаем UI, а уведомляем
-                _events.emit(ChatEvent.ActionError("Сервер вернул ошибку при удалении. Возможно, функция еще не реализована на бэкенде."))
+                _events.emit(ChatEvent.ActionError("Ошибка при очистке чата"))
             }
         }
     }

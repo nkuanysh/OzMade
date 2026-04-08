@@ -9,20 +9,23 @@ class RealSellerRepository @Inject constructor(
 ) : SellerRepository {
 
     override suspend fun getSellerPage(sellerId: Int): SellerPageResponse {
-        val dto = api.getSellerPage(sellerId)
+        val resp = api.getSellerPage(sellerId)
+        if (!resp.isSuccessful) error("Не удалось загрузить страницу продавца (${resp.code()})")
+        
+        val dto = resp.body() ?: error("Пустой ответ от сервера")
 
         val seller = SellerHeaderUi(
-            id = dto.seller.id,
-            name = dto.seller.name,
-            status = dto.seller.status,
-            ordersCount = dto.seller.ordersCount,
-            rating = dto.seller.rating,
-            reviewsCount = dto.seller.reviewsCount,
-            daysWithOzMade = dto.seller.daysWithOzMade,
-            avatarUrl = ImageUtils.formatImageUrl(dto.seller.avatarUrl)
+            id = dto.seller?.id ?: sellerId,
+            name = dto.seller?.name ?: "Продавец",
+            status = dto.seller?.status ?: "",
+            ordersCount = dto.seller?.ordersCount ?: 0,
+            rating = dto.seller?.rating ?: 0.0,
+            reviewsCount = dto.seller?.reviewsCount ?: 0,
+            daysWithOzMade = dto.seller?.daysWithOzMade ?: 0,
+            avatarUrl = ImageUtils.formatImageUrl(dto.seller?.avatarUrl)
         )
 
-        val products = dto.products.map {
+        val products = dto.products?.map {
             SellerProductUi(
                 id = it.id,
                 title = it.title,
@@ -32,12 +35,11 @@ class RealSellerRepository @Inject constructor(
                 rating = it.rating,
                 imageUrl = ImageUtils.formatImageUrl(it.imageUrl)
             )
-        }
+        } ?: emptyList()
 
         return SellerPageResponse(seller, products)
     }
 
-    // лайки позже можно вынести в отдельный FavoritesApi
     override suspend fun toggleLike(productId: Int): Boolean = false
     override suspend fun isLiked(productId: Int): Boolean = false
 }

@@ -7,7 +7,9 @@ import com.example.ozmade.main.seller.chat.data.SellerChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -31,9 +33,17 @@ class SellerChatThreadViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<SellerChatThreadUiState>(SellerChatThreadUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
+    private val _events = MutableSharedFlow<SellerChatEvent>()
+    val events = _events.asSharedFlow()
+
     private var currentChatId: Int? = null
     private var buyerName: String = ""
     private var pollingJob: Job? = null
+
+    sealed class SellerChatEvent {
+        object ChatDeleted : SellerChatEvent()
+        data class ActionError(val message: String) : SellerChatEvent()
+    }
 
     fun open(chatId: Int, buyerName: String) {
         this.currentChatId = chatId
@@ -81,6 +91,15 @@ class SellerChatThreadViewModel @Inject constructor(
             }.onFailure {
                 _uiState.value = SellerChatThreadUiState.Error(it.message ?: "Ошибка")
             }
+        }
+    }
+
+    fun deleteChat() {
+        val chatId = currentChatId ?: return
+        viewModelScope.launch {
+            runCatching { repo.deleteChat(chatId) }
+                .onSuccess { _events.emit(SellerChatEvent.ChatDeleted) }
+                .onFailure { _events.emit(SellerChatEvent.ActionError(it.message ?: "Ошибка при удалении")) }
         }
     }
 

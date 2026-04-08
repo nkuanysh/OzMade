@@ -4,4 +4,5 @@ interface SellerChatRepository {
     suspend fun getThreads(): List<SellerChatThreadUi>
     suspend fun getMessages(chatId: Int): List<SellerChatMessageUi>
     suspend fun sendMessage(chatId: Int, text: String)
+    suspend fun deleteChat(chatId: Int)
 }

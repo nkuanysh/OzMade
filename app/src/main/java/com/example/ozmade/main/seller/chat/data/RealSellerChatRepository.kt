@@ -20,8 +20,16 @@ class RealSellerChatRepository @Inject constructor(
         if (!resp.isSuccessful) error("Не удалось загрузить чаты (${resp.code()})")
         val chats = resp.body().orEmpty()
 
-        chats.map { chat ->
-            val last = chat.messages?.maxByOrNull { it.createdAt }
+        chats.mapNotNull { chat ->
+            // Фильтруем сообщения: только те, что созданы после последней очистки истории продавцом
+            val visibleMessages = chat.messages.orEmpty().filter { msg ->
+                chat.sellerClearedAt == null || msg.createdAt > chat.sellerClearedAt
+            }
+
+            // Если после фильтрации сообщений не осталось, и чат был очищен/удален, не показываем его в списке
+            if (visibleMessages.isEmpty()) return@mapNotNull null
+
+            val last = visibleMessages.maxByOrNull { it.createdAt }
             SellerChatThreadUi(
                 chatId = chat.id,
                 buyerId = chat.buyerId,
@@ -33,34 +41,34 @@ class RealSellerChatRepository @Inject constructor(
     }
 
     override suspend fun getMessages(chatId: Int): List<SellerChatMessageUi> = withContext(Dispatchers.IO) {
+        // Получаем информацию о чате, чтобы узнать время очистки (sellerClearedAt)
+        val chatsResp = api.getSellerChats()
+        val chat = chatsResp.body()?.find { it.id == chatId }
+        val clearedAt = chat?.sellerClearedAt
+
         val resp = api.getSellerChatMessages(chatId)
         if (!resp.isSuccessful) error("Не удалось загрузить сообщения (${resp.code()})")
         val dtos = resp.body().orEmpty()
 
         val myId = sessionStore.myUserId()
-        Log.d("SellerChatRepo", "myId: $myId")
 
-        dtos.map { dto ->
-            // УЛУЧШЕННАЯ ЛОГИКА ДЛЯ ПРОДАВЦА:
-            // 1. По ID (если он есть)
-            // 2. Если ID нет, по роли. 
-            // В чате ПРОДАВЦА роль "SELLER" (или любая кроме BUYER) - это МЫ.
-            val role = dto.senderRole?.uppercase()
-            val isMine = if (myId != null && myId > 0) {
-                dto.senderId == myId
-            } else {
-                role != "BUYER"
+        dtos
+            .filter { clearedAt == null || it.createdAt > clearedAt }
+            .map { dto ->
+                val role = dto.senderRole?.uppercase()
+                val isMine = if (myId != null && myId > 0) {
+                    dto.senderId == myId
+                } else {
+                    role != "BUYER"
+                }
+
+                SellerChatMessageUi(
+                    id = dto.id,
+                    text = dto.content,
+                    isMine = isMine,
+                    timeText = formatTime(dto.createdAt)
+                )
             }
-            
-            Log.d("SellerChatRepo", "Msg ${dto.id}: role=$role, isMine=$isMine")
-
-            SellerChatMessageUi(
-                id = dto.id,
-                text = dto.content,
-                isMine = isMine,
-                timeText = formatTime(dto.createdAt)
-            )
-        }
     }
 
     override suspend fun sendMessage(chatId: Int, text: String) = withContext(Dispatchers.IO) {
@@ -68,12 +76,17 @@ class RealSellerChatRepository @Inject constructor(
         if (!resp.isSuccessful) error("Не удалось отправить (${resp.code()})")
     }
 
+    override suspend fun deleteChat(chatId: Int) = withContext(Dispatchers.IO) {
+        val resp = api.deleteChat(chatId)
+        if (!resp.isSuccessful) error("Не удалось удалить историю (${resp.code()})")
+    }
+
     private fun formatTime(isoString: String): String {
         if (isoString.isBlank()) return ""
         return try {
             val parts = isoString.split("T")
             if (parts.size < 2) return isoString
-            parts[1].take(5) 
+            parts[1].take(5)
         } catch (e: Exception) {
             isoString
         }

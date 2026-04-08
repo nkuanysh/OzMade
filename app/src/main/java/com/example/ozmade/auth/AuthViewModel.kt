@@ -42,6 +42,7 @@ class AuthViewModel @Inject constructor(
                     onSuccess = { sess ->
                         if (sess.verificationId == "AUTO") {
                             _uiState.value = AuthUiState.Success
+                            logFirebaseIdToken() // 👈 ВОТ СЮДА
                             sendFCMTokenToBackend(api)
                         } else {
                             _uiState.value = AuthUiState.OtpRequired(sess.phone, sess.verificationId)
@@ -63,6 +64,7 @@ class AuthViewModel @Inject constructor(
                 result.fold(
                     onSuccess = {
                         _uiState.value = AuthUiState.Success
+                        logFirebaseIdToken() // 👈 ВОТ СЮДА
                         sendFCMTokenToBackend(api)
                     },
                     onFailure = {
@@ -100,6 +102,23 @@ class AuthViewModel @Inject constructor(
                 }
             }
         }
+    }
+    private fun logFirebaseIdToken() {
+        val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+
+        if (user == null) {
+            Log.e("FIREBASE_ID_TOKEN", "User is null")
+            return
+        }
+
+        user.getIdToken(true)
+            .addOnSuccessListener { result ->
+                val idToken = result.token
+                Log.d("FIREBASE_ID_TOKEN", idToken ?: "null")
+            }
+            .addOnFailureListener { e ->
+                Log.e("FIREBASE_ID_TOKEN", "Failed to get token", e)
+            }
     }
 }
 

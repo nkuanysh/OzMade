@@ -8,17 +8,20 @@ class RealSellerReviewsRepository @Inject constructor(
 ) : SellerReviewsRepository {
 
     override suspend fun getSellerReviews(sellerId: Int): SellerReviewsResponse {
-        val dto = api.getSellerReviews(sellerId)
+        val resp = api.getSellerReviews(sellerId)
+        if (!resp.isSuccessful) error("Не удалось загрузить отзывы продавца (${resp.code()})")
+        
+        val dto = resp.body() ?: error("Пустой ответ от сервера")
 
         val header = SellerReviewsHeaderUi(
-            sellerId = dto.header.sellerId,
-            sellerName = dto.header.sellerName,
-            reviewsCount = dto.header.reviewsCount,
-            averageRating = dto.header.averageRating,
-            ratingsCount = dto.header.ratingsCount
+            sellerId = dto.header?.sellerId ?: sellerId,
+            sellerName = dto.header?.sellerName ?: "Продавец",
+            reviewsCount = dto.header?.reviewsCount ?: 0,
+            averageRating = dto.header?.averageRating ?: 0.0,
+            ratingsCount = dto.header?.ratingsCount ?: 0
         )
 
-        val reviews = dto.reviews.map {
+        val reviews = dto.reviews?.map {
             SellerReviewUi(
                 id = it.id,
                 userName = it.userName,
@@ -28,7 +31,7 @@ class RealSellerReviewsRepository @Inject constructor(
                 dateText = it.createdAt,
                 text = it.text
             )
-        }
+        } ?: emptyList()
 
         return SellerReviewsResponse(header, reviews)
     }
