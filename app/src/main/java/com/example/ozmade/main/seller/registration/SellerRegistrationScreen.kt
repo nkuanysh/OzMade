@@ -118,6 +118,7 @@ fun SellerRegistrationScreen(
 
                 Spacer(Modifier.height(14.dp))
 
+                @Suppress("DEPRECATION")
                 OutlinedTextField(
                     value = firstName,
                     onValueChange = { firstName = it },
@@ -126,6 +127,7 @@ fun SellerRegistrationScreen(
                     singleLine = true
                 )
                 Spacer(Modifier.height(10.dp))
+                @Suppress("DEPRECATION")
                 OutlinedTextField(
                     value = lastName,
                     onValueChange = { lastName = it },
@@ -134,6 +136,7 @@ fun SellerRegistrationScreen(
                     singleLine = true
                 )
                 Spacer(Modifier.height(10.dp))
+                @Suppress("DEPRECATION")
                 OutlinedTextField(
                     value = displayName,
                     onValueChange = { displayName = it },
@@ -143,6 +146,7 @@ fun SellerRegistrationScreen(
                     singleLine = true
                 )
                 Spacer(Modifier.height(10.dp))
+                @Suppress("DEPRECATION")
                 OutlinedTextField(
                     value = city,
                     onValueChange = { city = it },
@@ -178,7 +182,8 @@ fun SellerRegistrationScreen(
                                     if (selected) selectedCategories - cat
                                     else selectedCategories + cat
                             },
-                            label = { Text(cat) }
+                            label = { Text(cat) },
+                            enabled = true
                         )
                     }
                 }
@@ -213,6 +218,7 @@ fun SellerRegistrationScreen(
                     pop()
                 }
 
+                @Suppress("DEPRECATION")
                 ClickableText(
                     text = linksText,
                     style = TextStyle(textAlign = TextAlign.Start, color = MaterialTheme.colorScheme.onSurface),

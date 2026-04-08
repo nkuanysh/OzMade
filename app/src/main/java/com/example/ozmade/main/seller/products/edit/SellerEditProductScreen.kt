@@ -380,7 +380,8 @@ private fun FlowRowChips(
                         selected = selected.contains(c),
                         onClick = { onToggle(c) },
                         label = { Text(c.title) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        enabled = true
                     )
                 }
                 if (row.size == 1) Spacer(Modifier.weight(1f))

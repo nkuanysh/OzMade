@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -34,124 +35,82 @@ fun SellerProfileScreen(
     ) { padding ->
         Column(
             modifier = Modifier
-                .padding(padding)
                 .fillMaxSize()
+                .padding(padding)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 16.dp)
         ) {
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(32.dp))
 
             Text(
                 text = "Мой магазин",
                 style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
-
-            Spacer(Modifier.height(16.dp))
-
-            SellerStatsRow()
 
             Spacer(Modifier.height(24.dp))
 
+            SellerStatsRow()
+
+            Spacer(Modifier.height(32.dp))
+
             Text(
-                text = "Управление",
+                text = "УПРАВЛЕНИЕ",
                 style = MaterialTheme.typography.labelLarge,
                 color = Color.Gray,
                 modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
             )
 
-            Surface(
-                shape = RoundedCornerShape(24.dp),
-                color = Color.White,
-                shadowElevation = 0.5.dp
-            ) {
-                Column {
-                    SellerMenuItem(
-                        Icons.Outlined.Settings,
-                        "Настройки магазина",
-                        "Название, описание, логотип",
-                        onClick = onOpenStoreSettings
-                    )
-                    HorizontalDivider(
-                        Modifier.padding(horizontal = 16.dp),
-                        thickness = 0.5.dp,
-                        color = Color(0xFFF1F1F1)
-                    )
-
-                    SellerMenuItem(
-                        Icons.Outlined.LocalShipping,
-                        "Доставка",
-                        "Самовывоз, моя доставка, межгород",
-                        onClick = onOpenDelivery
-                    )
-                    HorizontalDivider(
-                        Modifier.padding(horizontal = 16.dp),
-                        thickness = 0.5.dp,
-                        color = Color(0xFFF1F1F1)
-                    )
-
-                    SellerMenuItem(
-                        Icons.Outlined.Payments,
-                        "Реквизиты и оплата",
-                        "Куда приходят деньги",
-                        onClick = onOpenPayments
-                    )
-                    HorizontalDivider(
-                        Modifier.padding(horizontal = 16.dp),
-                        thickness = 0.5.dp,
-                        color = Color(0xFFF1F1F1)
-                    )
-
-                    SellerMenuItem(
-                        Icons.Outlined.Analytics,
-                        "Аналитика продаж",
-                        "Статистика за месяц",
-                        onClick = onOpenAnalytics
-                    )
-                }
+            ProfileSectionCard {
+                SellerMenuItem(
+                    icon = Icons.Outlined.Settings,
+                    title = "Настройки магазина",
+                    subtitle = "Название, описание, logoтип",
+                    iconColor = Color(0xFF5C6BC0),
+                    onClick = onOpenStoreSettings
+                )
+                MenuDivider()
+                SellerMenuItem(
+                    icon = Icons.Outlined.LocalShipping,
+                    title = "Доставка",
+                    subtitle = "Самовывоз, курьер, почта",
+                    iconColor = Color(0xFF66BB6A),
+                    onClick = onOpenDelivery
+                )
+                MenuDivider()
+                SellerMenuItem(
+                    icon = Icons.Outlined.Payments,
+                    title = "Реквизиты и оплата",
+                    subtitle = "Куда приходят деньги",
+                    iconColor = Color(0xFFFFA726),
+                    onClick = onOpenPayments
+                )
+                MenuDivider()
+                SellerMenuItem(
+                    icon = Icons.Outlined.Analytics,
+                    title = "Аналитика продаж",
+                    subtitle = "Статистика за месяц",
+                    iconColor = Color(0xFF26A69A),
+                    onClick = onOpenAnalytics
+                )
             }
 
             Spacer(Modifier.height(24.dp))
 
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
-                onClick = onBecomeBuyer
-            ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.SwitchAccount,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.secondary
-                    )
-                    Spacer(Modifier.width(16.dp))
-                    Column {
-                        Text(
-                            "Вернуться в покупки",
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                        Text(
-                            "Переключиться на профиль покупателя",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(0.7f)
-                        )
-                    }
-                }
-            }
+            ReturnToBuyerCard(onClick = onBecomeBuyer)
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(32.dp))
 
             TextButton(
                 onClick = { /* Logout logic */ },
-                modifier = Modifier.align(Alignment.CenterHorizontally)
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFE53935))
             ) {
-                Text("Выйти из системы", color = Color.Gray)
+                Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Выйти из системы", fontWeight = FontWeight.Bold)
             }
 
             Spacer(Modifier.height(16.dp))
@@ -165,9 +124,9 @@ private fun SellerStatsRow() {
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        StatCard("Товары", "24", Icons.Default.Inventory, Modifier.weight(1f))
+        StatCard("Товары", "24", Icons.Default.Inventory, Modifier.weight(1f), Color(0xFF5C6BC0))
         StatCard("Рейтинг", "4.9", Icons.Default.Star, Modifier.weight(1f), Color(0xFFFFA000))
-        StatCard("Заказы", "12", Icons.Default.LocalShipping, Modifier.weight(1f))
+        StatCard("Заказы", "12", Icons.Default.LocalShipping, Modifier.weight(1f), Color(0xFF66BB6A))
     }
 }
 
@@ -177,22 +136,46 @@ private fun StatCard(
     value: String,
     icon: ImageVector,
     modifier: Modifier,
-    iconColor: Color = MaterialTheme.colorScheme.primary
+    iconColor: Color
 ) {
-    Surface(
+    Card(
         modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        color = Color.White
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
     ) {
         Column(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(icon, contentDescription = null, tint = iconColor, modifier = Modifier.size(20.dp))
-            Spacer(Modifier.height(4.dp))
-            Text(value, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            Text(label, fontSize = 10.sp, color = Color.Gray)
+            Surface(
+                modifier = Modifier.size(36.dp),
+                shape = CircleShape,
+                color = iconColor.copy(alpha = 0.1f)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(value, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
+            Text(label, fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Medium)
         }
+    }
+}
+
+@Composable
+private fun ProfileSectionCard(content: @Composable ColumnScope.() -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
+    ) {
+        Column(content = content)
     }
 }
 
@@ -201,29 +184,96 @@ private fun SellerMenuItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
+    iconColor: Color,
     onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() }
+            .clickable(onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-            contentAlignment = Alignment.Center
+        Surface(
+            modifier = Modifier.size(40.dp),
+            shape = RoundedCornerShape(12.dp),
+            color = iconColor.copy(alpha = 0.1f)
         ) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp))
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.padding(10.dp),
+                tint = iconColor
+            )
         }
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-            Text(subtitle, fontSize = 12.sp, color = Color.Gray)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
         }
-        Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.LightGray)
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = Color.LightGray,
+            modifier = Modifier.size(20.dp)
+        )
     }
+}
+
+@Composable
+private fun ReturnToBuyerCard(onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(Color(0xFF455A64), Color(0xFF263238))
+                )
+            )
+            .clickable { onClick() },
+        color = Color.Transparent,
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "Вернуться в покупки",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Text(
+                    "Перейти в профиль покупателя",
+                    color = Color.White.copy(0.8f),
+                    fontSize = 13.sp
+                )
+            }
+            Icon(
+                Icons.Default.SwitchAccount,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun MenuDivider() {
+    HorizontalDivider(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        thickness = 0.5.dp,
+        color = Color(0xFFF1F1F1)
+    )
 }

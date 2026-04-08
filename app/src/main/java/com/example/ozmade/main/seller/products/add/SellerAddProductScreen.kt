@@ -363,11 +363,13 @@ private fun FlowRowChips(
         for (row in all.chunked(2)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEach { c ->
+                    val isSelected = selected.contains(c)
                     FilterChip(
-                        selected = selected.contains(c),
+                        selected = isSelected,
                         onClick = { onToggle(c) },
                         label = { Text(c.title) },
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        enabled = true
                     )
                 }
                 if (row.size == 1) Spacer(Modifier.weight(1f))
