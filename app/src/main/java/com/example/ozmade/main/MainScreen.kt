@@ -1,36 +1,39 @@
 package com.example.ozmade.main
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.ozmade.main.seller.SellerMainScreen
+import com.example.ozmade.main.seller.data.SellerLocalStore
 import com.example.ozmade.main.seller.onboarding.SellerGateRoute
 import com.example.ozmade.main.seller.onboarding.SellerOnboardingScreen
+import com.example.ozmade.main.seller.registration.SellerRegistrationRoute
 import com.example.ozmade.main.user.chat.ChatScreen
 import com.example.ozmade.main.user.chat.ChatThreadRoute
 import com.example.ozmade.main.user.favorites.FavoritesRoute
-import com.example.ozmade.main.user.favorites.FavoritesScreen
 import com.example.ozmade.main.user.profile.EditProfileScreen
 import com.example.ozmade.main.user.profile.ProfileScreen
+import com.example.ozmade.main.user.profile.about.AboutAppScreen
+import com.example.ozmade.main.user.profile.notification.NotificationsScreen
+import com.example.ozmade.main.user.profile.orders.OrdersHistoryScreen
 import com.example.ozmade.main.user.profile.support.SupportChatScreen
 import com.example.ozmade.main.user.profile.support.SupportScreen
 import com.example.ozmade.main.userHome.HomeRoute
@@ -39,11 +42,6 @@ import com.example.ozmade.main.userHome.details.ProductDetailsRoute
 import com.example.ozmade.main.userHome.reviews.ReviewsRoute
 import com.example.ozmade.main.userHome.seller.SellerRoute
 import com.example.ozmade.main.userHome.seller.reviews.SellerReviewsRoute
-import com.example.ozmade.main.seller.data.SellerLocalStore
-import com.example.ozmade.main.user.profile.notification.NotificationsScreen
-import com.example.ozmade.main.user.profile.orders.OrdersHistoryScreen
-import com.example.ozmade.main.user.profile.about.AboutAppScreen
-import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 
 private sealed class BottomItem(
@@ -181,115 +179,81 @@ fun MainScreen(
                 )
             }
 
-            composable(
-                route = "delivery/{productId}/{qty}",
-                arguments = listOf(
-                    navArgument("productId") { type = NavType.IntType },
-                    navArgument("qty") { type = NavType.IntType }
-                )
-            ) { backStackEntry ->
-                val productId = backStackEntry.arguments?.getInt("productId") ?: 0
-                val qty = backStackEntry.arguments?.getInt("qty") ?: 1
-
-                com.example.ozmade.main.user.orderflow.ui.DeliveryChooseRoute2(
-                    productId = productId,
-                    quantity = qty,
-                    onBack = { navController.popBackStack() },
-                    onCreated = {
-                        navController.navigate("buyer_orders") {
-                            launchSingleTop = true
-                        }
-                    }
+            composable("reviews/{productId}") { b ->
+                ReviewsRoute(
+                    productId = b.arguments?.getString("productId")?.toInt() ?: 0,
+                    onBack = { navController.popBackStack() }
                 )
             }
 
-            composable("buyer_orders") {
-                com.example.ozmade.main.user.orders.BuyerOrdersRoute(
+            composable("seller_reviews/{sellerId}") { b ->
+                SellerReviewsRoute(
+                    sellerId = b.arguments?.getString("sellerId")?.toInt() ?: 0,
                     onBack = { navController.popBackStack() },
-                    onOpenOrder = { orderId ->
-                        navController.navigate("buyer_order/$orderId")
-                    }
+                    onOpenProduct = { pid -> navController.navigate("product/$pid") }
                 )
             }
 
-            composable(
-                route = "buyer_order/{orderId}",
-                arguments = listOf(
-                    navArgument("orderId") { type = NavType.IntType }
-                )
-            ) { backStackEntry ->
-                val orderId = backStackEntry.arguments?.getInt("orderId") ?: 0
-
-                com.example.ozmade.main.user.orders.BuyerOrderDetailsRoute(
-                    orderId = orderId,
-                    onBack = { navController.popBackStack() },
-                    onOpenProduct = { pid ->
-                        navController.navigate("product/$pid")
-                    }
-                )
-            }
-
-            composable(BottomItem.Favorites.route) { 
+            composable(BottomItem.Favorites.route) {
                 FavoritesRoute(
-                    onBuyClick = {
-                        navController.navigate("home")
-                    },
                     onOpenProduct = { id -> navController.navigate("product/$id") }
-                ) 
+                )
             }
 
             composable(BottomItem.Chat.route) {
                 ChatScreen(
-                    onOpenThread = { t ->
-                        val encS = Uri.encode(t.sellerName)
-                        val encT = Uri.encode(t.productTitle)
+                    onOpenThread = { thread ->
+                        val encS = Uri.encode(thread.sellerName)
+                        val encT = Uri.encode(thread.productTitle)
                         navController.navigate(
-                            "chat/${t.chatId}/${t.sellerId}/${t.productId}?sellerName=$encS&productTitle=$encT&price=${t.productPrice}"
+                            "chat/${thread.chatId}/${thread.sellerId}/${thread.productId}?sellerName=$encS&productTitle=$encT&price=${thread.productPrice}"
                         )
-                    }
+                    },
+                    onOpenSupportChat = { navController.navigate("support_chat") },
+                    onNavigateToHome = { navController.navigate(BottomItem.Home.route) }
                 )
             }
 
             composable(
-                route = "chat/{chatId}/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
+                "chat/{chatId}/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
                 arguments = listOf(
                     navArgument("chatId") { type = NavType.IntType },
                     navArgument("sellerId") { type = NavType.IntType },
                     navArgument("productId") { type = NavType.IntType },
-                    navArgument("sellerName") { defaultValue = "" },
-                    navArgument("productTitle") { defaultValue = "" },
-                    navArgument("price") { type = NavType.IntType; defaultValue = 0 }
+                    navArgument("sellerName") { type = NavType.StringType },
+                    navArgument("productTitle") { type = NavType.StringType },
+                    navArgument("price") { type = NavType.IntType }
                 )
-            ) { backStackEntry ->
+            ) { b ->
                 ChatThreadRoute(
-                    chatId = backStackEntry.arguments?.getInt("chatId"),
-                    sellerId = backStackEntry.arguments?.getInt("sellerId") ?: 0,
-                    productId = backStackEntry.arguments?.getInt("productId") ?: 0,
-                    sellerName = backStackEntry.arguments?.getString("sellerName") ?: "Продавец",
-                    productTitle = backStackEntry.arguments?.getString("productTitle") ?: "Товар",
-                    productPrice = backStackEntry.arguments?.getInt("price") ?: 0,
+                    chatId = b.arguments?.getInt("chatId") ?: 0,
+                    sellerId = b.arguments?.getInt("sellerId") ?: 0,
+                    productId = b.arguments?.getInt("productId") ?: 0,
+                    sellerName = b.arguments?.getString("sellerName") ?: "",
+                    productTitle = b.arguments?.getString("productTitle") ?: "",
+                    productPrice = b.arguments?.getInt("price") ?: 0,
                     onBack = { navController.popBackStack() },
                     onOpenProduct = { pid -> navController.navigate("product/$pid") }
                 )
             }
 
             composable(
-                route = "chat_new/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
+                "chat_new/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
                 arguments = listOf(
                     navArgument("sellerId") { type = NavType.IntType },
                     navArgument("productId") { type = NavType.IntType },
-                    navArgument("sellerName") { defaultValue = "" },
-                    navArgument("productTitle") { defaultValue = "" },
-                    navArgument("price") { type = NavType.IntType; defaultValue = 0 }
+                    navArgument("sellerName") { type = NavType.StringType },
+                    navArgument("productTitle") { type = NavType.StringType },
+                    navArgument("price") { type = NavType.IntType }
                 )
-            ) { backStackEntry ->
+            ) { b ->
                 ChatThreadRoute(
-                    chatId = null,
-                    sellerId = backStackEntry.arguments?.getInt("sellerId") ?: 0,
-                    productId = backStackEntry.arguments?.getInt("productId") ?: 0,
-                    sellerName = backStackEntry.arguments?.getString("sellerName") ?: "Продавец",
-                    productTitle = backStackEntry.arguments?.getString("productTitle") ?: "Товар",
-                    productPrice = backStackEntry.arguments?.getInt("price") ?: 0,
+                    chatId = 0,
+                    sellerId = b.arguments?.getInt("sellerId") ?: 0,
+                    productId = b.arguments?.getInt("productId") ?: 0,
+                    sellerName = b.arguments?.getString("sellerName") ?: "",
+                    productTitle = b.arguments?.getString("productTitle") ?: "",
+                    productPrice = b.arguments?.getInt("price") ?: 0,
                     onBack = { navController.popBackStack() },
                     onOpenProduct = { pid -> navController.navigate("product/$pid") }
                 )
@@ -335,7 +299,11 @@ fun MainScreen(
                             }
                         }
                     },
-                    onOpenOnboarding = { navController.navigate("seller_onboarding") },
+                    onOpenOnboarding = {
+                        navController.navigate("seller_onboarding") {
+                            popUpTo("seller_gate") { inclusive = true }
+                        }
+                    },
                     onBack = { navController.popBackStack() }
                 )
             }
@@ -348,7 +316,7 @@ fun MainScreen(
             }
 
             composable("seller_registration") {
-                com.example.ozmade.main.seller.registration.SellerRegistrationRoute(
+                SellerRegistrationRoute(
                     onBack = { navController.popBackStack() },
                     onOpenSellerTerms = {},
                     onOpenPrivacy = {},
@@ -364,52 +332,39 @@ fun MainScreen(
             }
 
             composable("seller_main") {
-                SellerMainScreen(onExitSeller = {
-                    scope.launch {
-                        sellerStore.setSellerMode(false)
-                        navController.navigate(BottomItem.Home.route) {
-                            popUpTo(0) { inclusive = true }
+                SellerMainScreen(
+                    onExitSeller = {
+                        scope.launch {
+                            sellerStore.setSellerMode(false)
+                            navController.navigate(BottomItem.Home.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
                         }
                     }
-                })
-            }
-
-            composable("reviews/{productId}") { b ->
-                ReviewsRoute(productId = b.arguments?.getInt("productId") ?: 0, onBack = { navController.popBackStack() })
-            }
-            composable("seller_reviews/{sellerId}") { b ->
-                SellerReviewsRoute(sellerId = b.arguments?.getInt("sellerId") ?: 0, onBack = { navController.popBackStack() }, onOpenProduct = { pid -> navController.navigate("product/$pid") })
+                )
             }
         }
     }
 }
 
 @Composable
-private fun CustomNavigationBar(
-    navController: androidx.navigation.NavHostController,
-    currentDestination: androidx.navigation.NavDestination?
-) {
-    val items = listOf(BottomItem.Home, BottomItem.Favorites, BottomItem.Chat, BottomItem.Profile)
-
+fun CustomNavigationBar(navController: androidx.navigation.NavHostController, currentDestination: androidx.navigation.NavDestination?) {
     NavigationBar(
-        modifier = Modifier
-            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
         containerColor = Color.White,
         tonalElevation = 8.dp
     ) {
+        val items = listOf(BottomItem.Home, BottomItem.Favorites, BottomItem.Chat, BottomItem.Profile)
         items.forEach { item ->
-            val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
-
+            val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
             NavigationBarItem(
-                selected = isSelected,
-                label = { Text(item.label, fontWeight = if (isSelected) androidx.compose.ui.text.font.FontWeight.Bold else null) },
                 icon = {
                     Icon(
-                        imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
-                        contentDescription = item.label,
-                        tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.Gray
+                        imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
+                        contentDescription = item.label
                     )
                 },
+                label = { Text(item.label, fontSize = 12.sp) },
+                selected = selected,
                 onClick = {
                     navController.navigate(item.route) {
                         popUpTo(navController.graph.findStartDestination().id) { saveState = true }
@@ -418,7 +373,11 @@ private fun CustomNavigationBar(
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                    selectedIconColor = Color(0xFFFF9800),
+                    selectedTextColor = Color(0xFFFF9800),
+                    unselectedIconColor = Color.Gray,
+                    unselectedTextColor = Color.Gray,
+                    indicatorColor = Color(0xFFFFF3E0)
                 )
             )
         }
