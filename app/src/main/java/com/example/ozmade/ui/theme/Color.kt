@@ -17,3 +17,7 @@ val DarkBackground = Color(0xFF121212)
 val DarkSurface = Color(0xFF1E1E1E)
 val DarkOnSurface = Color(0xFFEEEEEE)
 val DarkOnSurfaceVariant = Color(0xFFB0B0B0)
+
+//darkNavy = Color(0xFF0D0F2C)
+val DarkNavyPrimary = Color(0xFF0D0F2C)
+

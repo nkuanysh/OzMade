@@ -44,6 +44,9 @@ fun OtpCodeScreen(
     var secondsLeft by remember { mutableIntStateOf(59) }
     var canResend by remember { mutableStateOf(false) }
 
+    val darkNavy = Color(0xFF0D0F2C)
+
+
     LaunchedEffect(key1 = canResend) {
         if (!canResend) {
             secondsLeft = 59
@@ -66,7 +69,7 @@ fun OtpCodeScreen(
                 .fillMaxWidth()
                 .weight(0.8f)
                 .background(
-                    color = MaterialTheme.colorScheme.primaryContainer,
+                    color = darkNavy,
                     shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp)
                 )
                 .padding(horizontal = 24.dp)
@@ -86,7 +89,7 @@ fun OtpCodeScreen(
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                        tint = Color.White,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -95,7 +98,7 @@ fun OtpCodeScreen(
 
                 Text(
                     text = "Проверка",
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = Color.White,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -104,12 +107,12 @@ fun OtpCodeScreen(
 
                 Text(
                     text = "Мы отправили код подтверждения на ",
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                    color = Color.White,
                     fontSize = 14.sp
                 )
                 Text(
                     text = phone,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = Color.White,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
