@@ -33,11 +33,10 @@ fun OtpCodeScreen(
     onResend: () -> Unit,
     onBackClick: () -> Unit = {}
 ) {
-    val darkNavy = Color(0xFF0D0F2C)
-    val lightGray = Color(0xFFF2F2F2)
-    val orangePrimary = Color(0xFFFF7A1A)
-    val secondaryText = Color(0xFFCFCFCF)
-    val inputBg = Color(0xFFE5E5E5)
+    val orangePrimary = MaterialTheme.colorScheme.primary
+    val background = MaterialTheme.colorScheme.background
+    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
 
     var otpCode by remember { mutableStateOf(List(6) { "" }) }
     val focusRequesters = remember { List(6) { FocusRequester() } }
@@ -59,7 +58,7 @@ fun OtpCodeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(lightGray)
+            .background(background)
     ) {
         // Top Section
         Box(
@@ -67,11 +66,11 @@ fun OtpCodeScreen(
                 .fillMaxWidth()
                 .weight(0.8f)
                 .background(
-                    color = darkNavy,
+                    color = MaterialTheme.colorScheme.primaryContainer,
                     shape = RoundedCornerShape(bottomStart = 40.dp, bottomEnd = 40.dp)
                 )
                 .padding(horizontal = 24.dp)
-                .padding(top = 48.dp, bottom = 24.dp) // Added top padding to move content down
+                .padding(top = 48.dp, bottom = 24.dp)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize()
@@ -80,14 +79,14 @@ fun OtpCodeScreen(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(inputBg.copy(alpha = 0.2f), CircleShape)
+                        .background(MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f), CircleShape)
                         .clickable { onBackClick() },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -96,7 +95,7 @@ fun OtpCodeScreen(
 
                 Text(
                     text = "Проверка",
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -105,12 +104,12 @@ fun OtpCodeScreen(
 
                 Text(
                     text = "Мы отправили код подтверждения на ",
-                    color = secondaryText,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
                     fontSize = 14.sp
                 )
                 Text(
                     text = phone,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -128,7 +127,7 @@ fun OtpCodeScreen(
             Text(
                 text = "КОД",
                 modifier = Modifier.align(Alignment.Start),
-                color = Color.Gray,
+                color = onSurfaceVariant,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -169,15 +168,18 @@ fun OtpCodeScreen(
                         textStyle = LocalTextStyle.current.copy(
                             textAlign = TextAlign.Center,
                             fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
                         ),
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         singleLine = true,
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = inputBg,
-                            unfocusedContainerColor = inputBg,
+                            focusedContainerColor = surfaceVariant,
+                            unfocusedContainerColor = surfaceVariant,
                             focusedIndicatorColor = orangePrimary,
                             unfocusedIndicatorColor = Color.Transparent,
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                         ),
                         shape = RoundedCornerShape(8.dp)
                     )
@@ -191,7 +193,7 @@ fun OtpCodeScreen(
                 if (!canResend) {
                     Text(
                         text = "Повторно отправить код ${secondsLeft} сек",
-                        color = Color.Gray,
+                        color = onSurfaceVariant,
                         fontSize = 13.sp
                     )
                 } else {
@@ -212,7 +214,7 @@ fun OtpCodeScreen(
             if (!errorText.isNullOrEmpty()) {
                 Text(
                     text = errorText,
-                    color = Color.Red,
+                    color = MaterialTheme.colorScheme.error,
                     fontSize = 12.sp,
                     modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
                     textAlign = TextAlign.Start
@@ -231,11 +233,11 @@ fun OtpCodeScreen(
                 enabled = otpCode.all { it.isNotEmpty() } && !isLoading
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
                 } else {
                     Text(
                         text = "ПРОВЕРИТЬ",
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )

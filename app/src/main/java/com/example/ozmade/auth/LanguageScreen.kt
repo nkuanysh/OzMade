@@ -1,6 +1,7 @@
 package com.example.ozmade.auth
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -18,48 +19,55 @@ fun LanguageScreen(
     onChooseRussian: () -> Unit,
     logo: @Composable () -> Unit = { DefaultLogo() }
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
-        // Большой лого по центру
-        Spacer(Modifier.weight(1f))
-
-        Box(Modifier.size(180.dp), contentAlignment = Alignment.Center) {
-            logo()
-        }
-
-        Spacer(Modifier.weight(0.7f))
-
-        Text(
-            text = stringResource(R.string.choose_language_title),
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Medium
-        )
-
-        Spacer(Modifier.height(24.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            OutlinedButton(
-                onClick = onChooseKazakh,
-                modifier = Modifier.weight(1f).height(52.dp)
-            ) {
-                Text(stringResource(R.string.lang_kk))
-            }
-            Button(
-                onClick = onChooseRussian,
-                modifier = Modifier.weight(1f).height(52.dp)
-            ) {
-                Text(stringResource(R.string.lang_ru))
-            }
-        }
+            // Большой лого по центру
+            Spacer(Modifier.weight(1f))
 
-        Spacer(Modifier.height(16.dp))
+            Box(Modifier.size(180.dp), contentAlignment = Alignment.Center) {
+                logo()
+            }
+
+            Spacer(Modifier.weight(0.7f))
+
+            Text(
+                text = stringResource(R.string.choose_language_title),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onChooseKazakh,
+                    modifier = Modifier.weight(1f).height(52.dp)
+                ) {
+                    Text(stringResource(R.string.lang_kk))
+                }
+                Button(
+                    onClick = onChooseRussian,
+                    modifier = Modifier.weight(1f).height(52.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Text(stringResource(R.string.lang_ru))
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+        }
     }
 }
 

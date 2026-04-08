@@ -80,7 +80,7 @@ fun ProductDetailsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(Color(0xFFF8F9FA))
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
                 modifier = Modifier
@@ -165,7 +165,7 @@ fun ProductDetailsScreen(
                     modifier = Modifier
                         .offset(y = (-20).dp)
                         .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                        .background(Color.White)
+                        .background(MaterialTheme.colorScheme.surface)
                         .padding(top = 24.dp)
                 ) {
                     Row(
@@ -186,11 +186,11 @@ fun ProductDetailsScreen(
                             Icon(
                                 if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = null,
-                                tint = if (liked) Color.Red else Color.Gray
+                                tint = if (liked) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                         IconButton(onClick = onShare) {
-                            Icon(Icons.Default.Share, contentDescription = null, tint = Color.Gray)
+                            Icon(Icons.Default.Share, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
 
@@ -213,14 +213,14 @@ fun ProductDetailsScreen(
                         Text(" ${formatRating(product.rating)} ", fontWeight = FontWeight.Bold)
                         Text(
                             text = "· ${product.reviewsCount} отзывов",
-                            color = Color.Blue,
+                            color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.clickable { onOpenReviews(product.id) }
                         )
                         Spacer(Modifier.width(12.dp))
                         Text(
                             "· ${product.ordersCount} заказов",
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -233,7 +233,7 @@ fun ProductDetailsScreen(
                             .padding(horizontal = 20.dp)
                             .height(48.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFFF1F3F5))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     ) {
                         TabButton(
                             text = "Описание",
@@ -259,7 +259,7 @@ fun ProductDetailsScreen(
                             Text(
                                 text = product.description,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = Color.DarkGray
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         } else {
                             SpecsBlock(product.specs)
@@ -283,7 +283,7 @@ fun ProductDetailsScreen(
                     .fillMaxWidth()
                     .height(64.dp)
                     .alpha(topBarAlpha)
-                    .background(Color.White.copy(alpha = 0.95f))
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
                     .shadow(if (topBarAlpha > 0.8f) 4.dp else 0.dp)
             )
 
@@ -298,7 +298,7 @@ fun ProductDetailsScreen(
                     onClick = onBack,
                     colors = IconButtonDefaults.iconButtonColors(
                         containerColor = if (topBarAlpha < 0.5f) Color.Black.copy(0.3f) else Color.Transparent,
-                        contentColor = if (topBarAlpha < 0.5f) Color.White else Color.Black
+                        contentColor = if (topBarAlpha < 0.5f) Color.White else MaterialTheme.colorScheme.onSurface
                     )
                 ) {
                     Icon(
@@ -349,7 +349,7 @@ fun ProductDetailsScreen(
 private fun InfoSection(title: String, icon: ImageVector, content: @Composable () -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = Color.Gray)
+            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(Modifier.width(8.dp))
             Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         }
@@ -363,7 +363,7 @@ private fun BottomActionsBar(
     onChat: () -> Unit,
     onOrder: () -> Unit
 ) {
-    Surface(modifier = Modifier.shadow(16.dp), color = Color.White) {
+    Surface(modifier = Modifier.shadow(16.dp), color = MaterialTheme.colorScheme.surface) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -375,8 +375,7 @@ private fun BottomActionsBar(
                 modifier = Modifier
                     .weight(0.4f)
                     .height(54.dp),
-                shape = RoundedCornerShape(16.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray)
+                shape = RoundedCornerShape(16.dp)
             ) {
                 Icon(Icons.Default.ChatBubbleOutline, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
@@ -399,20 +398,19 @@ private fun BottomActionsBar(
 
 @Composable
 private fun TabButton(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val alpha by animateFloatAsState(if (selected) 1f else 0f, label = "")
     Box(
         modifier = modifier
             .fillMaxHeight()
             .padding(4.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(if (selected) Color.White else Color.Transparent)
+            .background(if (selected) MaterialTheme.colorScheme.surface else Color.Transparent)
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = if (selected) Color.Black else Color.Gray
+            color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -422,15 +420,16 @@ private fun SpecsBlock(specs: List<Pair<String, String>>) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         specs.forEach { (k, v) ->
             Row(modifier = Modifier.fillMaxWidth()) {
-                Text(text = k, modifier = Modifier.weight(1f), color = Color.Gray)
+                Text(text = k, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(
                     text = v,
                     modifier = Modifier.weight(1f),
                     fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.End
+                    textAlign = TextAlign.End,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
-            HorizontalDivider(color = Color(0xFFF1F1F1))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
         }
     }
 }
@@ -438,7 +437,7 @@ private fun SpecsBlock(specs: List<Pair<String, String>>) {
 @Composable
 private fun DeliveryBlock(delivery: DeliveryInfoUi) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -457,8 +456,8 @@ private fun DeliveryBlock(delivery: DeliveryInfoUi) {
 @Composable
 private fun DeliveryRow(label: String, value: String) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(label, color = Color.DarkGray)
-        Text(value, fontWeight = FontWeight.Bold, color = Color(0xFF2E7D32))
+        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, fontWeight = FontWeight.Bold, color = Color(0xFF4CAF50))
     }
 }
 
@@ -467,7 +466,7 @@ private fun SellerBlock(seller: SellerUi, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        color = Color(0xFFF8F9FA),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -478,19 +477,19 @@ private fun SellerBlock(seller: SellerUi, onClick: () -> Unit) {
                     .background(MaterialTheme.colorScheme.secondaryContainer),
                 contentAlignment = Alignment.Center
             ) {
-                Text(seller.name.take(1).uppercase(), style = MaterialTheme.typography.titleLarge)
+                Text(seller.name.take(1).uppercase(), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSecondaryContainer)
             }
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(seller.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                Text(seller.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
                 Text(
                     seller.address,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1
                 )
             }
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = Color.LightGray)
+            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline)
         }
     }
 }

@@ -34,7 +34,7 @@ fun ChatScreen(
     viewModel: ChatListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val orangeColor = Color(0xFFFF9800)
+    val orangeColor = MaterialTheme.colorScheme.primary
 
     LaunchedEffect(Unit) { viewModel.load() }
 
@@ -43,7 +43,7 @@ fun ChatScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
+                    .background(MaterialTheme.colorScheme.surface)
                     .statusBarsPadding()
                     .padding(16.dp)
             ) {
@@ -52,16 +52,18 @@ fun ChatScreen(
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp
-                    )
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         Box(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .background(Color(0xFFFBFBFB)) // Тот же фон, что в треде
+                .background(MaterialTheme.colorScheme.background)
         ) {
             when (val state = uiState) {
                 is ChatListUiState.Loading -> {
@@ -103,7 +105,7 @@ fun ChatScreen(
                                 ChatSupportCard(onClick = onOpenSupportChat, accentColor = orangeColor)
                                 HorizontalDivider(
                                     modifier = Modifier.padding(horizontal = 16.dp),
-                                    color = Color(0xFFEEEEEE)
+                                    color = MaterialTheme.colorScheme.outlineVariant
                                 )
                             }
 
@@ -115,7 +117,7 @@ fun ChatScreen(
                                 )
                                 HorizontalDivider(
                                     modifier = Modifier.padding(horizontal = 72.dp),
-                                    color = Color(0xFFF5F5F5)
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                                 )
                             }
 
@@ -155,13 +157,14 @@ private fun EmptyChatsPlaceholder(onNavigateToHome: () -> Unit, accentColor: Col
                 "У вас пока нет активных диалогов",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(8.dp))
             Text(
                 "Задайте вопрос продавцу на странице любого товара.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )
             Spacer(Modifier.height(24.dp))
@@ -181,8 +184,8 @@ private fun ChatSupportCard(onClick: () -> Unit, accentColor: Color) {
     ListItem(
         modifier = Modifier.clickable(onClick = onClick),
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        headlineContent = { Text("Служба поддержки", fontWeight = FontWeight.SemiBold) },
-        supportingContent = { Text("Напишите нам, если возникли вопросы", maxLines = 1) },
+        headlineContent = { Text("Служба поддержки", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface) },
+        supportingContent = { Text("Напишите нам, если возникли вопросы", maxLines = 1, color = MaterialTheme.colorScheme.onSurfaceVariant) },
         leadingContent = {
             Surface(
                 modifier = Modifier.size(48.dp),
@@ -199,7 +202,7 @@ private fun ChatSupportCard(onClick: () -> Unit, accentColor: Color) {
             }
         },
         trailingContent = {
-            Text("8:00–22:00", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+            Text("8:00–22:00", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     )
 }
@@ -214,7 +217,8 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit, accentColor: C
                 text = thread.sellerName,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface
             )
         },
         supportingContent = {
@@ -222,7 +226,7 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit, accentColor: C
                 text = thread.lastMessage,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         },
         leadingContent = {
@@ -231,7 +235,7 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit, accentColor: C
                     AsyncImage(
                         model = thread.productImageUrl,
                         contentDescription = null,
-                        modifier = Modifier.size(48.dp).clip(CircleShape).background(Color(0xFFF5F5F5)),
+                        modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant),
                         contentScale = ContentScale.Crop
                     )
                 } else {
@@ -255,7 +259,7 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit, accentColor: C
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
                             .size(14.dp)
-                            .background(Color.White, CircleShape)
+                            .background(MaterialTheme.colorScheme.surface, CircleShape)
                             .padding(2.dp)
                     ) {
                         Box(
@@ -271,7 +275,7 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit, accentColor: C
             Text(
                 text = thread.lastTimeText,
                 style = MaterialTheme.typography.labelSmall,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     )
