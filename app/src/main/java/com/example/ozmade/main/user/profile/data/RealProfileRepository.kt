@@ -98,10 +98,17 @@ class RealProfileRepository @Inject constructor(
 
 // маппер DTO -> Domain
 private fun com.example.ozmade.network.model.ProfileDto.toDomain(): UserProfile {
+    // We use safe calls and Elvis operator to ensure no nulls are passed 
+    // to non-nullable UserProfile fields, which prevents the constructor crash.
+    val phoneStr = phoneNumber ?: ""
+    val nameStr = name?.takeIf { it.isNotBlank() } 
+        ?: email?.takeIf { it.isNotBlank() } 
+        ?: phoneStr.ifBlank { "User" }
+
     return UserProfile(
         id = id.toString(),
-        name = name ?: email ?: phoneNumber,
-        phone = phoneNumber,
+        name = nameStr,
+        phone = phoneStr,
         avatarUrl = avatarUrl,
         address = address ?: ""
     )

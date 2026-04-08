@@ -2,8 +2,8 @@ package com.example.ozmade.main.user.profile.data
 
 data class UserProfile(
     val id: String,
-    val name: String,
-    val phone: String,
+    val name: String = "",
+    val phone: String = "",
     val avatarUrl: String? = null,
     val address: String = ""
 )

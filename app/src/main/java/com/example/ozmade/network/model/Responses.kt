@@ -96,15 +96,24 @@ data class AuthSyncResponse(
 
 data class ProfileDto(
     @SerializedName("ID") val id: Int,
-    @SerializedName("FirebaseUID") val firebaseUid: String,
-    @SerializedName("PhoneNumber") val phoneNumber: String,
-    @SerializedName("Email") val email: String?,
-    @SerializedName(value = "Name", alternate = ["name"]) val name: String? = null,
-    @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl"]) val avatarUrl: String? = null,
-    @SerializedName("Address") val address: String?,
-    @SerializedName("Role") val role: String,
-    @SerializedName("IsSeller") val isSeller: Boolean,
-    @SerializedName("CreatedAt") val createdAt: String
+    @SerializedName(value = "FirebaseUID", alternate = ["firebase_uid", "firebaseUid"]) 
+    val firebaseUid: String? = null,
+    @SerializedName(value = "PhoneNumber", alternate = ["phone_number", "phoneNumber"]) 
+    val phoneNumber: String? = null,
+    @SerializedName(value = "Email", alternate = ["email"]) 
+    val email: String? = null,
+    @SerializedName(value = "Name", alternate = ["name"]) 
+    val name: String? = null,
+    @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl"]) 
+    val avatarUrl: String? = null,
+    @SerializedName(value = "Address", alternate = ["address"]) 
+    val address: String? = null,
+    @SerializedName(value = "Role", alternate = ["role"]) 
+    val role: String? = null,
+    @SerializedName(value = "IsSeller", alternate = ["is_seller", "isSeller"]) 
+    val isSeller: Boolean? = null,
+    @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) 
+    val createdAt: String? = null
 )
 
 data class FavoriteStatusResponse(
