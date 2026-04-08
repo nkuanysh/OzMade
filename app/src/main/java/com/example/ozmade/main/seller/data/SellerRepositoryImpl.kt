@@ -51,11 +51,12 @@ class SellerRepositoryImpl @Inject constructor(
     override suspend fun getMyProducts(): List<SellerProductUi> {
         val response = api.getSellerProducts()
         return response.body()?.map { dto ->
+            val rawImg = dto.images?.firstOrNull() ?: dto.imageUrl
             SellerProductUi(
                 id = dto.id,
                 title = dto.title ?: dto.name ?: "No Title",
                 price = (dto.price ?: 0.0).toInt(),
-                imageUrl = ImageUtils.formatImageUrl(dto.imageUrl ?: dto.images?.firstOrNull()),
+                imageUrl = ImageUtils.formatImageUrl(rawImg),
                 status = SellerProductStatus.ON_SALE
             )
         } ?: emptyList()

@@ -7,6 +7,7 @@ import com.example.ozmade.main.seller.data.SellerRepository
 import com.example.ozmade.main.seller.products.add.AddProductState
 import com.example.ozmade.main.seller.products.add.SellerCategory
 import com.example.ozmade.network.model.ProductRequest
+import com.example.ozmade.utils.ImageUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -35,12 +36,11 @@ class SellerEditProductViewModel @Inject constructor(
                 val dto = repo.getProductDetails(productId)
 
                 _state.update { st ->
-                    val productPhotos = if (!dto.images.isNullOrEmpty()) {
-                        dto.images.map { Uri.parse(it) }
-                    } else if (!dto.imageUrl.isNullOrBlank()) {
-                        listOf(Uri.parse(dto.imageUrl))
-                    } else {
-                        emptyList()
+                    val rawPhotos = dto.images?.takeIf { it.isNotEmpty() } 
+                        ?: listOfNotNull(dto.imageUrl)
+
+                    val formattedPhotos = rawPhotos.map { 
+                        Uri.parse(ImageUtils.formatImageUrl(it)) 
                     }
 
                     val catTitles = dto.categories ?: listOfNotNull(dto.type)
@@ -52,7 +52,7 @@ class SellerEditProductViewModel @Inject constructor(
                         title = dto.title ?: "",
                         description = dto.description ?: "",
                         priceText = (dto.price ?: 0.0).toString(),
-                        photos = productPhotos,
+                        photos = formattedPhotos,
                         selectedCategories = SellerCategory.entries
                             .filter { cat -> catTitles.any { it == cat.title || it == cat.backendValue } }
                             .toSet(),

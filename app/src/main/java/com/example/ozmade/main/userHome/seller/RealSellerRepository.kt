@@ -19,7 +19,7 @@ class RealSellerRepository @Inject constructor(
             rating = dto.seller.rating,
             reviewsCount = dto.seller.reviewsCount,
             daysWithOzMade = dto.seller.daysWithOzMade,
-            avatarUrl = null // No avatar in SellerHeaderDto yet
+            avatarUrl = ImageUtils.formatImageUrl(dto.seller.avatarUrl)
         )
 
         val products = dto.products.map {
@@ -30,7 +30,7 @@ class RealSellerRepository @Inject constructor(
                 city = it.city,
                 address = it.address,
                 rating = it.rating,
-                imageUrl = null // Product imageUrl not present in SellerProductDto, using default
+                imageUrl = ImageUtils.formatImageUrl(it.imageUrl)
             )
         }
 
