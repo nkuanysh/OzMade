@@ -1,9 +1,11 @@
 package com.example.ozmade.main.userHome
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ozmade.R
 import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.utils.ImageUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +16,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val api: OzMadeApi
 ) : ViewModel() {
+
+    private val TAG = "HomeViewModel"
 
     private val _uiState = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
     val uiState = _uiState.asStateFlow()
@@ -27,19 +31,24 @@ class HomeViewModel @Inject constructor(
             _uiState.value = HomeUiState.Loading
             try {
                 val productsResp = api.getProducts()
-                // val adsResp = api.getAds() // Используем локальные баннеры
+                Log.d(TAG, "load: products successful=${productsResp.isSuccessful}")
 
                 if (productsResp.isSuccessful) {
                     val products = productsResp.body()?.map { dto ->
+                        val rawImg = dto.images?.firstOrNull() ?: dto.imageUrl
+                        val formattedUrl = ImageUtils.formatImageUrl(rawImg)
+                        
+                        Log.d(TAG, "Product ID=${dto.id}: rawImg=$rawImg -> formatted=$formattedUrl")
+
                         Product(
                             id = dto.id,
                             title = dto.title ?: "Без названия",
                             price = dto.price ?: 0.0,
-                            imageUrl = dto.imageUrl ?: ""
+                            imageUrl = formattedUrl
                         )
                     } ?: emptyList()
 
-                    // Локальные рекламные баннеры
+                    // Local promotional banners
                     val localAds = listOf(
                         AdBanner(id = "1", title = "Присоединяйся к клубу творцов!", imageRes = R.drawable.banner1),
                         AdBanner(id = "2", title = "Лучшие товары ручной работы", imageRes = R.drawable.banner2),
@@ -59,9 +68,11 @@ class HomeViewModel @Inject constructor(
                         ads = localAds
                     )
                 } else {
+                    Log.e(TAG, "load: Error code ${productsResp.code()}")
                     _uiState.value = HomeUiState.Error("Ошибка сервера: ${productsResp.code()}")
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "load: Exception", e)
                 _uiState.value = HomeUiState.Error(e.message ?: "Неизвестная ошибка")
             }
         }
@@ -86,7 +97,7 @@ class HomeViewModel @Inject constructor(
                     _uiState.value = currentState.copy(products = newProducts)
                 }
             } catch (e: Exception) {
-                // ignore
+                Log.e(TAG, "toggleLike: Error", e)
             }
         }
     }

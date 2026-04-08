@@ -1,5 +1,6 @@
 package com.example.ozmade.main.userHome.details
 
+import android.util.Log
 import com.example.ozmade.main.user.favorites.FavoriteProductUi
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.utils.ImageUtils
@@ -10,6 +11,8 @@ import javax.inject.Inject
 class RealProductRepository @Inject constructor(
     private val api: OzMadeApi
 ) : ProductRepository {
+
+    private val TAG = "RealProductRepository"
 
     override suspend fun getProductDetails(productId: Int): ProductDetailsUi {
         val id = productId
@@ -26,7 +29,17 @@ class RealProductRepository @Inject constructor(
             dto.images?.takeIf { it.isNotEmpty() }
                 ?: listOfNotNull(dto.imageUrl)
         
-        val images = rawImages.map { ImageUtils.formatImageUrl(it) }.filter { it.isNotBlank() }
+        Log.d(TAG, "getProductDetails: productId=$productId, rawImages size=${rawImages.size}")
+        
+        val images = rawImages.map { 
+            val formatted = ImageUtils.formatImageUrl(it)
+            Log.d(TAG, "  -> Formatted image: $formatted")
+            formatted
+        }.filter { it.isNotBlank() }
+
+        if (images.isEmpty()) {
+            Log.w(TAG, "getProductDetails: No valid images found after formatting!")
+        }
 
         val specs = buildList<Pair<String, String>> {
             dto.weight?.takeIf { it.isNotBlank() }?.let { add("Вес" to it) }

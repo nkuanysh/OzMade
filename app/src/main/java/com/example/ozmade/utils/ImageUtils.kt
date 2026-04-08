@@ -1,66 +1,49 @@
 package com.example.ozmade.utils
 
 import android.net.Uri
+import android.util.Log
 
 object ImageUtils {
+    private const val TAG = "ImageUtils"
+
     /**
-     * Formats a raw image URL or filename from the backend into a valid, direct 
-     * storage.googleapis.com link that can be loaded by Coil.
+     * Formats a raw image URL or filename from the backend into a valid link.
+     * 
+     * Since public access has been added to the 'oz-made' bucket, we use the
+     * direct Google Cloud Storage public URL. This avoids signature issues
+     * and Firebase API overhead.
      */
     fun formatImageUrl(url: String?): String {
         if (url.isNullOrBlank()) return ""
         
-        var formatted = url.trim()
+        val input = url.trim()
+        
+        // 1. Extract the CLEAN filename (strip query params and path prefixes)
+        val filename = try {
+            val uri = Uri.parse(input)
+            val path = uri.path ?: ""
+            // Extract the last segment (the filename)
+            val name = path.substringAfterLast("/")
+            if (name.isBlank() || name == "oz-made" || name == "products") {
+                // If the path was empty or just the bucket name, check if the input itself is the filename
+                if (!input.contains("/") && !input.contains("?")) input else ""
+            } else {
+                name
+            }
+        } catch (e: Exception) {
+            input.substringAfterLast("/").substringBefore("?")
+        }
 
-        // 1. Skip broken root URLs (e.g. https://storage.googleapis.com?X-Goog-Algorithm...)
-        if (formatted.startsWith("https://storage.googleapis.com?") || 
-            formatted == "https://storage.googleapis.com" ||
-            formatted == "https://storage.googleapis.com/") {
+        if (filename.isBlank() || filename == "oz-made" || filename == "products") {
+            Log.w(TAG, "formatImageUrl: Could not extract valid filename from: $input")
             return ""
         }
 
-        // 2. Handle double-prefixing
-        if (formatted.startsWith("https://storage.googleapis.com/https%3A//") || 
-            formatted.startsWith("https://storage.googleapis.com/http")) {
-            val decoded = Uri.decode(formatted.substringAfter("https://storage.googleapis.com/"))
-            return formatImageUrl(decoded)
-        }
-
-        // 3. Convert cloud console links to direct API links
-        if (formatted.contains("storage.cloud.google.com")) {
-            formatted = formatted.replace("storage.cloud.google.com", "storage.googleapis.com")
-        }
-
-        // 4. Fix malformed storage.googleapis.com paths
-        if (formatted.contains("storage.googleapis.com")) {
-            val uri = Uri.parse(formatted)
-            val path = uri.path ?: ""
-            val filename = path.substringAfterLast("/")
-            
-            if (filename.isBlank() || filename == "oz-made" || filename == "products") {
-                return ""
-            }
-
-            // If path is missing bucket prefix, the signature is invalid. Return clean public link.
-            if (!path.contains("/oz-made/")) {
-                formatted = "https://storage.googleapis.com/oz-made/products/$filename"
-            } else if (formatted.contains("authuser=")) {
-                // Strip authuser which causes 403 in many mobile clients
-                val newUri = uri.buildUpon().clearQuery().apply {
-                    uri.queryParameterNames.forEach { name ->
-                        if (name != "authuser") {
-                            appendQueryParameter(name, uri.getQueryParameter(name))
-                        }
-                    }
-                }.build()
-                formatted = newUri.toString()
-            }
-        } else if (!formatted.startsWith("http")) {
-            // 5. Prepend base URL for raw filenames
-            val cleanName = if (formatted.startsWith("/")) formatted.substring(1) else formatted
-            formatted = "https://storage.googleapis.com/oz-made/products/$cleanName"
-        }
+        // 2. Reconstruct the direct Public GCS URL.
+        // Files are confirmed to be stored in the 'products/' subfolder.
+        val formattedUrl = "https://storage.googleapis.com/oz-made/products/$filename"
         
-        return formatted
+        Log.d(TAG, "formatImageUrl: Using Public GCS URL -> $formattedUrl")
+        return formattedUrl
     }
 }
