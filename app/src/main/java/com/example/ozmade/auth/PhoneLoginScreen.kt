@@ -9,15 +9,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ozmade.R
@@ -37,7 +42,7 @@ fun PhoneLoginScreen(
     val background = MaterialTheme.colorScheme.background
     val orangePrimary = Color(0xFFFF7A1A)
     val secondaryText = Color(0xFFCFCFCF)
-    val inputBg = MaterialTheme.colorScheme.surfaceVariant
+    val inputBg = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
 
     Column(
         modifier = Modifier
@@ -64,7 +69,7 @@ fun PhoneLoginScreen(
                     modifier = Modifier
                         .align(Alignment.Start)
                         .size(40.dp)
-                        .background(Color.White.copy(alpha = 0.2f), CircleShape)
+                        .background(Color.White.copy(alpha = 0.15f), CircleShape)
                         .clickable { onBackClick() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -78,13 +83,19 @@ fun PhoneLoginScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Image(
-                    painter = painterResource(id = R.drawable.image_removebg_preview),
-                    contentDescription = "Logo",
-                    modifier = Modifier.size(120.dp)
-                )
+                Surface(
+                    modifier = Modifier.size(100.dp),
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.1f)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.image_removebg_preview),
+                        contentDescription = "Logo",
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
                     text = "Добро пожаловать!",
@@ -93,11 +104,14 @@ fun PhoneLoginScreen(
                     fontWeight = FontWeight.Bold
                 )
 
+                Spacer(modifier = Modifier.height(8.dp))
+
                 Text(
-                    text = "Введите свой номер телефона, чтобы продолжить",
+                    text = "Введите номер телефона для входа в OzMade",
                     color = secondaryText,
                     fontSize = 14.sp,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(horizontal = 20.dp)
                 )
             }
         }
@@ -117,27 +131,38 @@ fun PhoneLoginScreen(
                 modifier = Modifier.align(Alignment.Start),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.sp
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            TextField(
+            OutlinedTextField(
                 value = phoneNumber,
-                onValueChange = { phoneNumber = it },
+                onValueChange = { 
+                    if (it.startsWith("+7") && it.length <= 12) {
+                        phoneNumber = it 
+                    } else if (it.length < 2) {
+                        phoneNumber = "+7"
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("+7 777 123 45 67", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                leadingIcon = {
+                    Icon(Icons.Default.Phone, contentDescription = null, tint = orangePrimary)
+                },
+                placeholder = { Text("777 123 45 67", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = inputBg,
-                    unfocusedContainerColor = inputBg,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedBorderColor = orangePrimary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
                     unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 ),
-                shape = RoundedCornerShape(12.dp),
-                singleLine = true
+                shape = RoundedCornerShape(16.dp),
+                singleLine = true,
+                textStyle = LocalTextStyle.current.copy(fontSize = 18.sp, fontWeight = FontWeight.Medium)
             )
 
             if (!errorText.isNullOrEmpty()) {
@@ -156,22 +181,63 @@ fun PhoneLoginScreen(
                 onClick = { onSendCode(phoneNumber) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = orangePrimary),
-                shape = RoundedCornerShape(12.dp),
-                enabled = !isLoading && phoneNumber.length >= 10
+                shape = RoundedCornerShape(16.dp),
+                enabled = !isLoading && phoneNumber.length >= 12
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                 } else {
-                    Text(text = "ОТПРАВИТЬ КОД", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = "ОТПРАВИТЬ КОД", 
+                        color = Color.White, 
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        letterSpacing = 1.sp
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                Text("Политика конфиденциальности", modifier = Modifier.clickable { onOpenPrivacy() }, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-                Text(" | ", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
-                Text("Условиями использования", modifier = Modifier.clickable { onOpenTerms() }, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+            // Footer with improved layout
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = "Продолжая, вы соглашаетесь с нашими",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 12.sp,
+                    textAlign = TextAlign.Center
+                )
+                
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Условиями",
+                        modifier = Modifier.clickable { onOpenTerms() },
+                        color = orangePrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        textDecoration = TextDecoration.Underline
+                    )
+                    Text(
+                        text = " и ",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp
+                    )
+                    Text(
+                        text = "Политикой конфиденциальности",
+                        modifier = Modifier.clickable { onOpenPrivacy() },
+                        color = orangePrimary,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold,
+                        textDecoration = TextDecoration.Underline
+                    )
+                }
             }
         }
     }

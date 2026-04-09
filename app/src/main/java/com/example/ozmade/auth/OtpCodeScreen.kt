@@ -1,10 +1,12 @@
 package com.example.ozmade.auth
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -14,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.font.FontWeight
@@ -33,19 +36,17 @@ fun OtpCodeScreen(
     onResend: () -> Unit,
     onBackClick: () -> Unit = {}
 ) {
-    val orangePrimary = MaterialTheme.colorScheme.primary
+    val orangePrimary = Color(0xFFFF7A1A)
     val background = MaterialTheme.colorScheme.background
-    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
-    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
+    val darkNavy = Color(0xFF0D0F2C)
+    val secondaryText = Color(0xFFCFCFCF)
+    val boxBg = Color(0xFFE8E4F0) // Light purple/grey background from image
 
     var otpCode by remember { mutableStateOf(List(6) { "" }) }
     val focusRequesters = remember { List(6) { FocusRequester() } }
     
     var secondsLeft by remember { mutableIntStateOf(59) }
     var canResend by remember { mutableStateOf(false) }
-
-    val darkNavy = Color(0xFF0D0F2C)
-
 
     LaunchedEffect(key1 = canResend) {
         if (!canResend) {
@@ -82,7 +83,7 @@ fun OtpCodeScreen(
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .background(MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f), CircleShape)
+                        .background(Color.White.copy(alpha = 0.15f), CircleShape)
                         .clickable { onBackClick() },
                     contentAlignment = Alignment.Center
                 ) {
@@ -103,18 +104,18 @@ fun OtpCodeScreen(
                     fontWeight = FontWeight.Bold
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
                     text = "Мы отправили код подтверждения на ",
-                    color = Color.White,
+                    color = secondaryText,
                     fontSize = 14.sp
                 )
                 Text(
                     text = phone,
                     color = Color.White,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.ExtraBold
                 )
             }
         }
@@ -130,80 +131,97 @@ fun OtpCodeScreen(
             Text(
                 text = "КОД",
                 modifier = Modifier.align(Alignment.Start),
-                color = onSurfaceVariant,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.sp
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // OTP Input Boxes
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 otpCode.forEachIndexed { index, digit ->
-                    OutlinedTextField(
-                        value = digit,
-                        onValueChange = { newValue ->
-                            if (newValue.length <= 1 && newValue.all { it.isDigit() }) {
-                                val newCode = otpCode.toMutableList()
-                                newCode[index] = newValue
-                                otpCode = newCode
-                                
-                                // Auto focus move
-                                if (newValue.isNotEmpty() && index < 5) {
-                                    focusRequesters[index + 1].requestFocus()
-                                }
-                            }
-                        },
+                    var isFocused by remember { mutableStateOf(false) }
+                    
+                    Box(
                         modifier = Modifier
-                            .size(48.dp)
-                            .focusRequester(focusRequesters[index])
-                            .onKeyEvent { event ->
-                                if (event.type == KeyEventType.KeyUp && event.key == Key.Backspace && digit.isEmpty() && index > 0) {
-                                    focusRequesters[index - 1].requestFocus()
-                                    true
-                                } else {
-                                    false
+                            .weight(1f)
+                            .aspectRatio(1f)
+                            .background(boxBg, RoundedCornerShape(12.dp))
+                            .border(
+                                width = 2.dp,
+                                color = if (isFocused) orangePrimary else Color.Transparent,
+                                shape = RoundedCornerShape(12.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        BasicTextField(
+                            value = digit,
+                            onValueChange = { newValue ->
+                                if (newValue.length <= 1 && newValue.all { it.isDigit() }) {
+                                    val newCode = otpCode.toMutableList()
+                                    newCode[index] = newValue
+                                    otpCode = newCode
+                                    
+                                    // Auto focus move
+                                    if (newValue.isNotEmpty() && index < 5) {
+                                        focusRequesters[index + 1].requestFocus()
+                                    }
                                 }
                             },
-                        textStyle = LocalTextStyle.current.copy(
-                            textAlign = TextAlign.Center,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
-                        ),
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        singleLine = true,
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = surfaceVariant,
-                            unfocusedContainerColor = surfaceVariant,
-                            focusedIndicatorColor = orangePrimary,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    )
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .focusRequester(focusRequesters[index])
+                                .onFocusChanged { isFocused = it.isFocused }
+                                .onKeyEvent { event ->
+                                    if (event.type == KeyEventType.KeyUp && event.key == Key.Backspace && digit.isEmpty() && index > 0) {
+                                        focusRequesters[index - 1].requestFocus()
+                                        true
+                                    } else {
+                                        false
+                                    }
+                                },
+                            textStyle = LocalTextStyle.current.copy(
+                                textAlign = TextAlign.Center,
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Black,
+                                color = Color.Black
+                            ),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            cursorBrush = androidx.compose.ui.graphics.SolidColor(orangePrimary),
+                            decorationBox = { innerTextField ->
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    innerTextField()
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Resend Timer
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 if (!canResend) {
                     Text(
-                        text = "Повторно отправить код ${secondsLeft} сек",
-                        color = onSurfaceVariant,
-                        fontSize = 13.sp
+                        text = "Повторно отправить код через ${secondsLeft} сек",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 14.sp
                     )
                 } else {
                     Text(
                         text = "Отправить повторно",
                         color = orangePrimary,
-                        fontSize = 13.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         textDecoration = TextDecoration.Underline,
                         modifier = Modifier.clickable { 
@@ -218,9 +236,9 @@ fun OtpCodeScreen(
                 Text(
                     text = errorText,
                     color = MaterialTheme.colorScheme.error,
-                    fontSize = 12.sp,
+                    fontSize = 13.sp,
                     modifier = Modifier.padding(top = 16.dp).fillMaxWidth(),
-                    textAlign = TextAlign.Start
+                    textAlign = TextAlign.Center
                 )
             }
 
@@ -232,17 +250,18 @@ fun OtpCodeScreen(
                     .fillMaxWidth()
                     .height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = orangePrimary),
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(16.dp),
                 enabled = otpCode.all { it.isNotEmpty() } && !isLoading
             ) {
                 if (isLoading) {
-                    CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp))
+                    CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                 } else {
                     Text(
                         text = "ПРОВЕРИТЬ",
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = Color.White,
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp
                     )
                 }
             }
