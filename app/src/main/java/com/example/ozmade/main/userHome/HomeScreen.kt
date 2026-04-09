@@ -98,7 +98,7 @@ fun HomeScreen(
                         item(span = { GridItemSpan(2) }) {
                             SectionHeader(
                                 title = "Все категории",
-                                actionText = null, // Убрали "Смотреть все"
+                                actionText = null,
                                 onActionClick = onSeeAllCategoriesClick,
                                 accentColor = orangeAccent
                             )
@@ -111,7 +111,7 @@ fun HomeScreen(
                         item(span = { GridItemSpan(2) }) {
                             SectionHeader(
                                 title = "Товары для вас",
-                                actionText = null, // Убрали "Смотреть все"
+                                actionText = null,
                                 onActionClick = onSeeAllProductsClick,
                                 accentColor = orangeAccent
                             )
@@ -198,7 +198,7 @@ fun ModernPromoSlider(ads: List<AdBanner>, accentColor: Color) {
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(2.1f) // Пропорции баннера (примерно 2:1 или 2.1:1)
+                .aspectRatio(2.1f)
                 .clip(RoundedCornerShape(16.dp))
         ) { page ->
             val ad = ads[page]
@@ -320,7 +320,7 @@ fun MarketProductCard(product: Product, onClick: () -> Unit, onFavoriteClick: ()
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
-                
+
                 Surface(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
@@ -340,7 +340,7 @@ fun MarketProductCard(product: Product, onClick: () -> Unit, onFavoriteClick: ()
                     }
                 }
             }
-            
+
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(
                     text = product.title,
@@ -356,9 +356,9 @@ fun MarketProductCard(product: Product, onClick: () -> Unit, onFavoriteClick: ()
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
-                
+
                 Spacer(modifier = Modifier.height(6.dp))
-                
+
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Rounded.Star, null, tint = Color(0xFFFFB300), modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))

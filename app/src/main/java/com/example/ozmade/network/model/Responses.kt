@@ -131,6 +131,7 @@ data class UploadUrlResponse(
 )
 
 data class SellerProfileDto(
+    @SerializedName(value = "ID", alternate = ["id"]) val id: Int = 0,
     @SerializedName(value = "Name", alternate = ["name"]) val name: String,
     @SerializedName(value = "Status", alternate = ["status"]) val status: String,
     @SerializedName(value = "TotalProducts", alternate = ["total_products", "totalProducts"]) val totalProducts: Int,
@@ -139,7 +140,8 @@ data class SellerProfileDto(
     @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl", "logo_url"]) val avatarUrl: String? = null,
     @SerializedName("about") val about: String? = null,
     @SerializedName("city") val city: String? = null,
-    @SerializedName("address") val address: String? = null
+    @SerializedName("address") val address: String? = null,
+    @SerializedName(value = "days_with_ozmade", alternate = ["daysWithOzMade"]) val daysWithOzMade: Int? = null
 )
 
 data class ChatDto(

@@ -1,39 +1,6 @@
 package com.example.ozmade.network.api
 
-import com.example.ozmade.network.model.AdDto
-import com.example.ozmade.network.model.ProductDetailsDto
-import com.example.ozmade.network.model.ProductDto
-import com.example.ozmade.network.model.AuthSyncResponse
-import com.example.ozmade.network.model.CategoryDto
-import com.example.ozmade.network.model.ChatDto
-import com.example.ozmade.network.model.ChatSendMessageRequest
-import com.example.ozmade.network.model.CommentDto
-import com.example.ozmade.network.model.CommentRequest
-import com.example.ozmade.network.model.CompleteOrderRequest
-import com.example.ozmade.network.model.CreateChatRequest
-import com.example.ozmade.network.model.CreateOrderRequest
-import com.example.ozmade.network.model.FavoriteStatusResponse
-import com.example.ozmade.network.model.MessageDto
-import com.example.ozmade.network.model.MessageResponse
-import com.example.ozmade.network.model.OrderDto
-//import com.example.ozmade.network.model.ProductDetailsFullDto
-import com.example.ozmade.network.model.ProductRequest
-import com.example.ozmade.network.model.ProductReviewsDto
-import com.example.ozmade.network.model.ProfileDto
-import com.example.ozmade.network.model.ReportRequest
-import com.example.ozmade.network.model.SellerPageDto
-import com.example.ozmade.network.model.SellerProfileDto
-import com.example.ozmade.network.model.SellerReviewsDto
-import com.example.ozmade.network.model.UpdateProfileRequest
-import com.example.ozmade.network.model.UpdateSellerProfileRequest
-import com.example.ozmade.network.model.UploadUrlResponse
-import com.example.ozmade.network.model.EnsureThreadResponse
-import com.example.ozmade.network.model.FCMTokenRequest
-import com.example.ozmade.network.model.ProductCreateRequest
-import com.example.ozmade.network.model.ReadyOrShippedRequest
-import com.example.ozmade.network.model.SellerDeliveryDto
-import com.example.ozmade.network.model.SellerQualityDto
-import com.example.ozmade.network.model.UpdateSellerDeliveryRequest
+import com.example.ozmade.network.model.*
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -106,11 +73,6 @@ interface OzMadeApi {
     @GET("profile/orders")
     suspend fun getOrders(): Response<List<OrderDto>>
 
-//    @POST("products/{id}/orders")
-//    suspend fun createOrder(
-//        @Body request: CreateOrderRequest
-//    ): Response<OrderDto>
-
     @POST("orders/{id}/cancel")
     suspend fun cancelOrder(
         @Path("id") orderId: Int
@@ -120,8 +82,6 @@ interface OzMadeApi {
     suspend fun markOrderReceived(
         @Path("id") orderId: Int
     ): Response<MessageResponse>
-
-
 
     @POST("seller/register")
     suspend fun registerSeller(): Response<MessageResponse>
@@ -159,7 +119,6 @@ interface OzMadeApi {
         @Path("id") id: Int
     ): Response<MessageResponse>
 
-
     @GET("products/{id}/reviews")
     suspend fun getProductReviews(@Path("id") productId: Int): Response<ProductReviewsDto>
 
@@ -177,6 +136,10 @@ interface OzMadeApi {
     @GET("sellers/{id}/reviews")
     suspend fun getSellerReviews(@Path("id") sellerId: Int): Response<SellerReviewsDto>
 
+    // Added to support seller quality view if seller/quality is 404
+    @GET("seller/{id}/review")
+    suspend fun getSellerReviewLegacy(@Path("id") id: Int): Response<SellerReviewsDto>
+
     @GET("seller/quality")
     suspend fun getSellerQuality(): Response<SellerQualityDto>
 
@@ -187,8 +150,6 @@ interface OzMadeApi {
     suspend fun updateSellerDelivery(
         @Body request: UpdateSellerDeliveryRequest
     ): Response<SellerDeliveryDto>
-
-
 
     // buyer
     @POST("orders")
@@ -222,7 +183,6 @@ interface OzMadeApi {
         @Body request: CompleteOrderRequest
     ): Response<Unit>
 
-    // BUYER CHAT ENDPOINTS (for buyers to create/get chats with sellers)
     @POST("chats")
     suspend fun createBuyerChat(
         @Body request: CreateChatRequest
@@ -247,7 +207,6 @@ interface OzMadeApi {
         @Body request: ChatSendMessageRequest
     ): Response<MessageDto>
 
-    // SELLER CHAT ENDPOINTS (for sellers to view chats from buyers)
     @GET("seller/chats")
     suspend fun getSellerChats(): Response<List<ChatDto>>
 

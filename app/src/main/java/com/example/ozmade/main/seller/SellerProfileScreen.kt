@@ -129,9 +129,7 @@ private fun SellerProfileContent(
 
         SellerStatsRow(
             profile = profile,
-            onOpenProducts = onOpenProducts,
-            onOpenQuality = onOpenQuality,
-            onOpenOrders = onOpenOrders
+            onOpenQuality = onOpenQuality
         )
 
         Spacer(Modifier.height(32.dp))
@@ -200,34 +198,18 @@ private fun SellerProfileContent(
 @Composable
 private fun SellerStatsRow(
     profile: SellerProfileUi,
-    onOpenProducts: () -> Unit,
-    onOpenQuality: () -> Unit,
-    onOpenOrders: () -> Unit
+    onOpenQuality: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         StatCard(
-            label = "Товары",
-            value = profile.totalProducts.toString(),
-            icon = Icons.Default.Inventory,
-            modifier = Modifier.weight(1f).clickable { onOpenProducts() },
-            iconColor = Color(0xFF5C6BC0)
-        )
-        StatCard(
             label = "Рейтинг",
             value = if (profile.rating > 0) String.format(Locale.US, "%.1f", profile.rating) else "—",
             icon = Icons.Default.Star,
-            modifier = Modifier.weight(1f).clickable { onOpenQuality() },
+            modifier = Modifier.fillMaxWidth().clickable { onOpenQuality() },
             iconColor = Color(0xFFFFA000)
-        )
-        StatCard(
-            label = "Заказы",
-            value = profile.ordersCount.toString(),
-            icon = Icons.Default.LocalShipping,
-            modifier = Modifier.weight(1f).clickable { onOpenOrders() },
-            iconColor = Color(0xFF66BB6A)
         )
     }
 }
