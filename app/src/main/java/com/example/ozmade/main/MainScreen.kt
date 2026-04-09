@@ -79,6 +79,9 @@ fun MainScreen(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
+    // Wait until preference is loaded to avoid flickering
+    if (isSellerModePref == null) return
+
     LaunchedEffect(openChatFromPush, pushChatId) {
         if (openChatFromPush && pushChatId != 0) {
             val encSellerName = Uri.encode(pushSellerName)
@@ -98,9 +101,6 @@ fun MainScreen(
             }
         }
     }
-
-    // Wait until preference is loaded to avoid flickering
-    if (isSellerModePref == null) return
 
     val currentDestination = navBackStackEntry?.destination
 

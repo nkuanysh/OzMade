@@ -40,6 +40,28 @@ class RealSellerRepository @Inject constructor(
         return SellerPageResponse(seller, products)
     }
 
-    override suspend fun toggleLike(productId: Int): Boolean = false
-    override suspend fun isLiked(productId: Int): Boolean = false
+    override suspend fun toggleLike(productId: Int): Boolean {
+        val response = api.toggleFavorite(productId)
+
+        if (!response.isSuccessful) {
+            return false
+        }
+
+        return when (response.body()?.status?.lowercase()) {
+            "added" -> true
+            "removed" -> false
+            else -> {
+                api.getFavorites().body()?.any { it.id == productId } == true
+            }
+        }
+    }
+
+    override suspend fun isLiked(productId: Int): Boolean {
+        return try {
+            val response = api.getFavorites()
+            response.body()?.any { it.id == productId } == true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }
