@@ -8,7 +8,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
@@ -21,10 +20,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,7 +43,6 @@ fun SellerProductsScreen(
     snackbarHostState: SnackbarHostState,
 ) {
 
-    var priceDialogFor by remember { mutableStateOf<SellerProductUi?>(null) }
     var deleteDialogFor by remember { mutableStateOf<SellerProductUi?>(null) }
 
     Scaffold(
@@ -202,7 +198,6 @@ fun SellerProductsScreen(
                             SellerProductCard(
                                 product = p,
                                 onOpen = { onOpenEdit(p.id) },
-                                onEditPrice = { priceDialogFor = p },
                                 onToggleSale = { onToggleSale(p.id) },
                                 onDelete = { deleteDialogFor = p }
                             )
@@ -210,19 +205,6 @@ fun SellerProductsScreen(
                     }
                 }
             }
-        }
-
-        // Диалог изменения цены
-        val priceP = priceDialogFor
-        if (priceP != null) {
-            ChangePriceDialog(
-                initial = priceP.price,
-                onDismiss = { priceDialogFor = null },
-                onConfirm = { newPrice ->
-                    onUpdatePrice(priceP.id, newPrice)
-                    priceDialogFor = null
-                }
-            )
         }
 
         // Диалог удаления
@@ -255,7 +237,6 @@ fun SellerProductsScreen(
 private fun SellerProductCard(
     product: SellerProductUi,
     onOpen: () -> Unit,
-    onEditPrice: () -> Unit,
     onToggleSale: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -346,13 +327,6 @@ private fun SellerProductCard(
                     onDismissRequest = { expanded = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Изменить цену") },
-                        onClick = {
-                            expanded = false
-                            onEditPrice()
-                        }
-                    )
-                    DropdownMenuItem(
                         text = { Text(if (isOnSale) "Снять с продажи" else "Вернуть в продажу") },
                         onClick = {
                             expanded = false
@@ -371,47 +345,4 @@ private fun SellerProductCard(
             }
         }
     }
-}
-
-@Composable
-fun ChangePriceDialog(
-    initial: Int,
-    onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit
-) {
-    var text by remember { mutableStateOf(initial.toString()) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Изменить цену", fontWeight = FontWeight.Bold) },
-        text = {
-            Column {
-                Text("Введите новую цену товара (AUD):", style = MaterialTheme.typography.bodyMedium)
-                Spacer(Modifier.height(12.dp))
-                OutlinedTextField(
-                    value = text,
-                    onValueChange = { if (it.all { c -> c.isDigit() }) text = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    shape = RoundedCornerShape(12.dp),
-                    suffix = { Text("AUD") },
-                    singleLine = true
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val p = text.toIntOrNull() ?: 0
-                    if (p > 0) onConfirm(p)
-                },
-                enabled = text.isNotEmpty(),
-                shape = RoundedCornerShape(12.dp)
-            ) { Text("Сохранить") }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
-        },
-        shape = RoundedCornerShape(28.dp)
-    )
 }
