@@ -33,7 +33,8 @@ fun CategoryScreen(
     uiState: CategoryUiState,
     onBack: () -> Unit,
     onRetry: () -> Unit,
-    onOpenProduct: (Int) -> Unit
+    onOpenProduct: (Int) -> Unit,
+    onToggleLike: (Int) -> Unit = {}
 ) {
     Scaffold { padding ->
         when (uiState) {
@@ -104,7 +105,8 @@ fun CategoryScreen(
                         items(uiState.products, key = { it.id }) { p ->
                             CategoryProductCard(
                                 product = p,
-                                onClick = { onOpenProduct(p.id) }
+                                onClick = { onOpenProduct(p.id) },
+                                onToggleLike = { onToggleLike(p.id) }
                             )
                         }
 
@@ -218,7 +220,8 @@ private fun CategoryHeader(
 @Composable
 private fun CategoryProductCard(
     product: Product,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onToggleLike: () -> Unit = {}
 ) {
     Card(
         shape = RoundedCornerShape(20.dp),
@@ -252,6 +255,26 @@ private fun CategoryProductCard(
                             Icons.Default.Image,
                             null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    }
+                }
+
+                // Кнопка избранного (справа сверху)
+                Surface(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(32.dp)
+                        .clickable { onToggleLike() },
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = if (product.liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                            contentDescription = null,
+                            tint = if (product.liked) Color.Red else Color.Gray,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }

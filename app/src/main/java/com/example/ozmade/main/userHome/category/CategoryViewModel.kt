@@ -3,6 +3,7 @@ package com.example.ozmade.main.userHome.category
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.userHome.HomeRepository
+import com.example.ozmade.main.userHome.details.ProductRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,7 +12,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CategoryViewModel @Inject constructor(
-    private val repo: HomeRepository
+    private val repo: HomeRepository,
+    private val productRepo: ProductRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<CategoryUiState>(CategoryUiState.Loading)
@@ -51,5 +53,22 @@ class CategoryViewModel @Inject constructor(
         "holidays" -> "Праздник — это эмоции, упакованные в детали."
         "home" -> "Дом начинается с вещей, которые хочется любить."
         else -> "Найди то, что сделано с душой."
+    }
+
+    fun toggleLike(productId: Int) {
+        viewModelScope.launch {
+            try {
+                val isLikedNow = productRepo.toggleLike(productId)
+                val currentState = _uiState.value
+                if (currentState is CategoryUiState.Data) {
+                    val newProducts = currentState.products.map {
+                        if (it.id == productId) it.copy(liked = isLikedNow) else it
+                    }
+                    _uiState.value = currentState.copy(products = newProducts)
+                }
+            } catch (e: Exception) {
+                // ignore
+            }
+        }
     }
 }

@@ -20,6 +20,7 @@ fun CategoryRoute(
         uiState = uiState,
         onBack = onBack,
         onRetry = { viewModel.load(categoryId) },
-        onOpenProduct = onOpenProduct
+        onOpenProduct = onOpenProduct,
+        onToggleLike = { viewModel.toggleLike(it) }
     )
 }
