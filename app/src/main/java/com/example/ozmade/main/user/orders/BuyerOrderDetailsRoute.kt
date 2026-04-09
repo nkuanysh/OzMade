@@ -8,6 +8,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
+import androidx.compose.ui.graphics.Color
 import com.example.ozmade.main.orders.data.DeliveryType
 import com.example.ozmade.main.orders.data.OrderStatus
 import com.example.ozmade.main.orders.data.deliveryTitle
@@ -26,7 +29,7 @@ fun BuyerOrderDetailsRoute(
     val ui by viewModel.ui.collectAsState()
     val order = remember(ui, orderId) { viewModel.findById(orderId) }
 
-    LaunchedEffect(Unit) { if (order == null) viewModel.load() }
+    LaunchedEffect(Unit) { viewModel.load() }
 
     Scaffold(
         topBar = {
@@ -117,11 +120,77 @@ fun BuyerOrderDetailsRoute(
                 }
 
                 OrderStatus.COMPLETED -> {
-                    Button(onClick = { /* TODO: открыть экран отзыва по orderId */ }, modifier = Modifier.fillMaxWidth()) {
+                    var showDialog by remember { mutableStateOf(false) }
+                    Button(onClick = { showDialog = true }, modifier = Modifier.fillMaxWidth()) {
                         Text("Оставить отзыв")
+                    }
+
+                    if (showDialog) {
+                        ReviewDialog(
+                            onDismiss = { showDialog = false },
+                            onSubmit = { rating, text ->
+                                viewModel.postReview(order.productId, rating, text) {
+                                    showDialog = false
+                                }
+                            }
+                        )
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+fun ReviewDialog(
+    onDismiss: () -> Unit,
+    onSubmit: (Int, String) -> Unit
+) {
+    var rating by remember { mutableIntStateOf(5) }
+    var text by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Оставить отзыв") },
+        text = {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    repeat(5) { index ->
+                        val starIndex = index + 1
+                        IconButton(onClick = { rating = starIndex }) {
+                            Icon(
+                                imageVector = if (starIndex <= rating) Icons.Default.Star else Icons.Default.StarBorder,
+                                contentDescription = null,
+                                tint = if (starIndex <= rating) Color(0xFFFFB400) else Color.Gray
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    label = { Text("Ваш отзыв") },
+                    modifier = Modifier.fillMaxWidth(),
+                    minLines = 3
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onSubmit(rating, text) },
+                enabled = text.isNotBlank()
+            ) {
+                Text("Отправить")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Отмена")
+            }
+        }
+    )
 }

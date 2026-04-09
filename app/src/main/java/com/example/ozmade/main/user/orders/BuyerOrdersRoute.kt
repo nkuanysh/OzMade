@@ -53,11 +53,17 @@ fun BuyerOrdersRoute(
 
             is BuyerOrdersUiState.Data -> {
                 val orders = (ui as BuyerOrdersUiState.Data).orders
-                OrdersList(
-                    orders = orders,
-                    onOpen = onOpenOrder,
-                    modifier = Modifier.padding(padding)
-                )
+                if (orders.isEmpty()) {
+                    Box(Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text("У вас пока нет заказов", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                } else {
+                    OrdersList(
+                        orders = orders,
+                        onOpen = onOpenOrder,
+                        modifier = Modifier.padding(padding)
+                    )
+                }
             }
         }
     }

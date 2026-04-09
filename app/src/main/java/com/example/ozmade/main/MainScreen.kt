@@ -348,7 +348,14 @@ fun MainScreen(
 
             composable("edit_profile") { EditProfileScreen(onBack = { navController.popBackStack() }) }
             composable("notifications") { NotificationsScreen(onBack = { navController.popBackStack() }) }
-            composable("orders_history") { OrdersHistoryScreen(onBack = { navController.popBackStack() }) }
+            composable("orders_history") {
+                com.example.ozmade.main.user.orders.BuyerOrdersRoute(
+                    onBack = { navController.popBackStack() },
+                    onOpenOrder = { orderId ->
+                        navController.navigate("buyer_order/$orderId")
+                    }
+                )
+            }
             composable("about_app") { AboutAppScreen(onBack = { navController.popBackStack() }) }
             composable("support") {
                 SupportScreen(onClose = { navController.popBackStack() }, onOpenSupportChat = { navController.navigate("support_chat") })

@@ -11,7 +11,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BuyerOrdersViewModel @Inject constructor(
-    private val repo: BuyerOrdersRepository
+    private val repo: BuyerOrdersRepository,
+    private val productRepo: com.example.ozmade.main.userHome.details.ProductRepository
 ) : ViewModel() {
 
     private val _ui = MutableStateFlow<BuyerOrdersUiState>(BuyerOrdersUiState.Loading)
@@ -23,6 +24,13 @@ class BuyerOrdersViewModel @Inject constructor(
             runCatching { repo.getMyOrders() }
                 .onSuccess { _ui.value = BuyerOrdersUiState.Data(it.sortedByDescending { o -> o.id }) }
                 .onFailure { _ui.value = BuyerOrdersUiState.Error(it.message ?: "Ошибка") }
+        }
+    }
+
+    fun postReview(productId: Int, rating: Int, text: String, onComplete: () -> Unit) {
+        viewModelScope.launch {
+            productRepo.postComment(productId, rating, text)
+                .onSuccess { onComplete() }
         }
     }
 
