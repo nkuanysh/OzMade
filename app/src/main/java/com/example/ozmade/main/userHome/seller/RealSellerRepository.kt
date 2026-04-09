@@ -28,11 +28,11 @@ class RealSellerRepository @Inject constructor(
         val products = dto.products?.map {
             SellerProductUi(
                 id = it.id,
-                title = it.title,
-                price = it.price,
-                city = it.city,
-                address = it.address,
-                rating = it.rating,
+                title = it.title ?: "Без названия",
+                price = it.price ?: 0.0,
+                city = it.city ?: "",
+                address = it.address ?: "",
+                rating = it.rating ?: 0.0,
                 imageUrl = ImageUtils.formatImageUrl(it.imageUrl)
             )
         } ?: emptyList()

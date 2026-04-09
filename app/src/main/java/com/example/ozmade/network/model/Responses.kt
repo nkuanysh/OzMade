@@ -169,22 +169,22 @@ data class SellerPageDto(
 
 data class SellerHeaderDto(
     @SerializedName("id") val id: Int,
-    @SerializedName("name") val name: String,
-    @SerializedName("status") val status: String,
-    @SerializedName("orders_count") val ordersCount: Int,
-    @SerializedName("rating") val rating: Double,
-    @SerializedName("reviews_count") val reviewsCount: Int,
-    @SerializedName("days_with_ozmade") val daysWithOzMade: Int,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("status") val status: String? = null,
+    @SerializedName("orders_count") val ordersCount: Int? = null,
+    @SerializedName("rating") val rating: Double? = null,
+    @SerializedName("reviews_count") val reviewsCount: Int? = null,
+    @SerializedName("days_with_ozmade") val daysWithOzMade: Int? = null,
     @SerializedName(value = "avatar_url", alternate = ["avatarUrl", "AvatarURL"]) val avatarUrl: String? = null
 )
 
 data class SellerProductDto(
     @SerializedName("id") val id: Int,
-    @SerializedName("title") val title: String,
-    @SerializedName("price") val price: Double,
-    @SerializedName("city") val city: String,
-    @SerializedName("address") val address: String,
-    @SerializedName("rating") val rating: Double,
+    @SerializedName("title") val title: String? = null,
+    @SerializedName("price") val price: Double? = null,
+    @SerializedName("city") val city: String? = null,
+    @SerializedName("address") val address: String? = null,
+    @SerializedName("rating") val rating: Double? = null,
     @SerializedName(value = "imageUrl", alternate = ["image_url", "ImageName"]) val imageUrl: String? = null
 )
 
