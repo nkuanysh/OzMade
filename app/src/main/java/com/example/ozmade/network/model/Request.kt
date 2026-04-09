@@ -54,8 +54,7 @@ data class ProductRequest(
     val depthCm: String?,
     @SerializedName("Composition")
     val composition: String?,
-    @SerializedName("YouTubeUrl")
-    val youtubeUrl: String?,
+    @SerializedName("youtube_url") val youtubeUrl: String?,
     @SerializedName("address")
     val address: String? = null
 )
@@ -72,7 +71,10 @@ data class CreateOrderRequest(
     @SerializedName("product_id") val productId: Int,
     @SerializedName("quantity") val quantity: Int,
     @SerializedName("delivery_type") val deliveryType: String,
-    @SerializedName("shipping_address_text") val shippingAddressText: String? = null
+    @SerializedName("shipping_address_text") val shippingAddressText: String? = null,
+    @SerializedName("shipping_lat") val shippingLat: Double? = null,
+    @SerializedName("shipping_lng") val shippingLng: Double? = null,
+    @SerializedName("shipping_comment") val shippingComment: String? = null
 )
 
 data class CompleteOrderRequest(
@@ -120,7 +122,7 @@ data class ProductCreateRequest(
     @SerializedName("WidthCm") val widthCm: String?,
     @SerializedName("DepthCm") val depthCm: String?,
     @SerializedName("Composition") val composition: String?,
-    @SerializedName("YouTubeUrl") val youtubeUrl: String?,
+    @SerializedName("youtube_url") val youtubeUrl: String?,
     @SerializedName("address") val address: String? = null
 )
 

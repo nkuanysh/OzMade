@@ -44,6 +44,9 @@ class DeliveryChooseViewModel2 @Inject constructor(
         quantity: Int,
         deliveryType: String,
         shippingAddressText: String?,
+        shippingLat: Double? = null,
+        shippingLng: Double? = null,
+        shippingComment: String? = null,
         onSuccess: () -> Unit
     ) {
         val current = _state.value
@@ -58,19 +61,22 @@ class DeliveryChooseViewModel2 @Inject constructor(
                         productId = productId,
                         quantity = quantity,
                         deliveryType = deliveryType,
-                        shippingAddressText = shippingAddressText
+                        shippingAddressText = shippingAddressText,
+                        shippingLat = shippingLat,
+                        shippingLng = shippingLng,
+                        shippingComment = shippingComment
                     )
                 )
             }.onSuccess {
                 onSuccess()
             }.onFailure {
                 val cur = _state.value
-                if (cur is UiState.Data) _state.value = cur.copy(saving = false, actionError = it.message ?: "Ошибка")
-                return@launch
+                if (cur is UiState.Data) {
+                    // Try to parse error message if it's from backend validation
+                    val msg = it.message ?: "Ошибка"
+                    _state.value = cur.copy(saving = false, actionError = msg)
+                }
             }
-
-            val cur = _state.value
-            if (cur is UiState.Data) _state.value = cur.copy(saving = false)
         }
     }
 }

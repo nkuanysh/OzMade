@@ -6,8 +6,8 @@ data class SellerDeliveryUi(
     val pickupTime: String,
 
     val myDeliveryEnabled: Boolean,
-    val centerLat: String,      // в UI строкой (чтобы вводить)
-    val centerLng: String,
+    val centerLat: Double? = null,
+    val centerLng: Double? = null,
     val radiusKm: Int,
     val centerAddress: String,
 

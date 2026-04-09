@@ -1,6 +1,9 @@
 package com.example.ozmade.main.userHome.details
 
 import android.util.Log
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -33,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.example.ozmade.main.user.orderflow.ui.OrderBottomSheet
 import kotlin.math.max
@@ -54,7 +58,12 @@ fun ProductDetailsScreen(
 ) {
     var tab by remember { mutableStateOf(DetailsTab.DESCRIPTION) }
     val scrollState = rememberScrollState()
-    val pagerState = rememberPagerState(pageCount = { max(product.images.size, 1) })
+    
+    val videoId = remember(product.youtubeUrl) { extractYoutubeVideoId(product.youtubeUrl) }
+    val hasVideo = videoId != null
+    val totalItems = product.images.size + (if (hasVideo) 1 else 0)
+    
+    val pagerState = rememberPagerState(pageCount = { max(totalItems, 1) })
 
     var showOrderSheet by remember { mutableStateOf(false) }
     var orderQuantity by remember { mutableIntStateOf(1) }
@@ -103,7 +112,7 @@ fun ProductDetailsScreen(
                                 .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center
                         ) {
-                            if (product.images.isNotEmpty()) {
+                            if (pageIndex < product.images.size) {
                                 val imageUrl = product.images[pageIndex]
                                 Log.d("ProductDetailsScreen", "Loading image[$pageIndex]: $imageUrl")
                                 AsyncImage(
@@ -117,6 +126,8 @@ fun ProductDetailsScreen(
                                         Log.e("ProductDetailsScreen", "Image error: $imageUrl", it.result.throwable)
                                     }
                                 )
+                            } else if (hasVideo && pageIndex == product.images.size) {
+                                YoutubeVideoSlide(videoId!!)
                             } else {
                                 Icon(
                                     Icons.Default.Image,
@@ -140,7 +151,7 @@ fun ProductDetailsScreen(
                             )
                     )
 
-                    if (product.images.size > 1) {
+                    if (totalItems > 1) {
                         Surface(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
@@ -152,7 +163,7 @@ fun ProductDetailsScreen(
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-                                repeat(product.images.size) { i ->
+                                repeat(totalItems) { i ->
                                     val active = pagerState.currentPage == i
                                     Box(
                                         modifier = Modifier
@@ -351,6 +362,84 @@ fun ProductDetailsScreen(
             }
         )
     }
+}
+
+@Composable
+fun YoutubeVideoSlide(videoId: String) {
+    var isPlaying by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier.fillMaxSize().background(Color.Black),
+        contentAlignment = Alignment.Center
+    ) {
+        if (isPlaying) {
+            AndroidView(
+                factory = { context ->
+                    WebView(context).apply {
+                        settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        settings.loadWithOverviewMode = true
+                        settings.useWideViewPort = true
+                        settings.mediaPlaybackRequiresUserGesture = false
+                        
+                        webViewClient = WebViewClient()
+                        webChromeClient = WebChromeClient()
+                        
+                        loadUrl("https://www.youtube.com/embed/$videoId?autoplay=1&modestbranding=1&rel=0")
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable { isPlaying = true },
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = "https://img.youtube.com/vi/$videoId/hqdefault.jpg",
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+                Surface(
+                    color = Color.Black.copy(alpha = 0.6f),
+                    shape = CircleShape,
+                    modifier = Modifier.size(64.dp)
+                ) {
+                    Icon(
+                        Icons.Default.PlayArrow,
+                        contentDescription = "Play",
+                        tint = Color.White,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(8.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun extractYoutubeVideoId(url: String?): String? {
+    if (url.isNullOrBlank()) return null
+    val id = try {
+        if (url.contains("youtu.be/")) {
+            url.substringAfter("youtu.be/").substringBefore("?").substringBefore("&").substringBefore("/")
+        } else if (url.contains("v=")) {
+            url.substringAfter("v=").substringBefore("&").substringBefore("/")
+        } else if (url.contains("/shorts/")) {
+            url.substringAfter("/shorts/").substringBefore("?").substringBefore("&").substringBefore("/")
+        } else if (url.contains("/embed/")) {
+            url.substringAfter("/embed/").substringBefore("?").substringBefore("&").substringBefore("/")
+        } else {
+            null
+        }
+    } catch (e: Exception) {
+        null
+    }
+    return id?.trim()?.takeIf { it.length == 11 }
 }
 
 @Composable

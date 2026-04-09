@@ -224,18 +224,33 @@ data class ReviewsSummaryDto(
 data class ReviewItemDto(
     @SerializedName(value = "ID", alternate = ["id"]) val id: Int,
     @SerializedName(value = "UserName", alternate = ["user_name", "userName"]) val userName: String,
+    @SerializedName(value = "ProductID", alternate = ["product_id", "productId"]) val productId: Int,
+    @SerializedName(value = "ProductTitle", alternate = ["product_title", "productTitle"]) val productTitle: String,
     @SerializedName(value = "Rating", alternate = ["rating"]) val rating: Double,
     @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String,
     @SerializedName(value = "Text", alternate = ["text"]) val text: String
 )
 
-data class EnsureThreadResponse(
-    @SerializedName("thread_id") val threadId: Int
+data class SellerQualityDto(
+    @SerializedName(value = "seller_name", alternate = ["sellerName", "Name"]) val sellerName: String,
+    @SerializedName(value = "orders_count", alternate = ["ordersCount", "total_orders"]) val ordersCount: Int,
+    @SerializedName(value = "days_with_ozmade", alternate = ["daysWithOzMade"]) val daysWithOzMade: Int,
+    @SerializedName(value = "average_rating", alternate = ["averageRating", "rating", "AverageRating"]) val averageRating: Double,
+    @SerializedName(value = "ratings_count", alternate = ["ratingsCount", "RatingsCount"]) val ratingsCount: Int,
+    @SerializedName(value = "reviews_count", alternate = ["reviewsCount", "ReviewsCount"]) val reviewsCount: Int,
+    @SerializedName(value = "reviews", alternate = ["Reviews"]) val reviews: List<SellerReviewItemDto>
 )
 
-data class SpecDto(
-    @SerializedName("key") val key: String,
-    @SerializedName("value") val value: String
+data class SellerDeliveryDto(
+    @SerializedName("pickup_enabled") val pickupEnabled: Boolean,
+    @SerializedName("pickup_address") val pickupAddress: String?,
+    @SerializedName("pickup_time") val pickupTime: String?,
+    @SerializedName("free_delivery_enabled") val myDeliveryEnabled: Boolean,
+    @SerializedName("delivery_center_lat") val centerLat: Double?,
+    @SerializedName("delivery_center_lng") val centerLng: Double?,
+    @SerializedName("delivery_radius_km") val radiusKm: Int?,
+    @SerializedName("delivery_center_address") val centerAddress: String?,
+    @SerializedName("intercity_enabled") val intercityEnabled: Boolean
 )
 
 data class DeliveryInfoDto(
@@ -245,10 +260,10 @@ data class DeliveryInfoDto(
     @SerializedName(value = "free_delivery_enabled", alternate = ["freeDeliveryEnabled"]) val freeDeliveryEnabled: Boolean,
     @SerializedName(value = "free_delivery_text", alternate = ["freeDeliveryText"]) val freeDeliveryText: String?,
     @SerializedName(value = "intercity_enabled", alternate = ["intercityEnabled"]) val intercityEnabled: Boolean,
-    @SerializedName(value = "deliveryCenterLat") val centerLat: Double? = null,
-    @SerializedName(value = "deliveryCenterLng") val centerLng: Double? = null,
-    @SerializedName(value = "deliveryRadiusKm") val radiusKm: Double? = null,
-    @SerializedName(value = "deliveryCenterAddress", alternate = ["centerAddress"]) val centerAddress: String? = null
+    @SerializedName(value = "delivery_center_lat", alternate = ["deliveryCenterLat"]) val centerLat: Double? = null,
+    @SerializedName(value = "delivery_center_lng", alternate = ["deliveryCenterLng"]) val centerLng: Double? = null,
+    @SerializedName(value = "delivery_radius_km", alternate = ["deliveryRadiusKm"]) val radiusKm: Double? = null,
+    @SerializedName(value = "delivery_center_address", alternate = ["centerAddress"]) val centerAddress: String? = null
 )
 
 data class SellerInfoDto(
@@ -283,28 +298,6 @@ data class SellerReviewItemDto(
     @SerializedName(value = "Text", alternate = ["text"]) val text: String
 )
 
-data class SellerQualityDto(
-    @SerializedName(value = "seller_name", alternate = ["sellerName", "Name"]) val sellerName: String,
-    @SerializedName(value = "orders_count", alternate = ["ordersCount", "total_orders"]) val ordersCount: Int,
-    @SerializedName(value = "days_with_ozmade", alternate = ["daysWithOzMade"]) val daysWithOzMade: Int,
-    @SerializedName(value = "average_rating", alternate = ["averageRating", "rating", "AverageRating"]) val averageRating: Double,
-    @SerializedName(value = "ratings_count", alternate = ["ratingsCount", "RatingsCount"]) val ratingsCount: Int,
-    @SerializedName(value = "reviews_count", alternate = ["reviewsCount", "ReviewsCount"]) val reviewsCount: Int,
-    @SerializedName(value = "reviews", alternate = ["Reviews"]) val reviews: List<SellerReviewItemDto>
-)
-
-data class SellerDeliveryDto(
-    @SerializedName("pickup_enabled") val pickupEnabled: Boolean,
-    @SerializedName("pickup_address") val pickupAddress: String?,
-    @SerializedName("pickup_time") val pickupTime: String?,
-    @SerializedName("free_delivery_enabled") val myDeliveryEnabled: Boolean,
-    @SerializedName("delivery_center_lat") val centerLat: Double?,
-    @SerializedName("delivery_center_lng") val centerLng: Double?,
-    @SerializedName("delivery_radius_km") val radiusKm: Int?,
-    @SerializedName("delivery_center_address") val centerAddress: String?,
-    @SerializedName("intercity_enabled") val intercityEnabled: Boolean
-)
-
 data class OrderDto(
     @SerializedName(value = "ID", alternate = ["id"]) val id: Int,
     @SerializedName(value = "Status", alternate = ["status"]) val status: String,
@@ -320,11 +313,13 @@ data class OrderDto(
     @SerializedName(value = "DeliveryType", alternate = ["delivery_type", "deliveryType"]) val deliveryType: String,
     @SerializedName(value = "PickupAddress", alternate = ["pickup_address", "pickupAddress"]) val pickupAddress: String? = null,
     @SerializedName(value = "PickupTime", alternate = ["pickup_time", "pickupTime"]) val pickupTime: String? = null,
-    @SerializedName(value = "ZoneCenterLat", alternate = ["zone_center_lat", "zoneCenterLat"]) val zoneCenterLat: Double? = null,
-    @SerializedName(value = "ZoneCenterLng", alternate = ["zone_center_lng", "zoneCenterLng"]) val zoneCenterLng: Double? = null,
-    @SerializedName(value = "ZoneRadiusKm", alternate = ["zone_radius_km", "zoneRadiusKm"]) val zoneRadiusKm: Int? = null,
-    @SerializedName(value = "ZoneCenterAddress", alternate = ["zone_center_address", "zoneCenterAddress"]) val zoneCenterAddress: String? = null,
+    @SerializedName(value = "ZoneCenterLat", alternate = ["zone_center_lat", "zoneCenterLat", "delivery_center_lat"]) val zoneCenterLat: Double? = null,
+    @SerializedName(value = "ZoneCenterLng", alternate = ["zone_center_lng", "zoneCenterLng", "delivery_center_lng"]) val zoneCenterLng: Double? = null,
+    @SerializedName(value = "ZoneRadiusKm", alternate = ["zone_radius_km", "zoneRadiusKm", "delivery_radius_km"]) val zoneRadiusKm: Int? = null,
+    @SerializedName(value = "ZoneCenterAddress", alternate = ["zone_center_address", "zoneCenterAddress", "delivery_center_address"]) val zoneCenterAddress: String? = null,
     @SerializedName(value = "ShippingAddressText", alternate = ["shipping_address_text", "shippingAddressText"]) val shippingAddressText: String? = null,
+    @SerializedName(value = "ShippingLat", alternate = ["shipping_lat", "shippingLat"]) val shippingLat: Double? = null,
+    @SerializedName(value = "ShippingLng", alternate = ["shipping_lng", "shippingLng"]) val shippingLng: Double? = null,
     @SerializedName(value = "ShippingComment", alternate = ["shipping_comment", "shippingComment"]) val shippingComment: String? = null,
     @SerializedName(value = "ConfirmCode", alternate = ["confirm_code", "confirmCode"]) val confirmCode: String? = null
 )

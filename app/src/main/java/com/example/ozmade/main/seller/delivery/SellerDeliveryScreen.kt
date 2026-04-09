@@ -1,13 +1,10 @@
 package com.example.ozmade.main.seller.delivery
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -15,11 +12,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.*
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,67 +45,41 @@ fun SellerDeliveryRoute(
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = null)
                     }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
+                }
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         bottomBar = {
             if (uiState is SellerDeliveryUiState.Data) {
-                Surface(
-                    tonalElevation = 8.dp,
-                    shadowElevation = 8.dp
-                ) {
+                Surface(tonalElevation = 8.dp, shadowElevation = 8.dp) {
                     Button(
                         onClick = {
-                            // Сохраняем всё сразу
-                            viewModel.savePickup { scope.launch { snackbarHostState.showSnackbar("Настройки самовывоза сохранены") } }
-                            viewModel.saveMyDelivery { scope.launch { snackbarHostState.showSnackbar("Настройки курьера сохранены") } }
-                            viewModel.saveIntercity { scope.launch { snackbarHostState.showSnackbar("Настройки межгорода сохранены") } }
+                            viewModel.savePickup { scope.launch { snackbarHostState.showSnackbar(it) } }
+                            viewModel.saveMyDelivery { scope.launch { snackbarHostState.showSnackbar(it) } }
+                            viewModel.saveIntercity { scope.launch { snackbarHostState.showSnackbar(it) } }
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .height(56.dp),
+                        modifier = Modifier.fillMaxWidth().padding(16.dp).height(56.dp),
                         shape = RoundedCornerShape(16.dp)
                     ) {
-                        Text("Сохранить все изменения", style = MaterialTheme.typography.titleMedium)
+                        Text("Сохранить все изменения")
                     }
                 }
             }
         }
     ) { padding ->
-        Box(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-        ) {
+        Box(modifier = Modifier.padding(padding).fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))) {
             when (val st = uiState) {
-                is SellerDeliveryUiState.Loading -> {
-                    CircularProgressIndicator(Modifier.align(Alignment.Center))
+                is SellerDeliveryUiState.Loading -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+                is SellerDeliveryUiState.Error -> Column(Modifier.align(Alignment.Center).padding(16.dp)) {
+                    Text(st.message, color = MaterialTheme.colorScheme.error)
+                    Button(onClick = { viewModel.load() }) { Text("Повторить") }
                 }
-
-                is SellerDeliveryUiState.Error -> {
-                    ErrorContent(message = st.message, onRetry = { viewModel.load() })
-                }
-
                 is SellerDeliveryUiState.Data -> {
                     val s = st.ui
-                    val scroll = rememberScrollState()
-
-                    Column(
-                        Modifier
-                            .fillMaxSize()
-                            .verticalScroll(scroll)
-                            .padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
+                    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         DeliveryCard(
                             title = "Самовывоз",
-                            description = "Покупатель сам забирает товар по адресу",
+                            description = "Покупатель забирает товар сам",
                             icon = Icons.Default.Storefront,
                             enabled = s.pickupEnabled,
                             onToggle = { on -> viewModel.updateLocal { it.copy(pickupEnabled = on) } }
@@ -113,90 +88,80 @@ fun SellerDeliveryRoute(
                                 value = s.pickupAddress,
                                 onValueChange = { v -> viewModel.updateLocal { it.copy(pickupAddress = v) } },
                                 label = { Text("Адрес пункта выдачи") },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
+                                modifier = Modifier.fillMaxWidth()
                             )
-                            Spacer(Modifier.height(12.dp))
+                            Spacer(Modifier.height(8.dp))
                             OutlinedTextField(
                                 value = s.pickupTime,
                                 onValueChange = { v -> viewModel.updateLocal { it.copy(pickupTime = v) } },
                                 label = { Text("График работы") },
-                                placeholder = { Text("Пн-Пт: 10:00 - 19:00") },
-                                modifier = Modifier.fillMaxWidth(),
-                                singleLine = true,
-                                shape = RoundedCornerShape(12.dp)
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
 
                         DeliveryCard(
                             title = "Моя доставка",
-                            description = "Ваша курьерская доставка по городу",
+                            description = "Зона вашей курьерской доставки",
                             icon = Icons.Default.DeliveryDining,
                             enabled = s.myDeliveryEnabled,
                             onToggle = { on -> viewModel.updateLocal { it.copy(myDeliveryEnabled = on) } }
                         ) {
+                            Text("Выберите центр и радиус доставки на карте", style = MaterialTheme.typography.bodySmall)
+                            
+                            val mapCenter = remember(s.centerLat, s.centerLng) {
+                                LatLng(s.centerLat ?: 43.238, s.centerLng ?: 76.889)
+                            }
+                            val cameraPositionState = rememberCameraPositionState {
+                                position = CameraPosition.fromLatLngZoom(mapCenter, 12f)
+                            }
+
+                            Box(Modifier.fillMaxWidth().height(300.dp).clip(RoundedCornerShape(12.dp))) {
+                                GoogleMap(
+                                    modifier = Modifier.fillMaxSize(),
+                                    cameraPositionState = cameraPositionState,
+                                    onMapClick = { latLng ->
+                                        viewModel.updateLocal { it.copy(centerLat = latLng.latitude, centerLng = latLng.longitude) }
+                                    }
+                                ) {
+                                    if (s.centerLat != null && s.centerLng != null) {
+                                        val pos = LatLng(s.centerLat, s.centerLng)
+                                        Marker(state = MarkerState(position = pos), title = "Центр доставки")
+                                        com.google.maps.android.compose.Circle(
+                                            center = pos,
+                                            radius = s.radiusKm * 1000.0,
+                                            fillColor = Color.Blue.copy(alpha = 0.2f),
+                                            strokeColor = Color.Blue,
+                                            strokeWidth = 2f
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(Modifier.height(8.dp))
+                            Text("Радиус: ${s.radiusKm} км")
+                            Slider(
+                                value = s.radiusKm.toFloat(),
+                                onValueChange = { v -> viewModel.updateLocal { it.copy(radiusKm = v.toInt()) } },
+                                valueRange = 1f..50f
+                            )
                             OutlinedTextField(
                                 value = s.centerAddress,
                                 onValueChange = { v -> viewModel.updateLocal { it.copy(centerAddress = v) } },
-                                label = { Text("Базовый адрес (откуда выезд)") },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-
-                            Spacer(Modifier.height(12.dp))
-
-                            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                                OutlinedTextField(
-                                    value = s.centerLat,
-                                    onValueChange = { v -> viewModel.updateLocal { it.copy(centerLat = v) } },
-                                    label = { Text("Широта (Lat)") },
-                                    modifier = Modifier.weight(1f),
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                OutlinedTextField(
-                                    value = s.centerLng,
-                                    onValueChange = { v -> viewModel.updateLocal { it.copy(centerLng = v) } },
-                                    label = { Text("Долгота (Lng)") },
-                                    modifier = Modifier.weight(1f),
-                                    singleLine = true,
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                            }
-
-                            Spacer(Modifier.height(16.dp))
-
-                            Text(
-                                text = "Радиус доставки: ${s.radiusKm} км",
-                                style = MaterialTheme.typography.titleSmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                            Slider(
-                                value = s.radiusKm.toFloat(),
-                                onValueChange = { v ->
-                                    viewModel.updateLocal { it.copy(radiusKm = v.toInt().coerceIn(1, 50)) }
-                                },
-                                valueRange = 1f..50f
+                                label = { Text("Описание зоны (напр. город Алматы)") },
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
 
                         DeliveryCard(
                             title = "Межгород",
-                            description = "Отправка товаров в другие города",
+                            description = "Доставка сторонними службами",
                             icon = Icons.Default.Public,
                             enabled = s.intercityEnabled,
                             onToggle = { on -> viewModel.updateLocal { it.copy(intercityEnabled = on) } }
                         ) {
-                            Text(
-                                "Покупатели из других регионов увидят возможность доставки транспортными компаниями.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Text("Позволяет покупателям из других городов заказывать ваши товары.")
                         }
-                        
-                        Spacer(Modifier.height(80.dp)) // Отступ под кнопку
+                        Spacer(Modifier.height(80.dp))
                     }
                 }
             }
@@ -205,91 +170,21 @@ fun SellerDeliveryRoute(
 }
 
 @Composable
-private fun DeliveryCard(
-    title: String,
-    description: String,
-    icon: ImageVector,
-    enabled: Boolean,
-    onToggle: (Boolean) -> Unit,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Card(
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (enabled) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (enabled) 2.dp else 0.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
+private fun DeliveryCard(title: String, description: String, icon: ImageVector, enabled: Boolean, onToggle: (Boolean) -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(16.dp)) {
         Column(Modifier.padding(16.dp)) {
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Surface(
-                    modifier = Modifier.size(40.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    color = if (enabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-                
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(icon, null, tint = if (enabled) MaterialTheme.colorScheme.primary else Color.Gray)
                 Spacer(Modifier.width(12.dp))
-                
                 Column(Modifier.weight(1f)) {
-                    Text(title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-                    Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(title, fontWeight = FontWeight.Bold)
+                    Text(description, style = MaterialTheme.typography.bodySmall)
                 }
-                
-                Switch(
-                    checked = enabled,
-                    onCheckedChange = onToggle,
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colorScheme.primary
-                    )
-                )
+                Switch(checked = enabled, onCheckedChange = onToggle)
             }
-
-            AnimatedVisibility(
-                visible = enabled,
-                enter = expandVertically(),
-                exit = shrinkVertically()
-            ) {
-                Column {
-                    Spacer(Modifier.height(16.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                    Spacer(Modifier.height(16.dp))
-                    content()
-                }
+            AnimatedVisibility(visible = enabled) {
+                Column { Spacer(Modifier.height(16.dp)); content() }
             }
-        }
-    }
-}
-
-@Composable
-private fun ErrorContent(message: String, onRetry: () -> Unit) {
-    Column(
-        Modifier.fillMaxSize().padding(24.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = Icons.Default.Error,
-            contentDescription = null,
-            modifier = Modifier.size(48.dp),
-            tint = MaterialTheme.colorScheme.error
-        )
-        Spacer(Modifier.height(16.dp))
-        Text(message, color = MaterialTheme.colorScheme.error, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
-        Spacer(Modifier.height(24.dp))
-        Button(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
-            Text("Повторить")
         }
     }
 }

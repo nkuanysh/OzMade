@@ -37,8 +37,13 @@ class RealBuyerOrdersRepository @Inject constructor(
                 pickupAddress = dto.pickupAddress,
                 pickupTime = dto.pickupTime,
                 zoneCenterAddress = dto.zoneCenterAddress,
+                zoneCenterLat = dto.zoneCenterLat,
+                zoneCenterLng = dto.zoneCenterLng,
                 zoneRadiusKm = dto.zoneRadiusKm,
                 shippingAddressText = dto.shippingAddressText,
+                shippingLat = dto.shippingLat,
+                shippingLng = dto.shippingLng,
+                shippingComment = dto.shippingComment,
 
                 confirmCode = dto.confirmCode
             )

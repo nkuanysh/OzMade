@@ -8,6 +8,8 @@ data class DeliveryInfoUi(
     val intercityEnabled: Boolean = false,
     val pickupAddress: String? = null,
     val centerAddress: String? = null,
+    val centerLat: Double? = null,
+    val centerLng: Double? = null,
     val radiusKm: Double? = null
 )
 data class SellerUi(
@@ -27,6 +29,7 @@ data class ProductDetailsUi(
     val reviewsCount: Int,
     val ordersCount: Int,
     val images: List<String>,
+    val youtubeUrl: String? = null,
     val description: String,
     val specs: List<Pair<String, String>>,
     val delivery: DeliveryInfoUi,

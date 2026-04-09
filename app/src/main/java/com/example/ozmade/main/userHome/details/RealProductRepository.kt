@@ -58,6 +58,7 @@ class RealProductRepository @Inject constructor(
             reviewsCount = dto.comments?.size ?: 0,
             ordersCount = dto.seller?.completedOrders ?: 0,
             images = images,
+            youtubeUrl = dto.youtubeUrl,
             description = dto.description,
             specs = specs,
             delivery = DeliveryInfoUi(

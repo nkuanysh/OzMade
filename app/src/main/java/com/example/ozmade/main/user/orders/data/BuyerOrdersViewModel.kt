@@ -3,6 +3,7 @@ package com.example.ozmade.main.user.orders.data
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.orders.data.OrderStatus
+import com.example.ozmade.network.model.CreateOrderRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

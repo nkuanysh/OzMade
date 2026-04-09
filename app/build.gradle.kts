@@ -116,4 +116,8 @@ dependencies {
 
 
     implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // Maps
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.maps)
 }

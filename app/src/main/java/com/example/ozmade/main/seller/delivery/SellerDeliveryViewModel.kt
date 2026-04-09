@@ -18,7 +18,6 @@ class SellerDeliveryViewModel @Inject constructor(
     private val _uiState = MutableStateFlow<SellerDeliveryUiState>(SellerDeliveryUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
-    // “последнее сохранённое” — нужно для Cancel
     private var saved: SellerDeliveryUi? = null
 
     fun load() {
@@ -35,8 +34,8 @@ class SellerDeliveryViewModel @Inject constructor(
                     pickupTime = d.pickupTime.orEmpty(),
 
                     myDeliveryEnabled = d.myDeliveryEnabled,
-                    centerLat = d.centerLat?.toString().orEmpty(),
-                    centerLng = d.centerLng?.toString().orEmpty(),
+                    centerLat = d.centerLat,
+                    centerLng = d.centerLng,
                     radiusKm = d.radiusKm ?: 3,
                     centerAddress = d.centerAddress.orEmpty(),
 
@@ -82,18 +81,14 @@ class SellerDeliveryViewModel @Inject constructor(
         val cur = (_uiState.value as? SellerDeliveryUiState.Data)?.ui ?: return
         viewModelScope.launch {
             runCatching {
-                val lat = cur.centerLat.trim().toDoubleOrNull()
-                val lng = cur.centerLng.trim().toDoubleOrNull()
-
-                // если включено — lat/lng должны быть
-                if (cur.myDeliveryEnabled && (lat == null || lng == null)) {
-                    error("Укажи координаты точки (lat/lng)")
+                if (cur.myDeliveryEnabled && (cur.centerLat == null || cur.centerLng == null)) {
+                    error("Выберите точку на карте для зоны доставки")
                 }
 
                 val req = UpdateSellerDeliveryRequest(
                     myDeliveryEnabled = cur.myDeliveryEnabled,
-                    centerLat = lat,
-                    centerLng = lng,
+                    centerLat = cur.centerLat,
+                    centerLng = cur.centerLng,
                     radiusKm = cur.radiusKm,
                     centerAddress = cur.centerAddress.trim().ifBlank { null }
                 )

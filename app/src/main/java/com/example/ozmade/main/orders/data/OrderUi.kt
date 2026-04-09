@@ -18,8 +18,13 @@ data class OrderUi(
     val pickupAddress: String?,
     val pickupTime: String?,
     val zoneCenterAddress: String?,
+    val zoneCenterLat: Double? = null,
+    val zoneCenterLng: Double? = null,
     val zoneRadiusKm: Int?,
     val shippingAddressText: String?,
+    val shippingLat: Double? = null,
+    val shippingLng: Double? = null,
+    val shippingComment: String? = null,
 
     val confirmCode: String?
 )
