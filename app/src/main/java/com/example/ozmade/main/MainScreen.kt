@@ -177,7 +177,14 @@ fun MainScreen(
                 }
                 composable(BottomItem.Favorites.route) {
                     FavoritesRoute(
-                        onOpenProduct = { pid -> navController.navigate("product/$pid") }
+                        onOpenProduct = { pid -> navController.navigate("product/$pid") },
+                        onBuyClick = {
+                            navController.navigate(BottomItem.Home.route) {
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
                     )
                 }
                 composable(BottomItem.Chat.route) {

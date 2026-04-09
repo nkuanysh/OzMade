@@ -96,6 +96,24 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    fun refreshFavorites() {
+        viewModelScope.launch {
+            try {
+                val favorites = repo.getFavorites()
+                val favoriteIds = favorites.map { it.id }.toSet()
+                val currentState = _uiState.value
+                if (currentState is HomeUiState.Data) {
+                    val newProducts = currentState.products.map {
+                        it.copy(liked = favoriteIds.contains(it.id))
+                    }
+                    _uiState.value = currentState.copy(products = newProducts)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "refreshFavorites error", e)
+            }
+        }
+    }
+
     fun onSearchQueryChange(query: String) {
         val currentState = _uiState.value
         if (currentState is HomeUiState.Data) {
