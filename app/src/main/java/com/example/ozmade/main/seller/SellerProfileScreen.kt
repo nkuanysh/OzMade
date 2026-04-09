@@ -134,9 +134,9 @@ private fun SellerProfileContent(
                     contentScale = ContentScale.Crop
                 )
             }
-            
+
             Spacer(Modifier.width(16.dp))
-            
+
             Column {
                 Text(
                     text = profile.name.ifBlank { "Мой магазин" },
