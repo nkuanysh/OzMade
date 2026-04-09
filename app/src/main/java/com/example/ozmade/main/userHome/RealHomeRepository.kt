@@ -109,7 +109,7 @@ private fun ProductDto.toDomain(liked: Boolean = false): Product {
     return Product(
         id = id,
         title = title ?: name ?: "Unknown",
-        price = cost ?: price ?: 0.0,
+        price = price ?: 0.0,
         city = address?.substringBefore(",") ?: "Unknown",
         address = address ?: "Unknown",
         rating = averageRating ?: 0.0,
