@@ -48,8 +48,7 @@ data class ProductDetailsDto(
     val categories: List<String>? = null,
     @SerializedName(value = "Cost", alternate = ["Price", "price", "cost"])
     val price: Double? = null,
-    @SerializedName(value = "Address", alternate = ["address"])
-    val address: String? = null,
+    @SerializedName(value = "Address", alternate = ["address"]) val address: String? = null,
     @SerializedName(value = "WhatsAppLink", alternate = ["whatsapp_link", "whatsappLink"])
     val whatsappLink: String? = null,
     @SerializedName(value = "ViewCount", alternate = ["view_count", "viewCount"])
@@ -141,6 +140,9 @@ data class SellerProfileDto(
     @SerializedName("about") val about: String? = null,
     @SerializedName("city") val city: String? = null,
     @SerializedName("address") val address: String? = null,
+    @SerializedName(value = "first_name", alternate = ["firstName"]) val firstName: String? = null,
+    @SerializedName(value = "last_name", alternate = ["lastName"]) val lastName: String? = null,
+    @SerializedName("categories") val categories: List<String>? = null,
     @SerializedName(value = "days_with_ozmade", alternate = ["daysWithOzMade"]) val daysWithOzMade: Int? = null
 )
 
@@ -270,8 +272,8 @@ data class SellerInfoDto(
     @SerializedName(value = "ID", alternate = ["id"]) val id: Int,
     @SerializedName(value = "Name", alternate = ["name"]) val name: String?,
     @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl", "ImageName"]) val avatarUrl: String? = null,
-    @SerializedName(value = "Address", alternate = ["address"]) val address: String?,
-    @SerializedName(value = "Rating", alternate = ["rating"]) val rating: Double? = null,
+    @SerializedName("Address") val address: String?,
+    @SerializedName("Rating") val rating: Double? = null,
     @SerializedName(value = "CompletedOrders", alternate = ["completed_orders", "completedOrders", "ordersCount"]) val completedOrders: Int? = null
 )
 

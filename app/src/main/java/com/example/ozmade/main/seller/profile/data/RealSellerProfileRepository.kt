@@ -13,7 +13,6 @@ class RealSellerProfileRepository @Inject constructor(
 ) : SellerProfileRepository {
 
     override suspend fun getSellerProfile(): SellerProfileUi = withContext(Dispatchers.IO) {
-        // Fetch both profile and quality info to ensure we have "correct information" (stats)
         val profileDeferred = async { api.getSellerProfile() }
         val qualityDeferred = async { api.getSellerQuality() }
 
@@ -23,13 +22,19 @@ class RealSellerProfileRepository @Inject constructor(
         if (!profileResp.isSuccessful) error("Не удалось загрузить профиль (${profileResp.code()})")
         
         val pDto = profileResp.body() ?: error("Пустой ответ профиля")
-        val qDto = qualityResp.body() // quality might fail or be empty, handled gracefully
+        val qDto = qualityResp.body() 
 
         SellerProfileUi(
             name = pDto.name,
+            firstName = pDto.firstName,
+            lastName = pDto.lastName,
+            about = pDto.about,
+            city = pDto.city,
+            address = pDto.address,
+            categories = pDto.categories,
             status = pDto.status,
+            avatarUrl = pDto.avatarUrl,
             totalProducts = pDto.totalProducts,
-            // Use quality DTO for rating and orders if available, as it's often more detailed
             rating = qDto?.averageRating ?: pDto.rating ?: 0.0,
             ratingsCount = qDto?.ratingsCount ?: 0,
             ordersCount = qDto?.ordersCount ?: pDto.ordersCount ?: 0

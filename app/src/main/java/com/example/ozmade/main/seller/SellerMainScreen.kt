@@ -179,7 +179,13 @@ fun SellerMainScreen(
             }
             composable(SellerRoutes.DELIVERY) {
                 com.example.ozmade.main.seller.delivery.SellerDeliveryRoute(
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onSuccess = {
+                        navController.navigate(SellerBottomItem.Products.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    }
                 )
             }
 

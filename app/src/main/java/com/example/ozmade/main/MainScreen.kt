@@ -13,7 +13,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -26,9 +25,6 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.ozmade.main.seller.SellerMainScreen
 import com.example.ozmade.main.seller.data.SellerLocalStore
-import com.example.ozmade.main.seller.onboarding.SellerGateRoute
-import com.example.ozmade.main.seller.onboarding.SellerOnboardingScreen
-import com.example.ozmade.main.seller.registration.SellerRegistrationRoute
 import com.example.ozmade.main.user.chat.ChatScreen
 import com.example.ozmade.main.user.chat.ChatThreadRoute
 import com.example.ozmade.main.user.favorites.FavoritesRoute
@@ -102,381 +98,241 @@ fun MainScreen(
         }
     }
 
-    val currentDestination = navBackStackEntry?.destination
+    if (isSellerModePref == true) {
+        SellerMainScreen(
+            onExitSeller = {
+                scope.launch { sellerStore.setSellerMode(false) }
+            }
+        )
+    } else {
+        Scaffold(
+            bottomBar = {
+                val currentDestination = navBackStackEntry?.destination
+                val showBottomBar = listOf(
+                    BottomItem.Home.route,
+                    BottomItem.Favorites.route,
+                    BottomItem.Chat.route,
+                    BottomItem.Profile.route
+                ).any { route ->
+                    currentDestination?.hierarchy?.any { it.route == route } == true
+                }
 
-    val hideBottomBarRoutes = listOf(
-        "chat/{chatId}/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
-        "chat_new/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
-        "support_chat",
-        "seller_gate",
-        "seller_onboarding",
-        "seller_registration",
-        "seller_main",
-        "delivery/{productId}/{qty}",
-        "buyer_orders",
-        "buyer_order/{orderId}",
-        "notifications",
-        "orders_history",
-        "about_app",
-    )
-
-    val showBottomBar = currentDestination?.route !in hideBottomBarRoutes &&
-            currentDestination?.route?.startsWith("chat/") == false &&
-            currentDestination?.route?.startsWith("chat_new/") == false &&
-            currentDestination?.route != "seller_main"
-
-    Scaffold(
-        bottomBar = {
-            AnimatedVisibility(
-                visible = showBottomBar,
-                enter = slideInVertically(initialOffsetY = { it }),
-                exit = slideOutVertically(targetOffsetY = { it })
+                AnimatedVisibility(
+                    visible = showBottomBar,
+                    enter = slideInVertically(initialOffsetY = { it }),
+                    exit = slideOutVertically(targetOffsetY = { it })
+                ) {
+                    NavigationBar(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        tonalElevation = 8.dp,
+                        modifier = Modifier.clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                    ) {
+                        val items = listOf(
+                            BottomItem.Home,
+                            BottomItem.Favorites,
+                            BottomItem.Chat,
+                            BottomItem.Profile
+                        )
+                        items.forEach { item ->
+                            val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
+                            NavigationBarItem(
+                                icon = {
+                                    Icon(
+                                        if (selected) item.selectedIcon else item.unselectedIcon,
+                                        contentDescription = item.label
+                                    )
+                                },
+                                label = { Text(item.label, fontSize = 10.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
+                                selected = selected,
+                                onClick = {
+                                    navController.navigate(item.route) {
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
+                                        }
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
+                                },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                                    indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        ) { innerPadding ->
+            NavHost(
+                navController,
+                startDestination = BottomItem.Home.route,
+                Modifier.padding(innerPadding)
             ) {
-                CustomNavigationBar(navController, currentDestination)
-            }
-        },
-        containerColor = Color.White
-    ) { paddingValues ->
-        NavHost(
-            navController = navController,
-            startDestination = if (isSellerModePref == true) "seller_main" else BottomItem.Home.route,
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            composable(BottomItem.Home.route) {
-                HomeRoute(
-                    onOpenProduct = { id -> navController.navigate("product/$id") },
-                    onOpenCategory = { id -> navController.navigate("category/$id") }
-                )
-            }
-
-            composable(
-                route = "category/{id}",
-                arguments = listOf(navArgument("id") { type = NavType.StringType })
-            ) { backStackEntry ->
-                CategoryRoute(
-                    categoryId = backStackEntry.arguments?.getString("id") ?: "",
-                    onBack = { navController.popBackStack() },
-                    onOpenProduct = { pid -> navController.navigate("product/$pid") }
-                )
-            }
-
-            composable(
-                route = "product/{id}",
-                arguments = listOf(navArgument("id") { type = NavType.IntType })
-            ) { backStackEntry ->
-                ProductDetailsRoute(
-                    productId = backStackEntry.arguments?.getInt("id") ?: 0,
-                    onBack = { navController.popBackStack() },
-                    onChat = { sid, sName, pid, pTitle, price ->
-                        val encS = Uri.encode(sName)
-                        val encT = Uri.encode(pTitle)
-                        navController.navigate(
-                            "chat_new/$sid/$pid?sellerName=$encS&productTitle=$encT&price=$price"
-                        )
-                    },
-                    onOpenDelivery = { pid, qty ->
-                        navController.navigate("delivery/$pid/$qty")
-                    },
-                    onOpenReviews = { pid -> navController.navigate("reviews/$pid") },
-                    onOpenSeller = { sid -> navController.navigate("seller/$sid") }
-                )
-            }
-
-            // Buyer Flow components from file 1
-            composable(
-                route = "delivery/{productId}/{qty}",
-                arguments = listOf(
-                    navArgument("productId") { type = NavType.IntType },
-                    navArgument("qty") { type = NavType.IntType }
-                )
-            ) { backStackEntry ->
-                val productId = backStackEntry.arguments?.getInt("productId") ?: 0
-                val qty = backStackEntry.arguments?.getInt("qty") ?: 1
-
-                com.example.ozmade.main.user.orderflow.ui.DeliveryChooseRoute2(
-                    productId = productId,
-                    quantity = qty,
-                    onBack = { navController.popBackStack() },
-                    onCreated = {
-                        navController.navigate("buyer_orders") {
-                            launchSingleTop = true
-                        }
-                    }
-                )
-            }
-
-            composable("buyer_orders") {
-                com.example.ozmade.main.user.orders.BuyerOrdersRoute(
-                    onBack = { navController.popBackStack() },
-                    onOpenOrder = { orderId ->
-                        navController.navigate("buyer_order/$orderId")
-                    }
-                )
-            }
-
-            composable(
-                route = "buyer_order/{orderId}",
-                arguments = listOf(
-                    navArgument("orderId") { type = NavType.IntType }
-                )
-            ) { backStackEntry ->
-                val orderId = backStackEntry.arguments?.getInt("orderId") ?: 0
-
-                com.example.ozmade.main.user.orders.BuyerOrderDetailsRoute(
-                    orderId = orderId,
-                    onBack = { navController.popBackStack() },
-                    onOpenProduct = { pid ->
-                        navController.navigate("product/$pid")
-                    }
-                )
-            }
-
-            composable(
-                route = "reviews/{productId}",
-                arguments = listOf(navArgument("productId") { type = NavType.IntType })
-            ) { b ->
-                ReviewsRoute(
-                    productId = b.arguments?.getInt("productId") ?: 0,
-                    onBack = { navController.popBackStack() }
-                )
-            }
-
-            composable(
-                route = "seller_reviews/{sellerId}",
-                arguments = listOf(navArgument("sellerId") { type = NavType.IntType })
-            ) { b ->
-                SellerReviewsRoute(
-                    sellerId = b.arguments?.getInt("sellerId") ?: 0,
-                    onBack = { navController.popBackStack() },
-                    onOpenProduct = { pid -> navController.navigate("product/$pid") }
-                )
-            }
-
-            composable(BottomItem.Favorites.route) {
-                FavoritesRoute(
-                    onOpenProduct = { id -> navController.navigate("product/$id") },
-                    onBuyClick = {
-                        navController.navigate(BottomItem.Home.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                )
-            }
-
-            composable(BottomItem.Chat.route) {
-                ChatScreen(
-                    onOpenThread = { thread ->
-                        val encS = Uri.encode(thread.sellerName)
-                        val encT = Uri.encode(thread.productTitle)
-                        navController.navigate(
-                            "chat/${thread.chatId}/${thread.sellerId}/${thread.productId}?sellerName=$encS&productTitle=$encT&price=${thread.productPrice}"
-                        )
-                    },
-                    onOpenSupportChat = { navController.navigate("support_chat") },
-                    onNavigateToHome = {
-                        navController.navigate(BottomItem.Home.route) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                )
-            }
-
-            composable(
-                route = "chat/{chatId}/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
-                arguments = listOf(
-                    navArgument("chatId") { type = NavType.IntType },
-                    navArgument("sellerId") { type = NavType.IntType },
-                    navArgument("productId") { type = NavType.IntType },
-                    navArgument("sellerName") { defaultValue = "" },
-                    navArgument("productTitle") { defaultValue = "" },
-                    navArgument("price") { type = NavType.IntType; defaultValue = 0 }
-                )
-            ) { backStackEntry ->
-                ChatThreadRoute(
-                    chatId = backStackEntry.arguments?.getInt("chatId"),
-                    sellerId = backStackEntry.arguments?.getInt("sellerId") ?: 0,
-                    productId = backStackEntry.arguments?.getInt("productId") ?: 0,
-                    sellerName = backStackEntry.arguments?.getString("sellerName") ?: "Продавец",
-                    productTitle = backStackEntry.arguments?.getString("productTitle") ?: "Товар",
-                    productPrice = backStackEntry.arguments?.getInt("price") ?: 0,
-                    onBack = { navController.popBackStack() },
-                    onOpenProduct = { pid -> navController.navigate("product/$pid") }
-                )
-            }
-
-            composable(
-                route = "chat_new/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
-                arguments = listOf(
-                    navArgument("sellerId") { type = NavType.IntType },
-                    navArgument("productId") { type = NavType.IntType },
-                    navArgument("sellerName") { defaultValue = "" },
-                    navArgument("productTitle") { defaultValue = "" },
-                    navArgument("price") { type = NavType.IntType; defaultValue = 0 }
-                )
-            ) { backStackEntry ->
-                ChatThreadRoute(
-                    chatId = null,
-                    sellerId = backStackEntry.arguments?.getInt("sellerId") ?: 0,
-                    productId = backStackEntry.arguments?.getInt("productId") ?: 0,
-                    sellerName = backStackEntry.arguments?.getString("sellerName") ?: "Продавец",
-                    productTitle = backStackEntry.arguments?.getString("productTitle") ?: "Товар",
-                    productPrice = backStackEntry.arguments?.getInt("price") ?: 0,
-                    onBack = { navController.popBackStack() },
-                    onOpenProduct = { pid -> navController.navigate("product/$pid") }
-                )
-            }
-
-            composable(BottomItem.Profile.route) {
-                ProfileScreen(
-                    onLogout = onLogout,
-                    onEditProfile = { navController.navigate("edit_profile") },
-                    onNotifications = { navController.navigate("notifications") },
-                    onOrderHistory = { navController.navigate("orders_history") },
-                    onSupport = { navController.navigate("support") },
-                    onAbout = { navController.navigate("about_app") },
-                    onBecomeSeller = { navController.navigate("seller_gate") }
-                )
-            }
-
-            composable("edit_profile") { EditProfileScreen(onBack = { navController.popBackStack() }) }
-            composable("notifications") { NotificationsScreen(onBack = { navController.popBackStack() }) }
-            composable("orders_history") {
-                com.example.ozmade.main.user.orders.BuyerOrdersRoute(
-                    onBack = { navController.popBackStack() },
-                    onOpenOrder = { orderId ->
-                        navController.navigate("buyer_order/$orderId")
-                    }
-                )
-            }
-            composable("about_app") { AboutAppScreen(onBack = { navController.popBackStack() }) }
-            composable("support") {
-                SupportScreen(onClose = { navController.popBackStack() }, onOpenSupportChat = { navController.navigate("support_chat") })
-            }
-            composable("support_chat") { SupportChatScreen(onBack = { navController.popBackStack() }) }
-
-            composable(
-                route = "seller/{sellerId}",
-                arguments = listOf(navArgument("sellerId") { type = NavType.IntType })
-            ) { b ->
-                SellerRoute(
-                    sellerId = b.arguments?.getInt("sellerId") ?: 0,
-                    onBack = { navController.popBackStack() },
-                    onOpenProduct = { pid -> navController.navigate("product/$pid") },
-                    onOpenSellerReviews = { sid -> navController.navigate("seller_reviews/$sid") }
-                )
-            }
-
-            composable("seller_gate") {
-                SellerGateRoute(
-                    onOpenSellerHome = {
-                        scope.launch {
-                            sellerStore.setSellerMode(true)
-                            navController.navigate("seller_main") {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        }
-                    },
-                    onOpenOnboarding = {
-                        navController.navigate("seller_onboarding") {
-                            popUpTo("seller_gate") { inclusive = true }
-                        }
-                    },
-                    onBack = { navController.popBackStack() }
-                )
-            }
-
-            composable("seller_onboarding") {
-                SellerOnboardingScreen(
-                    onBack = { navController.popBackStack() },
-                    onContinue = { navController.navigate("seller_registration") }
-                )
-            }
-
-            composable("seller_registration") {
-                SellerRegistrationRoute(
-                    onBack = { navController.popBackStack() },
-                    onOpenSellerTerms = {},
-                    onOpenPrivacy = {},
-                    onSuccess = {
-                        scope.launch {
-                            sellerStore.setSellerMode(true)
-                            navController.navigate("seller_main") {
-                                popUpTo(0) { inclusive = true }
-                            }
-                        }
-                    }
-                )
-            }
-
-            composable("seller_main") {
-                SellerMainScreen(
-                    onExitSeller = {
-                        scope.launch {
-                            sellerStore.setSellerMode(false)
+                composable(BottomItem.Home.route) {
+                    HomeRoute(
+                        onOpenProduct = { pid -> navController.navigate("product/$pid") },
+                        onOpenCategory = { title -> navController.navigate("category/0?title=$title") }
+                    )
+                }
+                composable(BottomItem.Favorites.route) {
+                    FavoritesRoute(
+                        onOpenProduct = { pid -> navController.navigate("product/$pid") }
+                    )
+                }
+                composable(BottomItem.Chat.route) {
+                    ChatScreen(
+                        onOpenSupportChat = { navController.navigate("support") },
+                        onOpenThread = { t ->
+                            val encName = Uri.encode(t.sellerName)
+                            val encTitle = Uri.encode(t.productTitle)
+                            navController.navigate("chat/${t.chatId}/${t.sellerId}/${t.productId}?sellerName=$encName&productTitle=$encTitle&price=${t.productPrice}")
+                        },
+                        onNavigateToHome = {
                             navController.navigate(BottomItem.Home.route) {
-                                popUpTo(0) { inclusive = true }
+                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
                             }
                         }
-                    }
-                )
+                    )
+                }
+                composable(BottomItem.Profile.route) {
+                    ProfileScreen(
+                        onLogout = onLogout,
+                        onEditProfile = { navController.navigate("edit_profile") },
+                        onNotifications = { navController.navigate("notifications") },
+                        onOrderHistory = { navController.navigate("orders_history") },
+                        onSupport = { navController.navigate("support") },
+                        onAbout = { navController.navigate("about") },
+                        onBecomeSeller = {
+                            scope.launch { sellerStore.setSellerMode(true) }
+                        }
+                    )
+                }
+
+                composable("edit_profile") {
+                    EditProfileScreen(onBack = { navController.popBackStack() })
+                }
+                composable("orders_history") {
+                    OrdersHistoryScreen(onBack = { navController.popBackStack() })
+                }
+                composable("support") {
+                    SupportScreen(
+                        onClose = { navController.popBackStack() },
+                        onOpenSupportChat = { navController.navigate("support_chat") }
+                    )
+                }
+                composable("support_chat") {
+                    SupportChatScreen(onBack = { navController.popBackStack() })
+                }
+                composable("about") {
+                    AboutAppScreen(onBack = { navController.popBackStack() })
+                }
+                composable("notifications") {
+                    NotificationsScreen(onBack = { navController.popBackStack() })
+                }
+
+                composable(
+                    "category/{categoryId}?title={title}",
+                    arguments = listOf(
+                        navArgument("categoryId") { type = NavType.IntType },
+                        navArgument("title") { type = NavType.StringType; defaultValue = "" }
+                    )
+                ) { backStackEntry ->
+                    val categoryId = backStackEntry.arguments?.getInt("categoryId") ?: 0
+                    CategoryRoute(
+                        categoryId = categoryId.toString(),
+                        onBack = { navController.popBackStack() },
+                        onOpenProduct = { pid -> navController.navigate("product/$pid") }
+                    )
+                }
+
+                composable(
+                    "product/{productId}",
+                    arguments = listOf(navArgument("productId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val productId = backStackEntry.arguments?.getInt("productId") ?: 0
+                    ProductDetailsRoute(
+                        productId = productId,
+                        onBack = { navController.popBackStack() },
+                        onOpenSeller = { sid -> navController.navigate("seller/$sid") },
+                        onChat = { sellerId, sellerName, prodId, productTitle, price ->
+                            val encSName = Uri.encode(sellerName)
+                            val encPTitle = Uri.encode(productTitle)
+                            navController.navigate("chat/0/$sellerId/$prodId?sellerName=$encSName&productTitle=$encPTitle&price=${price.toInt()}")
+                        },
+                        onOpenDelivery = { _, _ -> },
+                        onOpenReviews = { pid -> navController.navigate("reviews/$pid") }
+                    )
+                }
+
+                composable(
+                    "seller/{sellerId}",
+                    arguments = listOf(navArgument("sellerId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val sellerId = backStackEntry.arguments?.getInt("sellerId") ?: 0
+                    SellerRoute(
+                        sellerId = sellerId,
+                        onBack = { navController.popBackStack() },
+                        onOpenProduct = { pid -> navController.navigate("product/$pid") },
+                        onOpenSellerReviews = { sid -> navController.navigate("seller_reviews/$sid") }
+                    )
+                }
+
+                composable(
+                    "reviews/{productId}",
+                    arguments = listOf(navArgument("productId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val productId = backStackEntry.arguments?.getInt("productId") ?: 0
+                    ReviewsRoute(
+                        productId = productId,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+
+                composable(
+                    "seller_reviews/{sellerId}",
+                    arguments = listOf(navArgument("sellerId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val sellerId = backStackEntry.arguments?.getInt("sellerId") ?: 0
+                    SellerReviewsRoute(
+                        sellerId = sellerId,
+                        onBack = { navController.popBackStack() },
+                        onOpenProduct = { pid -> navController.navigate("product/$pid") }
+                    )
+                }
+
+                composable(
+                    "chat/{chatId}/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
+                    arguments = listOf(
+                        navArgument("chatId") { type = NavType.IntType },
+                        navArgument("sellerId") { type = NavType.IntType },
+                        navArgument("productId") { type = NavType.IntType },
+                        navArgument("sellerName") { type = NavType.StringType },
+                        navArgument("productTitle") { type = NavType.StringType },
+                        navArgument("price") { type = NavType.IntType }
+                    )
+                ) { backStackEntry ->
+                    val chatId = backStackEntry.arguments?.getInt("chatId") ?: 0
+                    val sellerId = backStackEntry.arguments?.getInt("sellerId") ?: 0
+                    val productId = backStackEntry.arguments?.getInt("productId") ?: 0
+                    val sellerName = backStackEntry.arguments?.getString("sellerName") ?: ""
+                    val productTitle = backStackEntry.arguments?.getString("productTitle") ?: ""
+                    val price = backStackEntry.arguments?.getInt("price") ?: 0
+
+                    ChatThreadRoute(
+                        chatId = if (chatId == 0) null else chatId,
+                        sellerId = sellerId,
+                        productId = productId,
+                        sellerName = sellerName,
+                        productTitle = productTitle,
+                        productPrice = price,
+                        onBack = { navController.popBackStack() },
+                        onOpenProduct = { pid -> navController.navigate("product/$pid") }
+                    )
+                }
             }
-        }
-    }
-}
-
-@Composable
-private fun CustomNavigationBar(
-    navController: androidx.navigation.NavHostController,
-    currentDestination: androidx.navigation.NavDestination?
-) {
-    val items = listOf(BottomItem.Home, BottomItem.Favorites, BottomItem.Chat, BottomItem.Profile)
-
-    NavigationBar(
-        modifier = Modifier.clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)),
-        containerColor = Color.White,
-        tonalElevation = 8.dp
-    ) {
-        items.forEach { item ->
-            val isSelected = currentDestination?.hierarchy?.any { it.route == item.route } == true
-
-            NavigationBarItem(
-                selected = isSelected,
-                label = {
-                    Text(
-                        text = item.label,
-                        fontSize = 12.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else null
-                    )
-                },
-                icon = {
-                    Icon(
-                        imageVector = if (isSelected) item.selectedIcon else item.unselectedIcon,
-                        contentDescription = item.label
-                    )
-                },
-                onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color(0xFFFF9800),
-                    selectedTextColor = Color(0xFFFF9800),
-                    unselectedIconColor = Color.Gray,
-                    unselectedTextColor = Color.Gray,
-                    indicatorColor = Color(0xFFFFF3E0)
-                )
-            )
         }
     }
 }

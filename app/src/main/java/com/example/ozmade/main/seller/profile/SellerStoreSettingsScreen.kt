@@ -15,9 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AddAPhoto
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,7 +29,16 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val categoryOptions = listOf(
+    "Еда",
+    "Одежда",
+    "Искусство",
+    "Ремесло",
+    "Подарки",
+    "Для дома"
+)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun SellerStoreSettingsScreen(
     onBack: () -> Unit,
@@ -151,46 +158,70 @@ fun SellerStoreSettingsScreen(
 
             Spacer(Modifier.height(32.dp))
 
-            // Form Fields
-            SettingsTextField(
-                value = uiState.storeName,
-                onValueChange = viewModel::onStoreNameChange,
-                label = "Название магазина",
-                placeholder = "Введите название",
-                orangeAccent = orangeAccent
-            )
+            // --- Блок 1: Личные данные ---
+            SettingsSection(title = "Личные данные") {
+                SettingsTextField(
+                    value = uiState.firstName,
+                    onValueChange = viewModel::onFirstNameChange,
+                    label = "Имя",
+                    placeholder = "Введите имя",
+                    orangeAccent = orangeAccent,
+                    readOnly = true
+                )
+                Spacer(Modifier.height(16.dp))
+                SettingsTextField(
+                    value = uiState.lastName,
+                    onValueChange = viewModel::onLastNameChange,
+                    label = "Фамилия",
+                    placeholder = "Введите фамилию",
+                    orangeAccent = orangeAccent,
+                    readOnly = true
+                )
+            }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
 
-            SettingsTextField(
-                value = uiState.about,
-                onValueChange = viewModel::onAboutChange,
-                label = "О магазине / Описание",
-                placeholder = "Расскажите о себе и своих товарах",
-                orangeAccent = orangeAccent,
-                singleLine = false,
-                minLines = 3
-            )
+            // --- Блок 2: О магазине ---
+            SettingsSection(title = "Информация о магазине") {
+                SettingsTextField(
+                    value = uiState.storeName,
+                    onValueChange = viewModel::onStoreNameChange,
+                    label = "Название магазина",
+                    placeholder = "Введите название",
+                    orangeAccent = orangeAccent
+                )
+                Spacer(Modifier.height(16.dp))
+                SettingsTextField(
+                    value = uiState.about,
+                    onValueChange = viewModel::onAboutChange,
+                    label = "Описание магазина",
+                    placeholder = "Расскажите о своих товарах",
+                    orangeAccent = orangeAccent,
+                    singleLine = false,
+                    minLines = 3
+                )
+            }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
 
-            SettingsTextField(
-                value = uiState.city,
-                onValueChange = viewModel::onCityChange,
-                label = "Город",
-                placeholder = "Напр: Алматы",
-                orangeAccent = orangeAccent
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            SettingsTextField(
-                value = uiState.address,
-                onValueChange = viewModel::onAddressChange,
-                label = "Адрес мастерской / Шоурума",
-                placeholder = "Улица, дом, офис",
-                orangeAccent = orangeAccent
-            )
+            // --- Блок 3: Локация ---
+            SettingsSection(title = "Местоположение") {
+                SettingsTextField(
+                    value = uiState.city,
+                    onValueChange = viewModel::onCityChange,
+                    label = "Город",
+                    placeholder = "Напр: Алматы",
+                    orangeAccent = orangeAccent
+                )
+                Spacer(Modifier.height(16.dp))
+                SettingsTextField(
+                    value = uiState.address,
+                    onValueChange = viewModel::onAddressChange,
+                    label = "Адрес",
+                    placeholder = "Улица, дом, офис",
+                    orangeAccent = orangeAccent
+                )
+            }
 
             Spacer(Modifier.height(40.dp))
 
@@ -211,8 +242,22 @@ fun SellerStoreSettingsScreen(
                 }
             }
             
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(40.dp))
         }
+    }
+}
+
+@Composable
+private fun SettingsSection(title: String, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.DarkGray,
+            modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
+        )
+        content()
     }
 }
 
@@ -224,22 +269,25 @@ private fun SettingsTextField(
     placeholder: String,
     orangeAccent: Color,
     singleLine: Boolean = true,
-    minLines: Int = 1
+    minLines: Int = 1,
+    readOnly: Boolean = false
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+            color = Color.Gray,
+            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
         )
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
-            placeholder = { Text(placeholder, color = Color.Gray, fontSize = 14.sp) },
+            placeholder = { Text(placeholder, color = Color.LightGray, fontSize = 14.sp) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = singleLine,
             minLines = minLines,
+            readOnly = readOnly,
             shape = RoundedCornerShape(16.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = orangeAccent,

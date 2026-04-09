@@ -14,10 +14,13 @@ import javax.inject.Inject
 
 data class SellerStoreSettingsUiState(
     val isLoading: Boolean = false,
+    val firstName: String = "",
+    val lastName: String = "",
     val storeName: String = "",
     val about: String = "",
     val city: String = "",
     val address: String = "",
+    val selectedCategories: List<String> = emptyList(),
     val logoUrl: String? = null,
     val localLogoUri: Uri? = null,
     val error: String? = null,
@@ -44,11 +47,14 @@ class SellerStoreSettingsViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isLoading = false,
+                        firstName = profile.firstName ?: "",
+                        lastName = profile.lastName ?: "",
                         storeName = profile.name,
-                        // Assuming status or some other field might be 'about' or we fetch more details
-                        // For now let's use what we have or placeholder
-                        about = "", 
-                        logoUrl = null // If profile had a photo URL
+                        about = profile.about ?: "",
+                        city = profile.city ?: "",
+                        address = profile.address ?: "",
+                        selectedCategories = profile.categories ?: emptyList(),
+                        logoUrl = profile.avatarUrl
                     )
                 }
             } else {
@@ -57,11 +63,15 @@ class SellerStoreSettingsViewModel @Inject constructor(
         }
     }
 
+    fun onFirstNameChange(name: String) = Unit
+    fun onLastNameChange(name: String) = Unit
     fun onStoreNameChange(name: String) = _uiState.update { it.copy(storeName = name) }
     fun onAboutChange(about: String) = _uiState.update { it.copy(about = about) }
     fun onCityChange(city: String) = _uiState.update { it.copy(city = city) }
     fun onAddressChange(address: String) = _uiState.update { it.copy(address = address) }
     fun onLogoSelected(uri: Uri) = _uiState.update { it.copy(localLogoUri = uri) }
+    
+    fun onCategoryToggle(category: String) = Unit
 
     fun save() {
         val currentState = _uiState.value
@@ -80,7 +90,10 @@ class SellerStoreSettingsViewModel @Inject constructor(
                     displayName = currentState.storeName,
                     about = currentState.about,
                     city = currentState.city,
-                    address = currentState.address
+                    address = currentState.address,
+                    firstName = currentState.firstName,
+                    lastName = currentState.lastName,
+                    categories = currentState.selectedCategories
                 )
                 
                 repository.updateSellerProfile(request)

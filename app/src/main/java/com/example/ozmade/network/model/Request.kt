@@ -54,7 +54,8 @@ data class ProductRequest(
     val depthCm: String?,
     @SerializedName("Composition")
     val composition: String?,
-    @SerializedName("youtube_url") val youtubeUrl: String?,
+    @SerializedName("YouTubeUrl")
+    val youtubeUrl: String?,
     @SerializedName("address")
     val address: String? = null
 )
@@ -64,7 +65,10 @@ data class UpdateSellerProfileRequest(
     @SerializedName("display_name") val displayName: String? = null,
     @SerializedName("about") val about: String? = null,
     @SerializedName("city") val city: String? = null,
-    @SerializedName("address") val address: String? = null
+    @SerializedName("address") val address: String? = null,
+    @SerializedName("first_name") val firstName: String? = null,
+    @SerializedName("last_name") val lastName: String? = null,
+    @SerializedName("categories") val categories: List<String>? = null
 )
 
 data class CreateOrderRequest(
@@ -122,7 +126,7 @@ data class ProductCreateRequest(
     @SerializedName("WidthCm") val widthCm: String?,
     @SerializedName("DepthCm") val depthCm: String?,
     @SerializedName("Composition") val composition: String?,
-    @SerializedName("youtube_url") val youtubeUrl: String?,
+    @SerializedName("YouTubeUrl") val youtubeUrl: String?,
     @SerializedName("address") val address: String? = null
 )
 

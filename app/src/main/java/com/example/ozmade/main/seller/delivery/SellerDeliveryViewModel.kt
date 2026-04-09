@@ -34,8 +34,8 @@ class SellerDeliveryViewModel @Inject constructor(
                     pickupTime = d.pickupTime.orEmpty(),
 
                     myDeliveryEnabled = d.myDeliveryEnabled,
-                    centerLat = d.centerLat,
-                    centerLng = d.centerLng,
+                    centerLat = d.centerLat?.toString().orEmpty(),
+                    centerLng = d.centerLng?.toString().orEmpty(),
                     radiusKm = d.radiusKm ?: 3,
                     centerAddress = d.centerAddress.orEmpty(),
 
@@ -50,66 +50,41 @@ class SellerDeliveryViewModel @Inject constructor(
         }
     }
 
-    fun revert() {
-        val s = saved ?: return
-        _uiState.value = SellerDeliveryUiState.Data(s)
-    }
-
     fun updateLocal(block: (SellerDeliveryUi) -> SellerDeliveryUi) {
         val cur = (_uiState.value as? SellerDeliveryUiState.Data)?.ui ?: return
         _uiState.value = SellerDeliveryUiState.Data(block(cur))
     }
 
-    fun savePickup(onError: (String) -> Unit = {}) {
+    fun saveAll(onSuccess: () -> Unit, onError: (String) -> Unit) {
         val cur = (_uiState.value as? SellerDeliveryUiState.Data)?.ui ?: return
         viewModelScope.launch {
             runCatching {
+                val lat = cur.centerLat.trim().toDoubleOrNull()
+                val lng = cur.centerLng.trim().toDoubleOrNull()
+
+                if (cur.myDeliveryEnabled && (lat == null || lng == null)) {
+                    error("Укажи координаты точки (lat/lng)")
+                }
+
                 val req = UpdateSellerDeliveryRequest(
                     pickupEnabled = cur.pickupEnabled,
                     pickupAddress = cur.pickupAddress.trim().ifBlank { null },
-                    pickupTime = cur.pickupTime.trim().ifBlank { null }
+                    pickupTime = cur.pickupTime.trim().ifBlank { null },
+                    myDeliveryEnabled = cur.myDeliveryEnabled,
+                    centerLat = lat,
+                    centerLng = lng,
+                    radiusKm = cur.radiusKm,
+                    centerAddress = cur.centerAddress.trim().ifBlank { null },
+                    intercityEnabled = cur.intercityEnabled
                 )
                 val resp = api.updateSellerDelivery(req)
                 if (!resp.isSuccessful) error("Не удалось сохранить (${resp.code()})")
             }.onSuccess {
                 saved = cur
-            }.onFailure { onError(it.message ?: "Ошибка") }
-        }
-    }
-
-    fun saveMyDelivery(onError: (String) -> Unit = {}) {
-        val cur = (_uiState.value as? SellerDeliveryUiState.Data)?.ui ?: return
-        viewModelScope.launch {
-            runCatching {
-                if (cur.myDeliveryEnabled && (cur.centerLat == null || cur.centerLng == null)) {
-                    error("Выберите точку на карте для зоны доставки")
-                }
-
-                val req = UpdateSellerDeliveryRequest(
-                    myDeliveryEnabled = cur.myDeliveryEnabled,
-                    centerLat = cur.centerLat,
-                    centerLng = cur.centerLng,
-                    radiusKm = cur.radiusKm,
-                    centerAddress = cur.centerAddress.trim().ifBlank { null }
-                )
-                val resp = api.updateSellerDelivery(req)
-                if (!resp.isSuccessful) error("Не удалось сохранить (${resp.code()})")
-            }.onSuccess { saved = cur }
-                .onFailure { onError(it.message ?: "Ошибка") }
-        }
-    }
-
-    fun saveIntercity(onError: (String) -> Unit = {}) {
-        val cur = (_uiState.value as? SellerDeliveryUiState.Data)?.ui ?: return
-        viewModelScope.launch {
-            runCatching {
-                val req = UpdateSellerDeliveryRequest(
-                    intercityEnabled = cur.intercityEnabled
-                )
-                val resp = api.updateSellerDelivery(req)
-                if (!resp.isSuccessful) error("Не удалось сохранить (${resp.code()})")
-            }.onSuccess { saved = cur }
-                .onFailure { onError(it.message ?: "Ошибка") }
+                onSuccess()
+            }.onFailure {
+                onError(it.message ?: "Ошибка")
+            }
         }
     }
 }

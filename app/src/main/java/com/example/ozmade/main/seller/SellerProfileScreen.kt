@@ -18,13 +18,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.ozmade.main.seller.profile.SellerProfileViewModel
 import com.example.ozmade.main.seller.profile.data.SellerProfileUi
 import com.example.ozmade.main.seller.profile.data.SellerProfileUiState
+import com.example.ozmade.utils.ImageUtils
 import java.util.Locale
 
 @Composable
@@ -111,14 +114,42 @@ private fun SellerProfileContent(
     ) {
         Spacer(Modifier.height(32.dp))
 
-        Text(
-            text = profile.name.ifBlank { "Мой магазин" },
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        // Header with Photo
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Surface(
+                modifier = Modifier.size(64.dp),
+                shape = CircleShape,
+                color = Color(0xFFEEEEEE)
+            ) {
+                AsyncImage(
+                    model = ImageUtils.formatImageUrl(profile.avatarUrl),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+            
+            Spacer(Modifier.width(16.dp))
+            
+            Column {
+                Text(
+                    text = profile.name.ifBlank { "Мой магазин" },
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+                Text(
+                    text = profile.status.ifBlank { "Мастер" },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray
+                )
+            }
+        }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(32.dp))
 
         Text(
             text = "МОЯ СТАТИСТИКА",
@@ -156,14 +187,6 @@ private fun SellerProfileContent(
                 subtitle = "Самовывоз, курьер, почта",
                 iconColor = Color(0xFF66BB6A),
                 onClick = onOpenDelivery
-            )
-            MenuDivider()
-            SellerMenuItem(
-                icon = Icons.Outlined.Payments,
-                title = "Реквизиты и оплата",
-                subtitle = "Куда приходят деньги",
-                iconColor = Color(0xFFFFA726),
-                onClick = onOpenPayments
             )
             MenuDivider()
             SellerMenuItem(
