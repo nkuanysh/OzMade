@@ -100,6 +100,7 @@ fun MainScreen(
 
     if (isSellerModePref == true) {
         SellerMainScreen(
+            onLogout = onLogout,
             onExitSeller = {
                 scope.launch { sellerStore.setSellerMode(false) }
             }

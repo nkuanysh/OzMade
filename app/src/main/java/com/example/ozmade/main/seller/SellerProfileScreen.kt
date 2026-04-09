@@ -32,6 +32,7 @@ import java.util.Locale
 
 @Composable
 fun SellerProfileScreen(
+    onLogout: () -> Unit = {},
     onOpenProducts: () -> Unit = {},
     onOpenQuality: () -> Unit = {},
     onOpenOrders: () -> Unit = {},
@@ -77,6 +78,7 @@ fun SellerProfileScreen(
                 SellerProfileContent(
                     profile = state.profile,
                     padding = padding,
+                    onLogout = onLogout,
                     onOpenProducts = onOpenProducts,
                     onOpenQuality = onOpenQuality,
                     onOpenOrders = onOpenOrders,
@@ -95,6 +97,7 @@ fun SellerProfileScreen(
 private fun SellerProfileContent(
     profile: SellerProfileUi,
     padding: PaddingValues,
+    onLogout: () -> Unit,
     onOpenProducts: () -> Unit,
     onOpenQuality: () -> Unit,
     onOpenOrders: () -> Unit,
@@ -205,7 +208,7 @@ private fun SellerProfileContent(
         Spacer(Modifier.height(32.dp))
 
         TextButton(
-            onClick = { /* Logout logic */ },
+            onClick = onLogout,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFE53935))
         ) {

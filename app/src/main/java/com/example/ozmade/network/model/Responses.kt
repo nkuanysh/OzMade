@@ -34,7 +34,8 @@ data class ProductDto(
     @SerializedName(value = "ViewCount", alternate = ["view_count", "viewCount"]) val viewCount: Int? = null,
     @SerializedName(value = "AverageRating", alternate = ["average_rating", "averageRating", "rating", "Rating"]) val averageRating: Double? = null,
     @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String? = null,
-    @SerializedName("Comments") val comments: List<CommentDto>? = null
+    @SerializedName("Comments") val comments: List<CommentDto>? = null,
+    @SerializedName(value = "IsActive", alternate = ["is_active", "isActive"]) val isActive: Boolean? = null
 )
 
 data class ProductDetailsDto(
@@ -75,7 +76,8 @@ data class ProductDetailsDto(
     @SerializedName("Comments") val comments: List<CommentDto>? = null,
     @SerializedName("SellerName") val sellerName: String? = null,
     @SerializedName("delivery") val delivery: DeliveryInfoDto? = null,
-    @SerializedName("seller") val seller: SellerInfoDto? = null
+    @SerializedName("seller") val seller: SellerInfoDto? = null,
+    @SerializedName(value = "IsActive", alternate = ["is_active", "isActive"]) val isActive: Boolean? = null
 )
 
 data class CommentDto(

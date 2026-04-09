@@ -43,6 +43,7 @@ private object SellerRoutes {
 
 @Composable
 fun SellerMainScreen(
+    onLogout: () -> Unit = {},
     onExitSeller: () -> Unit = {}
 ) {
     val navController = rememberNavController()
@@ -143,6 +144,7 @@ fun SellerMainScreen(
             }
             composable(SellerBottomItem.Profile.route) {
                 SellerProfileScreen(
+                    onLogout = onLogout,
                     onBecomeBuyer = onExitSeller,
                     onOpenProducts = {
                         navController.navigate(SellerBottomItem.Products.route) {
