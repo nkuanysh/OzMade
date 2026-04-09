@@ -192,6 +192,14 @@ fun HomeSearchBar(
 @Composable
 fun ModernPromoSlider(ads: List<AdBanner>, accentColor: Color) {
     val pagerState = rememberPagerState(pageCount = { ads.size })
+        LaunchedEffect(Unit) {
+            while (true) {
+                kotlinx.coroutines.delay(2500)
+                val nextPage = (pagerState.currentPage + 1) % ads.size
+                pagerState.animateScrollToPage(nextPage)
+            }
+        }
+
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         HorizontalPager(

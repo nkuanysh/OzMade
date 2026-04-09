@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
     alias(libs.plugins.google.gms)
+    alias(libs.plugins.kotlin.compose)
 }
 
 android {
@@ -39,9 +40,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.14"
-    }
 }
 
 
@@ -76,6 +74,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.activity.compose)
+    implementation("androidx.compose.material:material-icons-extended")
     debugImplementation(libs.androidx.compose.ui.tooling)
 
     // Navigation
@@ -90,34 +89,25 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
 
-    //
+    // Retrofit & OkHttp
     implementation("com.squareup.retrofit2:retrofit:2.11.0")
     implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    //для языка
+    // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    implementation("androidx.compose.material:material-icons-extended:1.5.0")
-
-
-    implementation("io.coil-kt:coil-compose:2.4.0") // последняя версия на 2026 год
-
-
-    implementation("androidx.compose.material:material-icons-extended:1.5.0")
-
-
-    implementation("io.coil-kt:coil-compose:2.4.0") // последняя версия на 2026 год
-
-    //notification
-    implementation(platform("com.google.firebase:firebase-bom:33.1.1"))
-    implementation("com.google.firebase:firebase-messaging-ktx")
-
-
+    // Coil
     implementation("io.coil-kt:coil-compose:2.6.0")
+
+    // Firebase Messaging
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     // Maps
     implementation(libs.maps.compose)
     implementation(libs.play.services.maps)
+
+    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:13.0.0")
+
 }

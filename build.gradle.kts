@@ -6,4 +6,5 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.jvm) apply false
     alias(libs.plugins.hilt.android) apply false
     alias(libs.plugins.google.gms) apply false
+    alias(libs.plugins.kotlin.compose) apply false
 }

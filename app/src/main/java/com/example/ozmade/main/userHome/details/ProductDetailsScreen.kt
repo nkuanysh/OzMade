@@ -1,9 +1,6 @@
 package com.example.ozmade.main.userHome.details
 
 import android.util.Log
-import android.webkit.WebChromeClient
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -40,6 +37,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.example.ozmade.main.user.orderflow.ui.OrderBottomSheet
 import kotlin.math.max
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
 
 private enum class DetailsTab { DESCRIPTION, SPECS }
 
@@ -366,57 +368,89 @@ fun ProductDetailsScreen(
 
 @Composable
 fun YoutubeVideoSlide(videoId: String) {
-    var isPlaying by remember { mutableStateOf(false) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var isReady by remember { mutableStateOf(false) }
+    var hasError by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier.fillMaxSize().background(Color.Black),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
         contentAlignment = Alignment.Center
     ) {
-        if (isPlaying) {
-            AndroidView(
-                factory = { context ->
-                    WebView(context).apply {
-                        settings.javaScriptEnabled = true
-                        settings.domStorageEnabled = true
-                        settings.loadWithOverviewMode = true
-                        settings.useWideViewPort = true
-                        settings.mediaPlaybackRequiresUserGesture = false
-                        
-                        webViewClient = WebViewClient()
-                        webChromeClient = WebChromeClient()
-                        
-                        loadUrl("https://www.youtube.com/embed/$videoId?autoplay=1&modestbranding=1&rel=0")
-                    }
-                },
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clickable { isPlaying = true },
-                contentAlignment = Alignment.Center
-            ) {
-                AsyncImage(
-                    model = "https://img.youtube.com/vi/$videoId/hqdefault.jpg",
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-                Surface(
-                    color = Color.Black.copy(alpha = 0.6f),
-                    shape = CircleShape,
-                    modifier = Modifier.size(64.dp)
-                ) {
-                    Icon(
-                        Icons.Default.PlayArrow,
-                        contentDescription = "Play",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .padding(8.dp)
+        AndroidView(
+            factory = { context ->
+                YouTubePlayerView(context).apply {
+                    enableAutomaticInitialization = false
+
+                    lifecycleOwner.lifecycle.addObserver(this)
+
+                    val options = IFramePlayerOptions.Builder(context)
+                        .controls(1)
+                        .fullscreen(0)
+                        .rel(0)
+                        .ivLoadPolicy(3)
+                        .build()
+
+                    initialize(
+                        object : AbstractYouTubePlayerListener() {
+                            override fun onReady(
+                                youTubePlayer: com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+                            ) {
+                                isReady = true
+                                hasError = false
+                                youTubePlayer.loadVideo(videoId, 0f)
+                            }
+
+                            override fun onError(
+                                youTubePlayer: com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer,
+                                error: PlayerConstants.PlayerError
+                            ) {
+                                hasError = true
+                                android.util.Log.e(
+                                    "ProductDetailsScreen",
+                                    "YouTube player error: $error, videoId=$videoId"
+                                )
+                            }
+                        },
+                        options
                     )
                 }
+            },
+            modifier = Modifier.fillMaxSize(),
+            update = { playerView ->
+                // Ничего не делаем, чтобы не переинициализировать плеер лишний раз
+            },
+            onRelease = { playerView ->
+                playerView.release()
+            }
+        )
+
+        if (!isReady && !hasError) {
+            CircularProgressIndicator(color = Color.White)
+        }
+
+        if (hasError) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.75f))
+                    .padding(16.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayCircleOutline,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(56.dp)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Не удалось загрузить видео",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
     }
@@ -424,22 +458,20 @@ fun YoutubeVideoSlide(videoId: String) {
 
 private fun extractYoutubeVideoId(url: String?): String? {
     if (url.isNullOrBlank()) return null
-    val id = try {
-        if (url.contains("youtu.be/")) {
-            url.substringAfter("youtu.be/").substringBefore("?").substringBefore("&").substringBefore("/")
-        } else if (url.contains("v=")) {
-            url.substringAfter("v=").substringBefore("&").substringBefore("/")
-        } else if (url.contains("/shorts/")) {
-            url.substringAfter("/shorts/").substringBefore("?").substringBefore("&").substringBefore("/")
-        } else if (url.contains("/embed/")) {
-            url.substringAfter("/embed/").substringBefore("?").substringBefore("&").substringBefore("/")
-        } else {
-            null
-        }
-    } catch (e: Exception) {
-        null
+
+    val regexes = listOf(
+        "(?<=v=)[a-zA-Z0-9_-]{11}",
+        "(?<=youtu.be/)[a-zA-Z0-9_-]{11}",
+        "(?<=/embed/)[a-zA-Z0-9_-]{11}",
+        "(?<=/shorts/)[a-zA-Z0-9_-]{11}"
+    )
+
+    for (pattern in regexes) {
+        val match = Regex(pattern).find(url)?.value
+        if (!match.isNullOrBlank()) return match
     }
-    return id?.trim()?.takeIf { it.length == 11 }
+
+    return null
 }
 
 @Composable
