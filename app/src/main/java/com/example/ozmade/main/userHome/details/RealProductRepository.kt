@@ -119,7 +119,7 @@ class RealProductRepository @Inject constructor(
             FavoriteProductUi(
                 id = dto.id,
                 title = dto.title ?: dto.name ?: "Без названия",
-                price = dto.cost ?: dto.price ?: 0.0,
+                price = dto.price ?: 0.0,
                 imageUrl = img,
                 address = dto.address ?: "",
                 rating = dto.averageRating ?: 0.0

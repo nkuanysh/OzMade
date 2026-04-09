@@ -7,6 +7,7 @@ import com.example.ozmade.network.model.ProductDetailsDto
 import com.example.ozmade.network.model.ProductDto
 import com.example.ozmade.network.model.ProductRequest
 import com.example.ozmade.network.model.SellerProfileDto
+import com.example.ozmade.network.model.UpdateSellerProfileRequest
 import com.example.ozmade.network.model.UploadUrlResponse
 import java.io.File
 
@@ -36,7 +37,7 @@ interface SellerRepository {
 
     suspend fun getProductDetails(productId: Int): ProductDetailsDto
     suspend fun getSellerProfile(): SellerProfileDto?
-    suspend fun updateSellerProfile(profilePictureUrl: String): Result<Unit>
+    suspend fun updateSellerProfile(request: UpdateSellerProfileRequest): Result<Unit>
 
     suspend fun getUploadUrl(contentType: String): Result<UploadUrlResponse>
     suspend fun uploadImageToUrl(uploadUrl: String, file: File, mimeType: String): Result<Unit>

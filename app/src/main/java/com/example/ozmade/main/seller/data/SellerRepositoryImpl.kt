@@ -167,11 +167,9 @@ class SellerRepositoryImpl @Inject constructor(
         return if (resp.isSuccessful) resp.body() else null
     }
 
-    override suspend fun updateSellerProfile(profilePictureUrl: String): Result<Unit> {
+    override suspend fun updateSellerProfile(request: UpdateSellerProfileRequest): Result<Unit> {
         return try {
-            val resp = api.updateSellerProfile(
-                UpdateSellerProfileRequest(profilePictureUrl)
-            )
+            val resp = api.updateSellerProfile(request)
             if (resp.isSuccessful) Result.success(Unit)
             else Result.failure(Exception("Error ${resp.code()}"))
         } catch (e: Exception) {

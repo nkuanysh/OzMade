@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import com.example.ozmade.main.seller.products.SellerProductsRoute
+import com.example.ozmade.main.seller.profile.SellerStoreSettingsScreen
 
 private sealed class SellerBottomItem(
     val route: String,
@@ -37,9 +38,9 @@ private object SellerRoutes {
     const val CHAT_THREAD = "seller_chat_thread"
     const val QUALITY = "seller_quality"
     const val DELIVERY = "seller_delivery"
-
-
+    const val STORE_SETTINGS = "seller_store_settings"
 }
+
 @Composable
 fun SellerMainScreen(
     onExitSeller: () -> Unit = {}
@@ -57,7 +58,7 @@ fun SellerMainScreen(
     val showBottomBar = when (currentRoute) {
         SellerRoutes.ADD_PRODUCT -> false
         SellerRoutes.EDIT_PRODUCT -> false
-
+        SellerRoutes.STORE_SETTINGS -> false
         else -> true
     }
 
@@ -145,7 +146,10 @@ fun SellerMainScreen(
                 SellerProfileScreen(
                     onBecomeBuyer = onExitSeller,
                     onOpenDelivery = {
-                        navController.navigate("seller_delivery")
+                        navController.navigate(SellerRoutes.DELIVERY)
+                    },
+                    onOpenStoreSettings = {
+                        navController.navigate(SellerRoutes.STORE_SETTINGS)
                     }
                 )
             }
@@ -160,6 +164,12 @@ fun SellerMainScreen(
             }
             composable(SellerRoutes.DELIVERY) {
                 com.example.ozmade.main.seller.delivery.SellerDeliveryRoute(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(SellerRoutes.STORE_SETTINGS) {
+                SellerStoreSettingsScreen(
                     onBack = { navController.popBackStack() }
                 )
             }
