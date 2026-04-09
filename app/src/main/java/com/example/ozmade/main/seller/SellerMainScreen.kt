@@ -93,7 +93,7 @@ fun SellerMainScreen(
         NavHost(
             navController = navController,
             startDestination = SellerBottomItem.Products.route,
-            modifier = Modifier.padding(padding) // ✅ как в user части
+            modifier = Modifier.padding(padding)
         ) {
             composable(SellerBottomItem.Products.route) {
                 SellerProductsRoute(
@@ -107,7 +107,6 @@ fun SellerMainScreen(
                 com.example.ozmade.main.seller.products.add.SellerAddProductRoute(
                     onBack = { navController.popBackStack() },
                     onCreated = {
-                        // после успешного создания вернёмся на список и обновим
                         navController.popBackStack()
                     }
                 )
@@ -145,6 +144,23 @@ fun SellerMainScreen(
             composable(SellerBottomItem.Profile.route) {
                 SellerProfileScreen(
                     onBecomeBuyer = onExitSeller,
+                    onOpenProducts = {
+                        navController.navigate(SellerBottomItem.Products.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
+                    onOpenQuality = {
+                        navController.navigate(SellerRoutes.QUALITY)
+                    },
+                    onOpenOrders = {
+                        navController.navigate(SellerBottomItem.Orders.route) {
+                            popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    },
                     onOpenDelivery = {
                         navController.navigate(SellerRoutes.DELIVERY)
                     },
@@ -157,8 +173,7 @@ fun SellerMainScreen(
                 com.example.ozmade.main.seller.quality.SellerQualityRoute(
                     onBack = { navController.popBackStack() },
                     onOpenProduct = { productId ->
-                        // если у продавца есть экран товара — сюда навигацию
-                        // иначе можно открыть user details, как у тебя сделано в другом месте
+                        // navigate to product details if needed
                     }
                 )
             }
@@ -184,7 +199,5 @@ fun SellerMainScreen(
                 )
             }
         }
-
     }
-
 }

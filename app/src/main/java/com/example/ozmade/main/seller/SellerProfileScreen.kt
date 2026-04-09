@@ -11,7 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,112 +21,214 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ozmade.main.seller.profile.SellerProfileViewModel
+import com.example.ozmade.main.seller.profile.data.SellerProfileUi
+import com.example.ozmade.main.seller.profile.data.SellerProfileUiState
+import java.util.Locale
 
 @Composable
 fun SellerProfileScreen(
+    onOpenProducts: () -> Unit = {},
+    onOpenQuality: () -> Unit = {},
+    onOpenOrders: () -> Unit = {},
     onOpenStoreSettings: () -> Unit = {},
-    onOpenDelivery: () -> Unit,
+    onOpenDelivery: () -> Unit = {},
     onOpenPayments: () -> Unit = {},
     onOpenAnalytics: () -> Unit = {},
-    onBecomeBuyer: () -> Unit
+    onBecomeBuyer: () -> Unit,
+    viewModel: SellerProfileViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.load()
+    }
+
     Scaffold(
         containerColor = Color(0xFFF8F9FA)
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(bottom = 16.dp)
-        ) {
-            Spacer(Modifier.height(32.dp))
-
-            Text(
-                text = "Мой магазин",
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            SellerStatsRow()
-
-            Spacer(Modifier.height(32.dp))
-
-            Text(
-                text = "УПРАВЛЕНИЕ",
-                style = MaterialTheme.typography.labelLarge,
-                color = Color.Gray,
-                modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
-            )
-
-            ProfileSectionCard {
-                SellerMenuItem(
-                    icon = Icons.Outlined.Settings,
-                    title = "Настройки магазина",
-                    subtitle = "Название, описание, logoтип",
-                    iconColor = Color(0xFF5C6BC0),
-                    onClick = onOpenStoreSettings
-                )
-                MenuDivider()
-                SellerMenuItem(
-                    icon = Icons.Outlined.LocalShipping,
-                    title = "Доставка",
-                    subtitle = "Самовывоз, курьер, почта",
-                    iconColor = Color(0xFF66BB6A),
-                    onClick = onOpenDelivery
-                )
-                MenuDivider()
-                SellerMenuItem(
-                    icon = Icons.Outlined.Payments,
-                    title = "Реквизиты и оплата",
-                    subtitle = "Куда приходят деньги",
-                    iconColor = Color(0xFFFFA726),
-                    onClick = onOpenPayments
-                )
-                MenuDivider()
-                SellerMenuItem(
-                    icon = Icons.Outlined.Analytics,
-                    title = "Аналитика продаж",
-                    subtitle = "Статистика за месяц",
-                    iconColor = Color(0xFF26A69A),
-                    onClick = onOpenAnalytics
+        when (val state = uiState) {
+            is SellerProfileUiState.Loading -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color(0xFFFF9800))
+                }
+            }
+            is SellerProfileUiState.Error -> {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(20.dp)) {
+                        Icon(Icons.Default.ErrorOutline, null, modifier = Modifier.size(48.dp), tint = Color.LightGray)
+                        Spacer(Modifier.height(16.dp))
+                        Text("Ошибка: ${state.message}", textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                        Spacer(Modifier.height(24.dp))
+                        Button(
+                            onClick = { viewModel.load() },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
+                        ) {
+                            Text("Повторить")
+                        }
+                    }
+                }
+            }
+            is SellerProfileUiState.Data -> {
+                SellerProfileContent(
+                    profile = state.profile,
+                    padding = padding,
+                    onOpenProducts = onOpenProducts,
+                    onOpenQuality = onOpenQuality,
+                    onOpenOrders = onOpenOrders,
+                    onOpenStoreSettings = onOpenStoreSettings,
+                    onOpenDelivery = onOpenDelivery,
+                    onOpenPayments = onOpenPayments,
+                    onOpenAnalytics = onOpenAnalytics,
+                    onBecomeBuyer = onBecomeBuyer
                 )
             }
-
-            Spacer(Modifier.height(24.dp))
-
-            ReturnToBuyerCard(onClick = onBecomeBuyer)
-
-            Spacer(Modifier.height(32.dp))
-
-            TextButton(
-                onClick = { /* Logout logic */ },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFE53935))
-            ) {
-                Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Выйти из системы", fontWeight = FontWeight.Bold)
-            }
-
-            Spacer(Modifier.height(16.dp))
         }
     }
 }
 
 @Composable
-private fun SellerStatsRow() {
+private fun SellerProfileContent(
+    profile: SellerProfileUi,
+    padding: PaddingValues,
+    onOpenProducts: () -> Unit,
+    onOpenQuality: () -> Unit,
+    onOpenOrders: () -> Unit,
+    onOpenStoreSettings: () -> Unit,
+    onOpenDelivery: () -> Unit,
+    onOpenPayments: () -> Unit,
+    onOpenAnalytics: () -> Unit,
+    onBecomeBuyer: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp)
+            .padding(bottom = 16.dp)
+    ) {
+        Spacer(Modifier.height(32.dp))
+
+        Text(
+            text = profile.name.ifBlank { "Мой магазин" },
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        Text(
+            text = "МОЯ СТАТИСТИКА",
+            style = MaterialTheme.typography.labelLarge,
+            color = Color.Gray,
+            modifier = Modifier.padding(start = 8.dp, bottom = 12.dp)
+        )
+
+        SellerStatsRow(
+            profile = profile,
+            onOpenProducts = onOpenProducts,
+            onOpenQuality = onOpenQuality,
+            onOpenOrders = onOpenOrders
+        )
+
+        Spacer(Modifier.height(32.dp))
+
+        Text(
+            text = "УПРАВЛЕНИЕ",
+            style = MaterialTheme.typography.labelLarge,
+            color = Color.Gray,
+            modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
+        )
+
+        ProfileSectionCard {
+            SellerMenuItem(
+                icon = Icons.Outlined.Settings,
+                title = "Настройки магазина",
+                subtitle = "Название, описание, логотип",
+                iconColor = Color(0xFF5C6BC0),
+                onClick = onOpenStoreSettings
+            )
+            MenuDivider()
+            SellerMenuItem(
+                icon = Icons.Outlined.LocalShipping,
+                title = "Доставка",
+                subtitle = "Самовывоз, курьер, почта",
+                iconColor = Color(0xFF66BB6A),
+                onClick = onOpenDelivery
+            )
+            MenuDivider()
+            SellerMenuItem(
+                icon = Icons.Outlined.Payments,
+                title = "Реквизиты и оплата",
+                subtitle = "Куда приходят деньги",
+                iconColor = Color(0xFFFFA726),
+                onClick = onOpenPayments
+            )
+            MenuDivider()
+            SellerMenuItem(
+                icon = Icons.Outlined.Analytics,
+                title = "Аналитика продаж",
+                subtitle = "Статистика за месяц",
+                iconColor = Color(0xFF26A69A),
+                onClick = onOpenAnalytics
+            )
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        ReturnToBuyerCard(onClick = onBecomeBuyer)
+
+        Spacer(Modifier.height(32.dp))
+
+        TextButton(
+            onClick = { /* Logout logic */ },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFE53935))
+        ) {
+            Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(8.dp))
+            Text("Выйти из системы", fontWeight = FontWeight.Bold)
+        }
+
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+private fun SellerStatsRow(
+    profile: SellerProfileUi,
+    onOpenProducts: () -> Unit,
+    onOpenQuality: () -> Unit,
+    onOpenOrders: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        StatCard("Товары", "24", Icons.Default.Inventory, Modifier.weight(1f), Color(0xFF5C6BC0))
-        StatCard("Рейтинг", "4.9", Icons.Default.Star, Modifier.weight(1f), Color(0xFFFFA000))
-        StatCard("Заказы", "12", Icons.Default.LocalShipping, Modifier.weight(1f), Color(0xFF66BB6A))
+        StatCard(
+            label = "Товары",
+            value = profile.totalProducts.toString(),
+            icon = Icons.Default.Inventory,
+            modifier = Modifier.weight(1f).clickable { onOpenProducts() },
+            iconColor = Color(0xFF5C6BC0)
+        )
+        StatCard(
+            label = "Рейтинг",
+            value = if (profile.rating > 0) String.format(Locale.US, "%.1f", profile.rating) else "—",
+            icon = Icons.Default.Star,
+            modifier = Modifier.weight(1f).clickable { onOpenQuality() },
+            iconColor = Color(0xFFFFA000)
+        )
+        StatCard(
+            label = "Заказы",
+            value = profile.ordersCount.toString(),
+            icon = Icons.Default.LocalShipping,
+            modifier = Modifier.weight(1f).clickable { onOpenOrders() },
+            iconColor = Color(0xFF66BB6A)
+        )
     }
 }
 
