@@ -226,53 +226,80 @@ private fun SellerStatsRow(
     profile: SellerProfileUi,
     onOpenQuality: () -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        StatCard(
-            label = "Рейтинг",
-            value = if (profile.rating > 0) String.format(Locale.US, "%.1f", profile.rating) else "—",
-            icon = Icons.Default.Star,
-            modifier = Modifier.fillMaxWidth().clickable { onOpenQuality() },
-            iconColor = Color(0xFFFFA000)
-        )
-    }
-}
-
-@Composable
-private fun StatCard(
-    label: String,
-    value: String,
-    icon: ImageVector,
-    modifier: Modifier,
-    iconColor: Color
-) {
     Card(
-        modifier = modifier,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onOpenQuality() },
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 20.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                modifier = Modifier.size(36.dp),
-                shape = CircleShape,
-                color = iconColor.copy(alpha = 0.1f)
+            // Rating Section
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
-                    imageVector = icon,
+                    imageVector = Icons.Default.Star,
                     contentDescription = null,
-                    tint = iconColor,
-                    modifier = Modifier.padding(8.dp)
+                    tint = Color(0xFFFFA000),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = if (profile.rating > 0) String.format(Locale.US, "%.1f", profile.rating) else "—",
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 20.sp,
+                    color = Color(0xFF2D2D2D)
+                )
+                Text(
+                    text = "Рейтинг",
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium
                 )
             }
-            Spacer(Modifier.height(8.dp))
-            Text(value, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-            Text(label, fontSize = 11.sp, color = Color.Gray, fontWeight = FontWeight.Medium)
+
+            // Vertical Divider
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(40.dp)
+                    .background(Color(0xFFF1F1F1))
+            )
+
+            // Level Section
+            Column(
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.EmojiEvents,
+                    contentDescription = null,
+                    tint = Color(0xFF4CAF50),
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = profile.status.ifBlank { "Мастер" },
+                    fontWeight = FontWeight.ExtraBold,
+                    fontSize = 20.sp,
+                    color = Color(0xFF2D2D2D),
+                    maxLines = 1
+                )
+                Text(
+                    text = "Уровень",
+                    fontSize = 12.sp,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }
