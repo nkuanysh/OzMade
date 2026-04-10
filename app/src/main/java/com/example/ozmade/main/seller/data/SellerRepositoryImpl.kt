@@ -11,6 +11,7 @@ import com.example.ozmade.network.model.ProductDetailsDto
 import com.example.ozmade.network.model.ProductDto
 import com.example.ozmade.network.model.ProductRequest
 import com.example.ozmade.network.model.SellerProfileDto
+import com.example.ozmade.network.model.SellerRegistrationRequestDto
 import com.example.ozmade.network.model.UpdateSellerProfileRequest
 import com.example.ozmade.network.model.UploadUrlResponse
 import com.example.ozmade.network.upload.UploadService
@@ -35,9 +36,9 @@ class SellerRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun registerSeller(): Result<Unit> {
+    override suspend fun registerSeller(request: SellerRegistrationRequestDto): Result<Unit> {
         return try {
-            val response = api.registerSeller()
+            val response = api.registerSeller(request)
             if (response.isSuccessful || response.code() == 400) {
                 Result.success(Unit)
             } else {

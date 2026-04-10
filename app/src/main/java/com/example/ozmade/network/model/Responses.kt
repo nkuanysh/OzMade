@@ -138,10 +138,10 @@ data class SellerProfileDto(
     @SerializedName(value = "TotalProducts", alternate = ["total_products", "totalProducts"]) val totalProducts: Int,
     @SerializedName(value = "Rating", alternate = ["rating", "average_rating"]) val rating: Double? = null,
     @SerializedName(value = "OrdersCount", alternate = ["orders_count", "ordersCount", "total_orders"]) val ordersCount: Int? = null,
-    @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl", "logo_url"]) val avatarUrl: String? = null,
+    @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl", "logo_url", "ImageName"]) val avatarUrl: String? = null,
     @SerializedName("about") val about: String? = null,
-    @SerializedName("city") val city: String? = null,
-    @SerializedName("address") val address: String? = null,
+    @SerializedName(value = "city", alternate = ["City"]) val city: String? = null,
+    @SerializedName(value = "address", alternate = ["Address"]) val address: String? = null,
     @SerializedName(value = "first_name", alternate = ["firstName"]) val firstName: String? = null,
     @SerializedName(value = "last_name", alternate = ["lastName"]) val lastName: String? = null,
     @SerializedName("categories") val categories: List<String>? = null,
@@ -186,7 +186,7 @@ data class SellerHeaderDto(
     @SerializedName("rating") val rating: Double? = null,
     @SerializedName("reviews_count") val reviewsCount: Int? = null,
     @SerializedName("days_with_ozmade") val daysWithOzMade: Int? = null,
-    @SerializedName(value = "avatar_url", alternate = ["avatarUrl", "AvatarURL"]) val avatarUrl: String? = null
+    @SerializedName(value = "avatar_url", alternate = ["avatarUrl", "AvatarURL", "logo_url", "ImageName"]) val avatarUrl: String? = null
 )
 
 data class SellerProductDto(
@@ -274,7 +274,7 @@ data class SellerInfoDto(
     @SerializedName(value = "ID", alternate = ["id"]) val id: Int,
     @SerializedName(value = "Name", alternate = ["name"]) val name: String?,
     @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl", "ImageName"]) val avatarUrl: String? = null,
-    @SerializedName("Address") val address: String?,
+    @SerializedName(value = "Address", alternate = ["address"]) val address: String?,
     @SerializedName("Rating") val rating: Double? = null,
     @SerializedName(value = "CompletedOrders", alternate = ["completed_orders", "completedOrders", "ordersCount"]) val completedOrders: Int? = null
 )

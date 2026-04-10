@@ -20,7 +20,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 import com.example.ozmade.main.seller.products.SellerProductsRoute
 import com.example.ozmade.main.seller.profile.SellerStoreSettingsScreen
-import com.example.ozmade.main.seller.analytics.SellerAnalyticsScreen
 
 private sealed class SellerBottomItem(
     val route: String,
@@ -40,7 +39,6 @@ private object SellerRoutes {
     const val QUALITY = "seller_quality"
     const val DELIVERY = "seller_delivery"
     const val STORE_SETTINGS = "seller_store_settings"
-    const val ANALYTICS = "seller_analytics"
 }
 
 @Composable
@@ -62,7 +60,6 @@ fun SellerMainScreen(
         SellerRoutes.ADD_PRODUCT -> false
         SellerRoutes.EDIT_PRODUCT -> false
         SellerRoutes.STORE_SETTINGS -> false
-        SellerRoutes.ANALYTICS -> false
         else -> true
     }
 
@@ -171,9 +168,6 @@ fun SellerMainScreen(
                     },
                     onOpenStoreSettings = {
                         navController.navigate(SellerRoutes.STORE_SETTINGS)
-                    },
-                    onOpenAnalytics = {
-                        navController.navigate(SellerRoutes.ANALYTICS)
                     }
                 )
             }
@@ -199,12 +193,6 @@ fun SellerMainScreen(
 
             composable(SellerRoutes.STORE_SETTINGS) {
                 SellerStoreSettingsScreen(
-                    onBack = { navController.popBackStack() }
-                )
-            }
-
-            composable(SellerRoutes.ANALYTICS) {
-                SellerAnalyticsScreen(
                     onBack = { navController.popBackStack() }
                 )
             }

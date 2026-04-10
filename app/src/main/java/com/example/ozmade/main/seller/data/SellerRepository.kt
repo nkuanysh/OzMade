@@ -7,13 +7,14 @@ import com.example.ozmade.network.model.ProductDetailsDto
 import com.example.ozmade.network.model.ProductDto
 import com.example.ozmade.network.model.ProductRequest
 import com.example.ozmade.network.model.SellerProfileDto
+import com.example.ozmade.network.model.SellerRegistrationRequestDto
 import com.example.ozmade.network.model.UpdateSellerProfileRequest
 import com.example.ozmade.network.model.UploadUrlResponse
 import java.io.File
 
 interface SellerRepository {
     suspend fun sellerProfileExists(): Boolean
-    suspend fun registerSeller(): Result<Unit>
+    suspend fun registerSeller(request: SellerRegistrationRequestDto): Result<Unit>
     suspend fun getMyProducts(): List<SellerProductUi>
 
     suspend fun updateProductPrice(productId: Int, newPrice: Int)

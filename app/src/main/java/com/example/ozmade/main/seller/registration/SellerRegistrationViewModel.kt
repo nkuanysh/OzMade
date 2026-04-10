@@ -1,5 +1,6 @@
 package com.example.ozmade.main.seller.registration
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.seller.data.SellerRepository
@@ -25,18 +26,55 @@ class SellerRegistrationViewModel @Inject constructor(
     private val _state = MutableStateFlow<SellerRegState>(SellerRegState.Idle)
     val state = _state.asStateFlow()
 
-    fun submit() {
+    private val _selectedUri = MutableStateFlow<Uri?>(null)
+    val selectedUri = _selectedUri.asStateFlow()
+
+    fun onImageSelected(uri: Uri?) {
+        _selectedUri.value = uri
+    }
+
+    fun submit(
+        firstName: String,
+        lastName: String,
+        displayName: String,
+        city: String,
+        address: String,
+        categories: List<String>,
+        about: String?
+    ) {
         _state.value = SellerRegState.Loading
         viewModelScope.launch {
-            repo.registerSeller()
-                .onSuccess {
-                    _state.value = SellerRegState.Success
+            try {
+                var photoUrl: String? = null
+                _selectedUri.value?.let { uri ->
+                    photoUrl = repo.uploadPhoto(uri).getOrNull()
                 }
-                .onFailure {
-                    _state.value = SellerRegState.Error(it.message ?: "Ошибка регистрации")
-                }
+
+                val request = SellerRegistrationRequestDto(
+                    firstName = firstName,
+                    lastName = lastName,
+                    displayName = displayName,
+                    city = city,
+                    address = address,
+                    categories = categories,
+                    about = about,
+                    idCardUrl = photoUrl // Using idCardUrl for the profile photo as per current DTO, or we might need to adjust
+                )
+
+                repo.registerSeller(request)
+                    .onSuccess {
+                        _state.value = SellerRegState.Success
+                    }
+                    .onFailure {
+                        _state.value = SellerRegState.Error(it.message ?: "Ошибка регистрации")
+                    }
+            } catch (e: Exception) {
+                _state.value = SellerRegState.Error(e.message ?: "Произошла ошибка")
+            }
         }
     }
 
-    fun reset() { _state.value = SellerRegState.Idle }
+    fun reset() {
+        _state.value = SellerRegState.Idle
+    }
 }

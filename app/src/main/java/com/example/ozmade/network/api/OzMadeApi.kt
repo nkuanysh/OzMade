@@ -84,7 +84,9 @@ interface OzMadeApi {
     ): Response<MessageResponse>
 
     @POST("seller/register")
-    suspend fun registerSeller(): Response<MessageResponse>
+    suspend fun registerSeller(
+        @Body request: SellerRegistrationRequestDto
+    ): Response<MessageResponse>
 
     @GET("seller/upload-id-url")
     suspend fun getUploadIdUrl(): Response<UploadUrlResponse>

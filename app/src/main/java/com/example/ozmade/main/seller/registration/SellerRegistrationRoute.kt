@@ -12,6 +12,7 @@ fun SellerRegistrationRoute(
     viewModel: SellerRegistrationViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val selectedUri by viewModel.selectedUri.collectAsState()
 
     LaunchedEffect(state) {
         if (state is SellerRegState.Success) {
@@ -24,8 +25,12 @@ fun SellerRegistrationRoute(
         onBack = onBack,
         onOpenSellerTerms = onOpenSellerTerms,
         onOpenPrivacy = onOpenPrivacy,
-        onSubmit = { _ -> viewModel.submit() }, // Исправлено: игнорируем аргумент, так как ViewModel его не ждет
+        onSubmit = { f, l, d, c, a, cats, ab -> 
+            viewModel.submit(f, l, d, c, a, cats, ab) 
+        },
         isLoading = state is SellerRegState.Loading,
-        errorText = (state as? SellerRegState.Error)?.message
+        errorText = (state as? SellerRegState.Error)?.message,
+        selectedUri = selectedUri,
+        onImageSelected = viewModel::onImageSelected
     )
 }

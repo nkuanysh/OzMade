@@ -1,5 +1,9 @@
 package com.example.ozmade.main.seller.registration
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -24,7 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ozmade.network.model.SellerRegistrationRequestDto
+import coil.compose.AsyncImage
 
 private val categoryOptions = listOf(
     "Еда",
@@ -41,9 +46,11 @@ fun SellerRegistrationScreen(
     onBack: () -> Unit,
     onOpenSellerTerms: () -> Unit,
     onOpenPrivacy: () -> Unit,
-    onSubmit: (SellerRegistrationRequestDto) -> Unit,
+    onSubmit: (firstName: String, lastName: String, displayName: String, city: String, address: String, categories: List<String>, about: String?) -> Unit,
     isLoading: Boolean,
-    errorText: String?
+    errorText: String?,
+    selectedUri: Uri?,
+    onImageSelected: (Uri?) -> Unit
 ) {
     var showInstruction by remember { mutableStateOf(true) }
 
@@ -59,6 +66,12 @@ fun SellerRegistrationScreen(
 
     val orangeColor = Color(0xFFFF9800)
     val scrollState = rememberScrollState()
+
+    val pickImage = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) onImageSelected(uri)
+    }
 
     val canContinue = firstName.isNotBlank() && lastName.isNotBlank() &&
             displayName.isNotBlank() && city.isNotBlank() &&
@@ -110,20 +123,30 @@ fun SellerRegistrationScreen(
                             modifier = Modifier
                                 .size(72.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFF0F0F0)),
+                                .background(Color(0xFFF0F0F0))
+                                .clickable { pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(Icons.Default.Person, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(32.dp))
+                            if (selectedUri != null) {
+                                AsyncImage(
+                                    model = selectedUri,
+                                    contentDescription = null,
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Icon(Icons.Default.Person, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(32.dp))
+                            }
                         }
                         Spacer(Modifier.width(16.dp))
                         OutlinedButton(
-                            onClick = { /* TODO */ },
+                            onClick = { pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = orangeColor)
                         ) {
                             Icon(Icons.Default.AddAPhoto, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text("Фото магазина")
+                            Text(if (selectedUri == null) "Фото магазина" else "Изменить фото")
                         }
                     }
 
@@ -262,15 +285,13 @@ fun SellerRegistrationScreen(
                 Button(
                     onClick = {
                         onSubmit(
-                            SellerRegistrationRequestDto(
-                                firstName = firstName.trim(),
-                                lastName = lastName.trim(),
-                                displayName = displayName.trim(),
-                                city = city.trim(),
-                                address = address.trim(),
-                                categories = selectedCategories.toList(),
-                                about = about.trim().ifBlank { null }
-                            )
+                            firstName.trim(),
+                            lastName.trim(),
+                            displayName.trim(),
+                            city.trim(),
+                            address.trim(),
+                            selectedCategories.toList(),
+                            about.trim().ifBlank { null }
                         )
                     },
                     modifier = Modifier.fillMaxWidth().height(56.dp),

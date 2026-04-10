@@ -25,6 +25,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.ozmade.main.seller.SellerMainScreen
 import com.example.ozmade.main.seller.data.SellerLocalStore
+import com.example.ozmade.main.seller.registration.SellerRegistrationRoute
 import com.example.ozmade.main.user.chat.ChatScreen
 import com.example.ozmade.main.user.chat.ChatThreadRoute
 import com.example.ozmade.main.user.favorites.FavoritesRoute
@@ -70,10 +71,16 @@ fun MainScreen(
     val context = LocalContext.current
     val sellerStore = remember { SellerLocalStore(context) }
     val isSellerModePref by sellerStore.isSellerModeFlow.collectAsState(initial = null)
+    var isRegistered by remember { mutableStateOf(false) }
+    
     val scope = rememberCoroutineScope()
 
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    LaunchedEffect(Unit) {
+        isRegistered = sellerStore.isSellerRegistered()
+    }
 
     // Wait until preference is loaded to avoid flickering
     if (isSellerModePref == null) return
@@ -214,7 +221,26 @@ fun MainScreen(
                         onSupport = { navController.navigate("support") },
                         onAbout = { navController.navigate("about") },
                         onBecomeSeller = {
-                            scope.launch { sellerStore.setSellerMode(true) }
+                            if (isRegistered) {
+                                scope.launch { sellerStore.setSellerMode(true) }
+                            } else {
+                                navController.navigate("seller_registration")
+                            }
+                        }
+                    )
+                }
+
+                composable("seller_registration") {
+                    SellerRegistrationRoute(
+                        onBack = { navController.popBackStack() },
+                        onOpenSellerTerms = { },
+                        onOpenPrivacy = { },
+                        onSuccess = {
+                            scope.launch {
+                                sellerStore.setSellerRegistered(true)
+                                isRegistered = true
+                                sellerStore.setSellerMode(true)
+                            }
                         }
                     )
                 }
