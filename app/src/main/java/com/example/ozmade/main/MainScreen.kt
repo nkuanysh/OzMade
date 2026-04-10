@@ -33,7 +33,7 @@ import com.example.ozmade.main.user.profile.EditProfileScreen
 import com.example.ozmade.main.user.profile.ProfileScreen
 import com.example.ozmade.main.user.profile.about.AboutAppScreen
 import com.example.ozmade.main.user.profile.notification.NotificationsScreen
-import com.example.ozmade.main.user.profile.orders.OrdersHistoryScreen
+import com.example.ozmade.main.user.orders.BuyerOrdersRoute
 import com.example.ozmade.main.user.profile.support.SupportChatScreen
 import com.example.ozmade.main.user.profile.support.SupportScreen
 import com.example.ozmade.main.userHome.HomeRoute
@@ -252,7 +252,10 @@ fun MainScreen(
                     EditProfileScreen(onBack = { navController.popBackStack() })
                 }
                 composable("orders_history") {
-                    OrdersHistoryScreen(onBack = { navController.popBackStack() })
+                    BuyerOrdersRoute(
+                        onBack = { navController.popBackStack() },
+                        onOpenOrder = { /* TODO */ }
+                    )
                 }
                 composable("support") {
                     SupportScreen(

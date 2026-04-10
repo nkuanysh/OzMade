@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.LocalShipping
 import androidx.compose.material.icons.outlined.Storefront
 import androidx.compose.material3.*
@@ -99,10 +100,11 @@ fun ProductDetailsScreen(
                     .fillMaxSize()
                     .verticalScroll(scrollState)
             ) {
+                // Image/Video Pager
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(380.dp)
+                        .height(400.dp)
                 ) {
                     HorizontalPager(
                         state = pagerState,
@@ -115,66 +117,50 @@ fun ProductDetailsScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             if (pageIndex < product.images.size) {
-                                val imageUrl = product.images[pageIndex]
-                                Log.d("ProductDetailsScreen", "Loading image[$pageIndex]: $imageUrl")
                                 AsyncImage(
-                                    model = imageUrl,
+                                    model = product.images[pageIndex],
                                     contentDescription = null,
                                     contentScale = ContentScale.Crop,
-                                    modifier = Modifier.fillMaxSize(),
-                                    onLoading = { Log.d("ProductDetailsScreen", "Image loading: $imageUrl") },
-                                    onSuccess = { Log.d("ProductDetailsScreen", "Image success: $imageUrl") },
-                                    onError = {
-                                        Log.e("ProductDetailsScreen", "Image error: $imageUrl", it.result.throwable)
-                                    }
+                                    modifier = Modifier.fillMaxSize()
                                 )
                             } else if (hasVideo && pageIndex == product.images.size) {
                                 YoutubeVideoSlide(videoId!!)
-                            } else {
-                                Icon(
-                                    Icons.Default.Image,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(64.dp),
-                                    tint = Color.LightGray
-                                )
                             }
                         }
                     }
 
+                    // Top gradient for back button visibility
                     Box(
                         modifier = Modifier
-                            .align(Alignment.BottomCenter)
                             .fillMaxWidth()
                             .height(80.dp)
                             .background(
                                 Brush.verticalGradient(
-                                    listOf(Color.Transparent, Color.Black.copy(0.3f))
+                                    listOf(Color.Black.copy(0.4f), Color.Transparent)
                                 )
                             )
                     )
 
+                    // Pager Indicators
                     if (totalItems > 1) {
                         Surface(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
-                                .padding(bottom = 16.dp),
-                            color = Color.Black.copy(alpha = 0.5f),
+                                .padding(bottom = 32.dp),
+                            color = Color.Black.copy(alpha = 0.3f),
                             shape = CircleShape
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 repeat(totalItems) { i ->
                                     val active = pagerState.currentPage == i
                                     Box(
                                         modifier = Modifier
-                                            .size(6.dp)
+                                            .size(if (active) 8.dp else 6.dp)
                                             .clip(CircleShape)
-                                            .background(
-                                                if (active) Color.White
-                                                else Color.White.copy(0.4f)
-                                            )
+                                            .background(if (active) Color.White else Color.White.copy(0.5f))
                                     )
                                 }
                             }
@@ -182,13 +168,15 @@ fun ProductDetailsScreen(
                     }
                 }
 
+                // Main Content
                 Column(
                     modifier = Modifier
-                        .offset(y = (-20).dp)
-                        .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+                        .offset(y = (-24).dp)
+                        .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
                         .background(MaterialTheme.colorScheme.surface)
                         .padding(top = 24.dp)
                 ) {
+                    // Price and Actions
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -197,62 +185,74 @@ fun ProductDetailsScreen(
                     ) {
                         Text(
                             text = "${product.price} ₸",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.primary
                             )
                         )
                         Spacer(Modifier.weight(1f))
-                        IconButton(onClick = onToggleLike) {
+                        IconButton(
+                            onClick = onToggleLike,
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
+                        ) {
                             Icon(
                                 if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = null,
                                 tint = if (liked) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        IconButton(onClick = onShare) {
+                        Spacer(Modifier.width(8.dp))
+                        IconButton(
+                            onClick = onShare,
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), CircleShape)
+                        ) {
                             Icon(Icons.Default.Share, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
 
                     Text(
                         text = product.title,
-                        style = MaterialTheme.typography.titleLarge.copy(lineHeight = 28.sp),
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 28.sp
+                        ),
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
                     )
 
+                    // Rating and Stats
                     Row(
-                        modifier = Modifier.padding(horizontal = 20.dp),
+                        modifier = Modifier
+                            .padding(horizontal = 20.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            Icons.Default.Star,
-                            contentDescription = null,
-                            tint = Color(0xFFFFB400),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(" ${formatRating(product.rating)} ", fontWeight = FontWeight.Bold)
+                        Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFB400), modifier = Modifier.size(20.dp))
+                        Text(" ${formatRating(product.rating)} ", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                        VerticalDivider(modifier = Modifier.height(16.dp).padding(horizontal = 8.dp))
                         Text(
-                            text = "· ${product.reviewsCount} отзывов",
+                            text = "${product.reviewsCount} отзывов",
                             color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium,
                             modifier = Modifier.clickable { onOpenReviews(product.id) }
                         )
-                        Spacer(Modifier.width(12.dp))
+                        VerticalDivider(modifier = Modifier.height(16.dp).padding(horizontal = 8.dp))
                         Text(
-                            "· ${product.ordersCount} заказов",
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.bodyMedium
+                            "${product.ordersCount} заказов",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
                     Spacer(Modifier.height(24.dp))
 
+                    // Tabs
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp)
-                            .height(48.dp)
+                            .height(44.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     ) {
@@ -272,7 +272,7 @@ fun ProductDetailsScreen(
 
                     Box(
                         modifier = Modifier
-                            .padding(20.dp)
+                            .padding(horizontal = 20.dp, vertical = 16.dp)
                             .fillMaxWidth()
                             .animateContentSize()
                     ) {
@@ -280,12 +280,15 @@ fun ProductDetailsScreen(
                             Text(
                                 text = product.description,
                                 style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
+                                lineHeight = 24.sp
                             )
                         } else {
                             SpecsBlock(product.specs)
                         }
                     }
+
+                    HorizontalDivider(Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
 
                     InfoSection(title = "Доставка", icon = Icons.Outlined.LocalShipping) {
                         DeliveryBlock(product.delivery)
@@ -295,16 +298,17 @@ fun ProductDetailsScreen(
                         SellerBlock(product.seller, onClick = { onOpenSeller(product.seller.id) })
                     }
 
-                    Spacer(Modifier.height(100.dp))
+                    Spacer(Modifier.height(120.dp))
                 }
             }
 
+            // Top AppBar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(64.dp)
                     .alpha(topBarAlpha)
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f))
+                    .background(MaterialTheme.colorScheme.surface)
                     .shadow(if (topBarAlpha > 0.8f) 4.dp else 0.dp)
             )
 
@@ -318,15 +322,11 @@ fun ProductDetailsScreen(
                 IconButton(
                     onClick = onBack,
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = if (topBarAlpha < 0.5f) Color.Black.copy(0.3f) else Color.Transparent,
+                        containerColor = if (topBarAlpha < 0.5f) Color.Transparent else Color.Transparent,
                         contentColor = if (topBarAlpha < 0.5f) Color.White else MaterialTheme.colorScheme.onSurface
                     )
                 ) {
-                    Icon(
-                        Icons.Default.KeyboardArrowLeft,
-                        contentDescription = null,
-                        modifier = Modifier.size(32.dp)
-                    )
+                    Icon(Icons.Default.KeyboardArrowLeft, contentDescription = null, modifier = Modifier.size(32.dp))
                 }
 
                 if (topBarAlpha > 0.7f) {
@@ -335,9 +335,8 @@ fun ProductDetailsScreen(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .weight(1f)
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(start = 8.dp).weight(1f)
                     )
                 }
             }
@@ -349,15 +348,9 @@ fun ProductDetailsScreen(
             title = product.title,
             price = product.price,
             quantity = orderQuantity,
-            onMinus = {
-                if (orderQuantity > 1) orderQuantity--
-            },
-            onPlus = {
-                orderQuantity++
-            },
-            onClose = {
-                showOrderSheet = false
-            },
+            onMinus = { if (orderQuantity > 1) orderQuantity-- },
+            onPlus = { orderQuantity++ },
+            onClose = { showOrderSheet = false },
             onChooseDelivery = {
                 showOrderSheet = false
                 onOpenDelivery(orderQuantity)
@@ -373,152 +366,87 @@ fun YoutubeVideoSlide(videoId: String) {
     var hasError by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black),
+        modifier = Modifier.fillMaxSize().background(Color.Black),
         contentAlignment = Alignment.Center
     ) {
         AndroidView(
             factory = { context ->
                 YouTubePlayerView(context).apply {
                     enableAutomaticInitialization = false
-
                     lifecycleOwner.lifecycle.addObserver(this)
-
                     val options = IFramePlayerOptions.Builder(context)
-                        .controls(1)
-                        .fullscreen(0)
-                        .rel(0)
-                        .ivLoadPolicy(3)
-                        .build()
-
-                    initialize(
-                        object : AbstractYouTubePlayerListener() {
-                            override fun onReady(
-                                youTubePlayer: com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
-                            ) {
-                                isReady = true
-                                hasError = false
-                                youTubePlayer.loadVideo(videoId, 0f)
-                            }
-
-                            override fun onError(
-                                youTubePlayer: com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer,
-                                error: PlayerConstants.PlayerError
-                            ) {
-                                hasError = true
-                                android.util.Log.e(
-                                    "ProductDetailsScreen",
-                                    "YouTube player error: $error, videoId=$videoId"
-                                )
-                            }
-                        },
-                        options
-                    )
+                        .controls(1).fullscreen(0).rel(0).ivLoadPolicy(3).build()
+                    initialize(object : AbstractYouTubePlayerListener() {
+                        override fun onReady(youTubePlayer: com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer) {
+                            isReady = true
+                            hasError = false
+                            youTubePlayer.loadVideo(videoId, 0f)
+                        }
+                        override fun onError(youTubePlayer: com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer, error: PlayerConstants.PlayerError) {
+                            hasError = true
+                        }
+                    }, options)
                 }
             },
-            modifier = Modifier.fillMaxSize(),
-            update = { playerView ->
-                // Ничего не делаем, чтобы не переинициализировать плеер лишний раз
-            },
-            onRelease = { playerView ->
-                playerView.release()
-            }
+            modifier = Modifier.fillMaxSize()
         )
-
-        if (!isReady && !hasError) {
-            CircularProgressIndicator(color = Color.White)
-        }
-
-        if (hasError) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.75f))
-                    .padding(16.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PlayCircleOutline,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(56.dp)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Не удалось загрузить видео",
-                    color = Color.White,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-        }
+        if (!isReady && !hasError) CircularProgressIndicator(color = Color.White)
     }
 }
 
 private fun extractYoutubeVideoId(url: String?): String? {
     if (url.isNullOrBlank()) return null
-
-    val regexes = listOf(
-        "(?<=v=)[a-zA-Z0-9_-]{11}",
-        "(?<=youtu.be/)[a-zA-Z0-9_-]{11}",
-        "(?<=/embed/)[a-zA-Z0-9_-]{11}",
-        "(?<=/shorts/)[a-zA-Z0-9_-]{11}"
-    )
-
+    val regexes = listOf("(?<=v=)[a-zA-Z0-9_-]{11}", "(?<=youtu.be/)[a-zA-Z0-9_-]{11}", "(?<=/embed/)[a-zA-Z0-9_-]{11}", "(?<=/shorts/)[a-zA-Z0-9_-]{11}")
     for (pattern in regexes) {
         val match = Regex(pattern).find(url)?.value
         if (!match.isNullOrBlank()) return match
     }
-
     return null
 }
 
 @Composable
 private fun InfoSection(title: String, icon: ImageVector, content: @Composable () -> Unit) {
-    Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)) {
+    Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            Spacer(Modifier.width(8.dp))
+            Icon(icon, contentDescription = null, modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.width(10.dp))
             Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         }
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(16.dp))
         content()
     }
 }
 
 @Composable
-private fun BottomActionsBar(
-    onChat: () -> Unit,
-    onOrder: () -> Unit
-) {
-    Surface(modifier = Modifier.shadow(16.dp), color = MaterialTheme.colorScheme.surface) {
+private fun BottomActionsBar(onChat: () -> Unit, onOrder: () -> Unit) {
+    Surface(
+        modifier = Modifier.shadow(24.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 4.dp
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(horizontal = 20.dp, vertical = 12.dp)
                 .navigationBarsPadding(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             OutlinedButton(
                 onClick = onChat,
-                modifier = Modifier
-                    .weight(0.4f)
-                    .height(54.dp),
-                shape = RoundedCornerShape(16.dp)
+                modifier = Modifier.weight(0.35f).height(56.dp),
+                shape = RoundedCornerShape(16.dp),
+                border = androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
-                Icon(Icons.Default.ChatBubbleOutline, contentDescription = null)
+                Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text("Чат", fontWeight = FontWeight.Bold)
             }
 
             Button(
                 onClick = onOrder,
-                modifier = Modifier
-                    .weight(0.6f)
-                    .height(54.dp),
+                modifier = Modifier.weight(0.65f).height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
                 Text("Купить сейчас", fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
@@ -528,7 +456,6 @@ private fun BottomActionsBar(
 
 @Composable
 private fun TabButton(text: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val alpha by animateFloatAsState(if (selected) 1f else 0.6f)
     Box(
         modifier = modifier
             .fillMaxHeight()
@@ -541,132 +468,86 @@ private fun TabButton(text: String, selected: Boolean, onClick: () -> Unit, modi
         Text(
             text = text,
             fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.alpha(alpha)
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
 
 @Composable
 private fun SpecsBlock(specs: List<Pair<String, String>>) {
-    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         specs.forEach { (k, v) ->
             Row(modifier = Modifier.fillMaxWidth()) {
-                Text(text = k, modifier = Modifier.weight(1f), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                Text(
-                    text = v,
-                    modifier = Modifier.weight(1f),
-                    fontWeight = FontWeight.SemiBold,
-                    textAlign = TextAlign.End,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Text(text = k, modifier = Modifier.weight(1.1f), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+                Text(text = v, modifier = Modifier.weight(0.9f), fontWeight = FontWeight.Bold, textAlign = TextAlign.End, color = MaterialTheme.colorScheme.onSurface)
             }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
         }
     }
 }
 
 @Composable
 private fun DeliveryBlock(delivery: DeliveryInfoUi) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
-        shape = RoundedCornerShape(16.dp)
+    OutlinedCard(
+        colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
     ) {
-        Column(
-            Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        Column(Modifier.padding(16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (delivery.freeDeliveryEnabled) {
-                DeliveryRow(
-                    icon = Icons.Default.Done,
-                    label = "Доставка курьером",
-                    value = delivery.freeDeliveryText ?: "Бесплатно"
-                )
+                DeliveryRow(icon = Icons.Default.CheckCircle, label = "Доставка курьером", value = delivery.freeDeliveryText ?: "Бесплатно", isFree = true)
             }
             if (delivery.pickupEnabled) {
-                DeliveryRow(
-                    icon = Icons.Default.LocationOn,
-                    label = "Самовывоз: ${delivery.pickupAddress ?: "не указан"}",
-                    value = delivery.pickupTime ?: "Бесплатно"
-                )
-            }
-            if (delivery.pickupEnabled || delivery.freeDeliveryEnabled || delivery.intercityEnabled) {
-                // ... logic
+                DeliveryRow(icon = Icons.Default.LocationOn, label = "Самовывоз: ${delivery.pickupAddress}", value = "Бесплатно", isFree = true)
             }
             if (delivery.intercityEnabled) {
-                DeliveryRow(
-                    icon = Icons.Default.Public,
-                    label = "Межгород",
-                    value = "Доступно"
-                )
+                DeliveryRow(icon = Icons.Default.Public, label = "Межгород", value = "Доступно", isFree = false)
             }
         }
     }
 }
 
 @Composable
-private fun DeliveryRow(icon: ImageVector, label: String, value: String) {
+private fun DeliveryRow(icon: ImageVector, label: String, value: String, isFree: Boolean) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.width(8.dp))
-        Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
-        Text(value, fontWeight = FontWeight.Bold, color = Color(0xFF4CAF50), textAlign = TextAlign.End)
+        Icon(icon, contentDescription = null, modifier = Modifier.size(18.dp), tint = if (isFree) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.width(10.dp))
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Text(value, fontWeight = FontWeight.ExtraBold, color = if (isFree) Color(0xFF2E7D32) else MaterialTheme.colorScheme.onSurface, style = MaterialTheme.typography.bodyMedium)
     }
 }
 
 @Composable
 private fun SellerBlock(seller: SellerUi, onClick: () -> Unit) {
-    Surface(
+    ElevatedCard(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Surface(
-                modifier = Modifier.size(50.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.secondaryContainer
-            ) {
-                val avatarUrl = seller.avatarUrl
-                if (!avatarUrl.isNullOrBlank()) {
-                    AsyncImage(
-                        model = avatarUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop
-                    )
+        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Surface(modifier = Modifier.size(52.dp), shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer) {
+                if (!seller.avatarUrl.isNullOrBlank()) {
+                    AsyncImage(model = seller.avatarUrl, contentDescription = null, contentScale = ContentScale.Crop)
                 } else {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = seller.name.take(1).uppercase(),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
+                        Text(seller.name.take(1).uppercase(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
                     }
                 }
             }
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f)) {
-                Text(
-                    text = seller.name,
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = seller.address,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
+                Text(text = seller.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+                Text(text = seller.address, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
             Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline)
         }
     }
 }
 
-private fun formatRating(rating: Double): String {
-    return if (rating == 0.0) "Новый" else String.format("%.1f", rating)
-}
+private fun formatRating(rating: Double): String = if (rating == 0.0) "Новый" else "%.1f".format(rating)
