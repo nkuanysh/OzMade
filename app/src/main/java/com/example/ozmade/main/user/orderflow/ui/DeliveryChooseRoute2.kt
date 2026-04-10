@@ -154,10 +154,10 @@ private fun DeliveryChooseContent(
     var shippingLng by remember { mutableStateOf<Double?>(null) }
     var shippingComment by remember { mutableStateOf("") }
     var isFullScreenMapOpen by remember { mutableStateOf(false) }
-
+    var localValidationError by remember { mutableStateOf<String?>(null) }
     val total = product.price * quantity
     val d = product.delivery
-
+    val sellerZoneAddress = d.centerAddress?.trim().orEmpty()
     val zoneCenter = remember(d.centerLat, d.centerLng) {
         if (d.centerLat != null && d.centerLng != null) {
             LatLng(d.centerLat, d.centerLng)
@@ -224,7 +224,7 @@ private fun DeliveryChooseContent(
             DeliveryOption(
                 title = "Доставка продавца",
                 subtitle = buildString {
-                    append("Зона: ${d.centerAddress ?: "—"}")
+                    append("Адрес продавца: ${sellerZoneAddress.ifBlank { "Адрес не указан" }}")
                     if (d.radiusKm != null) append("\nРадиус: ${formatKm(d.radiusKm)} км")
                 },
                 selected = selected == DeliveryType.MY_DELIVERY,
@@ -243,9 +243,11 @@ private fun DeliveryChooseContent(
                     BuyerMiniMap(
                         zoneCenter = zoneCenter,
                         zoneRadiusKm = zoneRadiusKm,
+                        sellerZoneAddress = sellerZoneAddress,
                         buyerLatLng = buyerLatLng,
                         onExpandClick = { isFullScreenMapOpen = true },
                         onMapClick = { latLng ->
+                            localValidationError = null
                             shippingLat = latLng.latitude
                             shippingLng = latLng.longitude
                             scope.launch {
@@ -268,6 +270,12 @@ private fun DeliveryChooseContent(
                         Spacer(Modifier.width(8.dp))
                         Text("Открыть карту на весь экран")
                     }
+                    Spacer(Modifier.height(12.dp))
+
+                    InfoSurface(
+                        text = "Адрес зоны продавца: ${sellerZoneAddress.ifBlank { "Адрес не указан" }}",
+                        isWarning = false
+                    )
 
                     Spacer(Modifier.height(12.dp))
 
@@ -327,6 +335,21 @@ private fun DeliveryChooseContent(
 
             Spacer(Modifier.height(12.dp))
         }
+        if (!localValidationError.isNullOrBlank()) {
+            Surface(
+                color = MaterialTheme.colorScheme.errorContainer,
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = localValidationError!!,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.padding(12.dp),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+        }
 
         if (!error.isNullOrBlank()) {
             Surface(
@@ -349,6 +372,22 @@ private fun DeliveryChooseContent(
         Button(
             onClick = {
                 val type = selected ?: return@Button
+
+                if (type == DeliveryType.MY_DELIVERY) {
+                    if (shippingLat == null || shippingLng == null || shippingAddressText.isBlank()) {
+                        localValidationError = "Выберите адрес доставки на карте"
+                        return@Button
+                    }
+
+                    if (isOutsideSellerZone) {
+                        localValidationError =
+                            "Продавец не доставляет по этому адресу. Выберите адрес внутри зоны доставки."
+                        return@Button
+                    }
+                }
+
+                localValidationError = null
+
                 onCreate(
                     type,
                     shippingAddressText.trim().ifBlank { null },
@@ -388,9 +427,11 @@ private fun DeliveryChooseContent(
         BuyerFullScreenMapDialog(
             zoneCenter = zoneCenter,
             zoneRadiusKm = zoneRadiusKm,
+            sellerZoneAddress = sellerZoneAddress,
             buyerLatLng = buyerLatLng,
             onDismiss = { isFullScreenMapOpen = false },
             onMapClick = { latLng ->
+                localValidationError = null
                 shippingLat = latLng.latitude
                 shippingLng = latLng.longitude
                 scope.launch {
@@ -408,6 +449,7 @@ private fun DeliveryChooseContent(
 private fun BuyerMiniMap(
     zoneCenter: LatLng,
     zoneRadiusKm: Double,
+    sellerZoneAddress: String,
     buyerLatLng: LatLng?,
     onExpandClick: () -> Unit,
     onMapClick: (LatLng) -> Unit
@@ -437,6 +479,7 @@ private fun BuyerMiniMap(
             SellerZoneAndBuyerMarker(
                 zoneCenter = zoneCenter,
                 zoneRadiusKm = zoneRadiusKm,
+                sellerZoneAddress = sellerZoneAddress,
                 buyerLatLng = buyerLatLng
             )
         }
@@ -479,6 +522,7 @@ private fun BuyerMiniMap(
 private fun BuyerFullScreenMapDialog(
     zoneCenter: LatLng,
     zoneRadiusKm: Double,
+    sellerZoneAddress: String,
     buyerLatLng: LatLng?,
     onDismiss: () -> Unit,
     onMapClick: (LatLng) -> Unit
@@ -528,6 +572,7 @@ private fun BuyerFullScreenMapDialog(
                 SellerZoneAndBuyerMarker(
                     zoneCenter = zoneCenter,
                     zoneRadiusKm = zoneRadiusKm,
+                    sellerZoneAddress = sellerZoneAddress,
                     buyerLatLng = buyerLatLng
                 )
             }
@@ -587,11 +632,18 @@ private fun BuyerFullScreenMapDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        "Выберите ваш адрес",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.weight(1f)
-                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Выберите ваш адрес",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "Адрес продавца: ${sellerZoneAddress.ifBlank { "Адрес не указан" }}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
 
                     Spacer(Modifier.width(12.dp))
 
@@ -613,11 +665,13 @@ private fun BuyerFullScreenMapDialog(
 private fun SellerZoneAndBuyerMarker(
     zoneCenter: LatLng,
     zoneRadiusKm: Double,
+    sellerZoneAddress: String,
     buyerLatLng: LatLng?
-) {
+){
     Marker(
         state = MarkerState(position = zoneCenter),
-        title = "Зона продавца"
+        title = "Зона продавца",
+        snippet = sellerZoneAddress.ifBlank { "Адрес продавца не указан" }
     )
 
     if (zoneRadiusKm > 0) {

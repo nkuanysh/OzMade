@@ -69,6 +69,8 @@ class RealProductRepository @Inject constructor(
                 intercityEnabled = dto.delivery?.intercityEnabled ?: false,
                 pickupAddress = dto.delivery?.pickupAddress,
                 centerAddress = dto.delivery?.centerAddress,
+                centerLat = dto.delivery?.centerLat,
+                centerLng = dto.delivery?.centerLng,
                 radiusKm = dto.delivery?.radiusKm
             ),
             seller = SellerUi(
