@@ -17,12 +17,19 @@ class RealSellerRepository @Inject constructor(
         val seller = SellerHeaderUi(
             id = dto.seller?.id ?: sellerId,
             name = dto.seller?.name ?: "Продавец",
+            storeName = dto.seller?.storeName,
             status = dto.seller?.status ?: "",
             ordersCount = dto.seller?.ordersCount ?: 0,
             rating = dto.seller?.rating ?: 0.0,
             reviewsCount = dto.seller?.reviewsCount ?: 0,
             daysWithOzMade = dto.seller?.daysWithOzMade ?: 0,
-            avatarUrl = ImageUtils.formatImageUrl(dto.seller?.avatarUrl)
+            avatarUrl = ImageUtils.formatImageUrl(dto.seller?.avatarUrl),
+            city = dto.seller?.city,
+            description = dto.seller?.description,
+            categories = dto.seller?.categories,
+            levelTitle = dto.seller?.levelTitle,
+            levelProgress = dto.seller?.levelProgress,
+            levelHint = dto.seller?.levelHint
         )
 
         val products = dto.products?.map {

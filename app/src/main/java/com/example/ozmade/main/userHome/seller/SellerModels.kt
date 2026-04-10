@@ -3,12 +3,19 @@ package com.example.ozmade.main.userHome.seller
 data class SellerHeaderUi(
     val id: Int,
     val name: String,
+    val storeName: String? = null,
     val status: String,         // "Новый мастер" и т.д.
     val ordersCount: Int,
     val rating: Double,
     val reviewsCount: Int,
     val daysWithOzMade: Int,
-    val avatarUrl: String? = null
+    val avatarUrl: String? = null,
+    val city: String? = null,
+    val description: String? = null,
+    val categories: String? = null,
+    val levelTitle: String? = null,
+    val levelProgress: Float? = null,
+    val levelHint: String? = null
 )
 
 data class SellerProductUi(

@@ -13,15 +13,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,8 +38,7 @@ fun SellerScreen(
     onToggleLike: (Int) -> Unit,
     onOpenProduct: (Int) -> Unit,
     onOpenSellerReviews: (Int) -> Unit,
-
-    ) {
+) {
     var search by remember { mutableStateOf("") }
 
     Scaffold(
@@ -118,7 +122,12 @@ fun SellerScreen(
                             modifier = Modifier.fillMaxWidth(),
                             placeholder = { Text("Поиск товаров продавца") },
                             singleLine = true,
-                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) }
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                            )
                         )
                     }
 
@@ -141,73 +150,139 @@ fun SellerScreen(
 private fun SellerHeaderBlock(
     seller: SellerHeaderUi,
     onOpenReviews: () -> Unit
-)
- {
-    Card(shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(14.dp)) {
-
-            // аватар + имя по центру
+) {
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+    ) {
+        Column(
+            Modifier
+                .padding(20.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Аватар
             Box(
                 modifier = Modifier
-                    .size(76.dp)
+                    .size(90.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .align(Alignment.CenterHorizontally),
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
+                if (!seller.avatarUrl.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = seller.avatarUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Text(
+                        text = seller.name.take(1).uppercase(),
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                text = seller.storeName ?: seller.name,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+
+            if (!seller.storeName.isNullOrEmpty()) {
                 Text(
-                    text = seller.name.take(1).uppercase(),
-                    style = MaterialTheme.typography.headlineSmall
+                    text = seller.name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(8.dp))
 
-            Text(
-                text = seller.name,
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            if (seller.status.isNotEmpty()) {
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    contentColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Text(
+                        text = seller.status,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
 
-            Spacer(Modifier.height(4.dp))
+            // Добавляем уровень/прогресс если есть
+            if (!seller.levelTitle.isNullOrEmpty() || (seller.levelProgress ?: 0f) > 0f) {
+                Spacer(Modifier.height(12.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = seller.levelTitle ?: "Уровень",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    if ((seller.levelProgress ?: 0f) > 0f) {
+                        Spacer(Modifier.height(4.dp))
+                        LinearProgressIndicator(
+                            progress = { seller.levelProgress ?: 0f },
+                            modifier = Modifier.width(120.dp).height(6.dp).clip(CircleShape),
+                            color = MaterialTheme.colorScheme.secondary,
+                            trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
+                        )
+                    }
+                }
+            }
 
-            Text(
-                text = seller.status,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            )
+            if (!seller.description.isNullOrEmpty()) {
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    text = seller.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
-            Spacer(Modifier.height(14.dp))
+            Spacer(Modifier.height(24.dp))
 
-            // Статистика: слева заказы, центр рейтинг/отзывы, справа дни
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-
-                StatColumn(
-                    title = "${seller.ordersCount}",
-                    subtitle = "заказов",
+            // Статистика
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                StatItem(
+                    value = "${seller.ordersCount}",
+                    label = "заказов",
                     modifier = Modifier.weight(1f)
                 )
 
-                Box(
+                VerticalDivider(modifier = Modifier.height(30.dp), thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
+
+                StatItem(
+                    value = String.format("%.1f", seller.rating),
+                    label = "${seller.reviewsCount} отзывов",
                     modifier = Modifier
                         .weight(1f)
-                        .clickable(onClick = onOpenReviews)
-                ) {
-                    StatColumn(
-                        title = String.format("%.1f", seller.rating),
-                        subtitle = "${seller.reviewsCount} отзывов",
-                        modifier = Modifier.fillMaxWidth(),
-                        center = true
-                    )
-                }
+                        .clickable(onClick = onOpenReviews),
+                    isHighlight = true
+                )
 
+                VerticalDivider(modifier = Modifier.height(30.dp), thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
 
-                StatColumn(
-                    title = "${seller.daysWithOzMade}",
-                    subtitle = "дней с OzMade",
-                    modifier = Modifier.weight(1f),
-                    right = true
+                StatItem(
+                    value = "${seller.daysWithOzMade}",
+                    label = "дней с нами",
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -215,22 +290,28 @@ private fun SellerHeaderBlock(
 }
 
 @Composable
-private fun StatColumn(
-    title: String,
-    subtitle: String,
+private fun StatItem(
+    value: String,
+    label: String,
     modifier: Modifier = Modifier,
-    center: Boolean = false,
-    right: Boolean = false
+    isHighlight: Boolean = false
 ) {
-    val align = when {
-        right -> Alignment.End
-        center -> Alignment.CenterHorizontally
-        else -> Alignment.Start
-    }
-    Column(modifier = modifier, horizontalAlignment = align) {
-        Text(title, style = MaterialTheme.typography.titleMedium)
-        Spacer(Modifier.height(2.dp))
-        Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = if (isHighlight) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
     }
 }
 
@@ -245,71 +326,113 @@ private fun SellerProductCard(
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .height(160.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(10.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.tertiaryContainer)
-                )
+                if (!product.imageUrl.isNullOrEmpty()) {
+                    AsyncImage(
+                        model = product.imageUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                        )
+                    }
+                }
 
                 IconButton(
                     onClick = onToggleLike,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(6.dp)
-                        .size(36.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.85f))
+                        .padding(8.dp)
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.8f))
                 ) {
                     Icon(
                         imageVector = if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = if (liked) Color.Red else Color.Gray,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }
 
-            Column(modifier = Modifier.padding(10.dp)) {
+            Column(modifier = Modifier.padding(12.dp)) {
                 Text(
                     text = "${product.price} ₸",
                     style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
-
-                Spacer(Modifier.height(2.dp))
 
                 Text(
                     text = product.title,
                     style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.heightIn(min = 40.dp)
                 )
 
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(8.dp))
 
-                Text(
-                    text = "${product.city}, ${product.address}",
-                    style = MaterialTheme.typography.bodySmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        text = product.city,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
 
-                Spacer(Modifier.height(6.dp))
-
-                Text(
-                    text = "Рейтинг: ${String.format("%.1f", product.rating)}",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                if (product.rating > 0) {
+                    Row(
+                        modifier = Modifier.padding(top = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        repeat(5) { index ->
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = null,
+                                modifier = Modifier.size(12.dp),
+                                tint = if (index < product.rating.toInt()) Color(0xFFFFB400) else Color.LightGray
+                            )
+                        }
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = String.format("%.1f", product.rating),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }
 }
+

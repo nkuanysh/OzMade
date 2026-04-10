@@ -20,4 +20,6 @@
 
     <string name="resend_in">Отправить повторно через: %1$d</string>
     <string name="resend">Отправить ещё раз</string>
+
+    <string name="google_maps_key">AIzaSyCguBxmFvx7yS2p_ghv4q97mADnpmFjKl8</string>
 </resources>
