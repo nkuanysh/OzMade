@@ -11,20 +11,32 @@ import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.example.ozmade.utils.ImageUtils
+import java.text.NumberFormat
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SellerAnalyticsScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: SellerAnalyticsViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -39,79 +51,94 @@ fun SellerAnalyticsScreen(
         },
         containerColor = Color(0xFFF8F9FA)
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            // Главная карточка дохода
-            RevenueCard()
-
-            Text(
-                "ОСНОВНЫЕ ПОКАЗАТЕЛИ",
-                style = MaterialTheme.typography.labelLarge,
-                color = Color.Gray,
-                modifier = Modifier.padding(start = 4.dp)
-            )
-
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                StatSmallCard(
-                    title = "Заказы",
-                    value = "12",
-                    icon = Icons.Default.ShoppingBag,
-                    color = Color(0xFF64B5F6),
-                    modifier = Modifier.weight(1f)
-                )
-                StatSmallCard(
-                    title = "Просмотры",
-                    value = "1.2k",
-                    icon = Icons.Default.Visibility,
-                    color = Color(0xFFFFB74D),
-                    modifier = Modifier.weight(1f)
-                )
+        if (uiState.isLoading) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Color(0xFFFF9800))
             }
-
-            // Популярные товары (заглушка)
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
+        } else {
+            Column(
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                Column(Modifier.padding(20.dp)) {
-                    Text("Популярные товары", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Spacer(Modifier.height(16.dp))
-                    repeat(3) {
-                        Row(
-                            Modifier.padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(Modifier.size(40.dp).background(Color(0xFFF1F1F1), RoundedCornerShape(8.dp)))
-                            Spacer(Modifier.width(12.dp))
-                            Column(Modifier.weight(1f)) {
-                                Text("Товар #${it + 1}", fontWeight = FontWeight.Medium)
-                                Text("Продано: ${10 - it}", fontSize = 12.sp, color = Color.Gray)
+                // Главная карточка дохода
+                RevenueCard(uiState.totalRevenue, uiState.revenueGrowth)
+
+                Text(
+                    "ОСНОВНЫЕ ПОКАЗАТЕЛИ",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(start = 4.dp)
+                )
+
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    StatSmallCard(
+                        title = "Заказы",
+                        value = uiState.ordersCount.toString(),
+                        icon = Icons.Default.ShoppingBag,
+                        color = Color(0xFF64B5F6),
+                        modifier = Modifier.weight(1f)
+                    )
+                    StatSmallCard(
+                        title = "Просмотры",
+                        value = formatViews(uiState.viewsCount),
+                        icon = Icons.Default.Visibility,
+                        color = Color(0xFFFFB74D),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                // Популярные товары
+                if (uiState.popularProducts.isNotEmpty()) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
+                    ) {
+                        Column(Modifier.padding(20.dp)) {
+                            Text("Популярные товары", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            Spacer(Modifier.height(16.dp))
+                            uiState.popularProducts.forEachIndexed { index, product ->
+                                Row(
+                                    Modifier.padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    AsyncImage(
+                                        model = ImageUtils.formatImageUrl(product.imageUrl),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(44.dp).clip(RoundedCornerShape(10.dp)),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                    Spacer(Modifier.width(12.dp))
+                                    Column(Modifier.weight(1f)) {
+                                        Text(product.name, fontWeight = FontWeight.Bold, maxLines = 1)
+                                        Text("Продано: ${product.salesCount}", fontSize = 12.sp, color = Color.Gray)
+                                    }
+                                    Text(formatPrice(product.revenue), fontWeight = FontWeight.ExtraBold, color = Color(0xFFFF9800))
+                                }
+                                if (index < uiState.popularProducts.size - 1) HorizontalDivider(color = Color(0xFFF1F1F1).copy(0.5f))
                             }
-                            Text("${(it + 1) * 5000} ₸", fontWeight = FontWeight.Bold)
                         }
-                        if (it < 2) HorizontalDivider(color = Color(0xFFF1F1F1))
                     }
                 }
+                
+                Spacer(Modifier.height(20.dp))
             }
         }
     }
 }
 
 @Composable
-private fun RevenueCard() {
+private fun RevenueCard(revenue: Double, growth: Double) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         color = Color.Transparent,
-        shadowElevation = 8.dp
+        shadowElevation = 4.dp
     ) {
         Box(
             modifier = Modifier.background(
@@ -121,9 +148,9 @@ private fun RevenueCard() {
             )
         ) {
             Column(Modifier.padding(24.dp)) {
-                Text("Ваш доход за месяц", color = Color.White.copy(0.8f), fontSize = 14.sp)
+                Text("Общий доход", color = Color.White.copy(0.8f), fontSize = 14.sp)
                 Spacer(Modifier.height(4.dp))
-                Text("145,000 ₸", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold)
+                Text(formatPrice(revenue), color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold)
                 Spacer(Modifier.height(20.dp))
                 Surface(
                     color = Color.White.copy(0.2f),
@@ -132,7 +159,7 @@ private fun RevenueCard() {
                     Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.AutoMirrored.Filled.TrendingUp, null, tint = Color.White, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("+15% к прошлому месяцу", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text("Статистика по заказам", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -166,5 +193,19 @@ private fun StatSmallCard(
             Text(value, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold)
             Text(title, fontSize = 12.sp, color = Color.Gray)
         }
+    }
+}
+
+private fun formatPrice(price: Double): String {
+    val formatter = NumberFormat.getCurrencyInstance(Locale("ru", "KZ"))
+    formatter.maximumFractionDigits = 0
+    return formatter.format(price).replace("KZT", "₸").replace("₸", " ₸")
+}
+
+private fun formatViews(views: Int): String {
+    return if (views >= 1000) {
+        String.format(Locale.US, "%.1fk", views / 1000f)
+    } else {
+        views.toString()
     }
 }
