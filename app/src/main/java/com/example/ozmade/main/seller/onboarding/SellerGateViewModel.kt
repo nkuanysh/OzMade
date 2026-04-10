@@ -19,7 +19,7 @@ sealed class SellerGateState {
 
 @HiltViewModel
 class SellerGateViewModel @Inject constructor(
-    private val repo: SellerRepository
+    val repo: SellerRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<SellerGateState>(SellerGateState.Idle)
@@ -38,6 +38,7 @@ class SellerGateViewModel @Inject constructor(
         }
     }
 
-    fun reset() { _state.value = SellerGateState.Idle
+    fun reset() {
+        _state.value = SellerGateState.Idle
     }
 }

@@ -25,6 +25,7 @@ import androidx.navigation.compose.*
 import androidx.navigation.navArgument
 import com.example.ozmade.main.seller.SellerMainScreen
 import com.example.ozmade.main.seller.data.SellerLocalStore
+import com.example.ozmade.main.seller.data.SellerRepository
 import com.example.ozmade.main.seller.registration.SellerRegistrationRoute
 import com.example.ozmade.main.user.chat.ChatScreen
 import com.example.ozmade.main.user.chat.ChatThreadRoute
@@ -44,6 +45,9 @@ import com.example.ozmade.main.userHome.seller.SellerRoute
 import com.example.ozmade.main.userHome.seller.reviews.SellerReviewsRoute
 import com.example.ozmade.main.user.orderflow.ui.DeliveryChooseRoute2
 import kotlinx.coroutines.launch
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ozmade.main.seller.data.SellerRepositoryImpl
+import javax.inject.Inject
 
 private sealed class BottomItem(
     val route: String,
@@ -67,12 +71,19 @@ fun MainScreen(
     pushSellerName: String = "Продавец",
     pushProductTitle: String = "Товар",
     pushPrice: Int = 0,
-    deepLinkProductId: Int = 0
+    deepLinkProductId: Int = 0,
+    sellerRepository: SellerRepository = hiltViewModel<com.example.ozmade.main.seller.onboarding.SellerGateViewModel>().let { 
+        // Note: Using a workaround to get repository if needed, but better to check profile directly
+        // However, for MainScreen we can just check if profile exists on the fly
+        // or rely on sellerStore after a check
+        it.repo 
+    }
 ) {
     val context = LocalContext.current
     val sellerStore = remember { SellerLocalStore(context) }
     val isSellerModePref by sellerStore.isSellerModeFlow.collectAsState(initial = null)
     var isRegistered by remember { mutableStateOf(false) }
+    var isCheckingRegistration by remember { mutableStateOf(true) }
     
     val scope = rememberCoroutineScope()
 
@@ -80,11 +91,19 @@ fun MainScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     LaunchedEffect(Unit) {
-        isRegistered = sellerStore.isSellerRegistered()
+        // Sync local registration state with server
+        val exists = sellerRepository.sellerProfileExists()
+        if (exists) {
+            sellerStore.setSellerRegistered(true)
+            isRegistered = true
+        } else {
+            isRegistered = sellerStore.isSellerRegistered()
+        }
+        isCheckingRegistration = false
     }
 
     // Wait until preference is loaded to avoid flickering
-    if (isSellerModePref == null) return
+    if (isSellerModePref == null || isCheckingRegistration) return
 
     LaunchedEffect(openChatFromPush, pushChatId) {
         if (openChatFromPush && pushChatId != 0) {
