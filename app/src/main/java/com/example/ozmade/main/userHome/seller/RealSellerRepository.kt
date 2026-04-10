@@ -14,22 +14,23 @@ class RealSellerRepository @Inject constructor(
         
         val dto = resp.body() ?: error("Пустой ответ от сервера")
 
+        val sDto = dto.seller
         val seller = SellerHeaderUi(
-            id = dto.seller?.id ?: sellerId,
-            name = dto.seller?.name ?: "Продавец",
-            storeName = dto.seller?.storeName,
-            status = dto.seller?.status ?: "",
-            ordersCount = dto.seller?.ordersCount ?: 0,
-            rating = dto.seller?.rating ?: 0.0,
-            reviewsCount = dto.seller?.reviewsCount ?: 0,
-            daysWithOzMade = dto.seller?.daysWithOzMade ?: 0,
-            avatarUrl = ImageUtils.formatImageUrl(dto.seller?.avatarUrl),
-            city = dto.seller?.city,
-            description = dto.seller?.description,
-            categories = dto.seller?.categories,
-            levelTitle = dto.seller?.levelTitle,
-            levelProgress = dto.seller?.levelProgress,
-            levelHint = dto.seller?.levelHint
+            id = sDto?.id ?: dto.id ?: sellerId,
+            name = sDto?.name ?: dto.name ?: "Продавец",
+            storeName = sDto?.storeName ?: dto.storeName,
+            status = sDto?.status ?: dto.status ?: sDto?.levelTitle ?: dto.levelTitle ?: "",
+            ordersCount = sDto?.ordersCount ?: dto.ordersCount ?: 0,
+            rating = sDto?.rating ?: dto.rating ?: 0.0,
+            reviewsCount = sDto?.reviewsCount ?: dto.reviewsCount ?: 0,
+            daysWithOzMade = sDto?.daysWithOzMade ?: dto.daysWithOzMade ?: 0,
+            avatarUrl = ImageUtils.formatImageUrl(sDto?.avatarUrl ?: dto.avatarUrl),
+            city = sDto?.city ?: dto.city,
+            description = sDto?.description ?: dto.description,
+            categories = sDto?.categories ?: dto.categories,
+            levelTitle = sDto?.levelTitle ?: dto.levelTitle,
+            levelProgress = sDto?.levelProgress ?: dto.levelProgress,
+            levelHint = sDto?.levelHint ?: dto.levelHint
         )
 
         val products = dto.products?.map {

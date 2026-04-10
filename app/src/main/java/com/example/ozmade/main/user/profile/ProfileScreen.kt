@@ -208,7 +208,7 @@ private fun ProfileHeader(name: String, phone: String, avatarUrl: String?, onEdi
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = phone,
+            text = phone.ifBlank { "Номер не указан" },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

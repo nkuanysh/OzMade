@@ -5,8 +5,15 @@ import kotlinx.coroutines.flow.StateFlow
 interface ProfileRepository {
     val profileFlow: StateFlow<UserProfile?>
     suspend fun getMyProfile(): UserProfile
-    suspend fun updateMyProfile(name: String, address: String, avatarUrl: String?): UserProfile
+    suspend fun updateMyProfile(
+        name: String,
+        address: String,
+        addressLat: Double?,
+        addressLng: Double?,
+        avatarUrl: String?
+    ): UserProfile
     suspend fun logout()
     suspend fun getMyOrders(): List<com.example.ozmade.network.model.OrderDto>
     suspend fun getMyFavorites(): List<com.example.ozmade.network.model.ProductDto>
+    suspend fun uploadAvatar(uri: android.net.Uri): String
 }

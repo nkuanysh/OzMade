@@ -2,6 +2,7 @@ package com.example.ozmade.main.userHome.details
 
 import android.util.Log
 import com.example.ozmade.main.user.favorites.FavoriteProductUi
+import com.example.ozmade.main.user.profile.data.ProfileRepository
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
@@ -9,7 +10,8 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class RealProductRepository @Inject constructor(
-    private val api: OzMadeApi
+    private val api: OzMadeApi,
+    private val profileRepo: ProfileRepository
 ) : ProductRepository {
 
     private val TAG = "RealProductRepository"
@@ -23,15 +25,15 @@ class RealProductRepository @Inject constructor(
         if (!resp.isSuccessful) error("Не удалось загрузить товар (${resp.code()})")
         val dto = resp.body() ?: error("Пустой ответ от сервера")
 
-        // Prioritize the images list, as the main ImageName field 
+        // Prioritize the images list, as the main ImageName field
         // sometimes contains a broken bucket-level signed URL.
         val rawImages: List<String> =
             dto.images?.takeIf { it.isNotEmpty() }
                 ?: listOfNotNull(dto.imageUrl)
-        
+
         Log.d(TAG, "getProductDetails: productId=$productId, rawImages size=${rawImages.size}")
-        
-        val images = rawImages.map { 
+
+        val images = rawImages.map {
             val formatted = ImageUtils.formatImageUrl(it)
             Log.d(TAG, "  -> Formatted image: $formatted")
             formatted
@@ -49,6 +51,10 @@ class RealProductRepository @Inject constructor(
             dto.composition?.takeIf { it.isNotBlank() }?.let { add("Материал" to it) }
             dto.youtubeUrl?.takeIf { it.isNotBlank() }?.let { add("YouTube" to it) }
         }
+
+        val profile = profileRepo.getMyProfile()
+        val buyerLat = profile.addressLat
+        val buyerLng = profile.addressLng
 
         return ProductDetailsUi(
             id = dto.id,
@@ -71,7 +77,17 @@ class RealProductRepository @Inject constructor(
                 centerAddress = dto.delivery?.centerAddress,
                 centerLat = dto.delivery?.centerLat,
                 centerLng = dto.delivery?.centerLng,
-                radiusKm = dto.delivery?.radiusKm
+                radiusKm = dto.delivery?.radiusKm,
+                buyerSavedAddress = profile.address,
+                buyerSavedAddressLat = buyerLat,
+                buyerSavedAddressLng = buyerLng,
+                isBuyerInsideDeliveryZone = isInsideDeliveryZone(
+                    buyerLat = buyerLat,
+                    buyerLng = buyerLng,
+                    sellerLat = dto.delivery?.centerLat,
+                    sellerLng = dto.delivery?.centerLng,
+                    radiusKm = dto.delivery?.radiusKm
+                )
             ),
             seller = SellerUi(
                 id = (dto.sellerId ?: dto.seller?.id ?: 0),

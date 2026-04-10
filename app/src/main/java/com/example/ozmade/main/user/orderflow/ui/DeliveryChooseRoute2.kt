@@ -157,6 +157,21 @@ private fun DeliveryChooseContent(
     var localValidationError by remember { mutableStateOf<String?>(null) }
     val total = product.price * quantity
     val d = product.delivery
+    LaunchedEffect(d.buyerSavedAddress, d.buyerSavedAddressLat, d.buyerSavedAddressLng, selected) {
+        if (
+            selected == DeliveryType.MY_DELIVERY &&
+            shippingAddressText.isBlank() &&
+            shippingLat == null &&
+            shippingLng == null &&
+            !d.buyerSavedAddress.isNullOrBlank() &&
+            d.buyerSavedAddressLat != null &&
+            d.buyerSavedAddressLng != null
+        ) {
+            shippingAddressText = d.buyerSavedAddress
+            shippingLat = d.buyerSavedAddressLat
+            shippingLng = d.buyerSavedAddressLng
+        }
+    }
     val sellerZoneAddress = d.centerAddress?.trim().orEmpty()
     val zoneCenter = remember(d.centerLat, d.centerLng) {
         if (d.centerLat != null && d.centerLng != null) {
@@ -228,7 +243,21 @@ private fun DeliveryChooseContent(
                     if (d.radiusKm != null) append("\nРадиус: ${formatKm(d.radiusKm)} км")
                 },
                 selected = selected == DeliveryType.MY_DELIVERY,
-                onClick = { selected = DeliveryType.MY_DELIVERY }
+                onClick = {
+                    selected = DeliveryType.MY_DELIVERY
+                    if (
+                        shippingAddressText.isBlank() &&
+                        shippingLat == null &&
+                        shippingLng == null &&
+                        !d.buyerSavedAddress.isNullOrBlank() &&
+                        d.buyerSavedAddressLat != null &&
+                        d.buyerSavedAddressLng != null
+                    ) {
+                        shippingAddressText = d.buyerSavedAddress
+                        shippingLat = d.buyerSavedAddressLat
+                        shippingLng = d.buyerSavedAddressLng
+                    }
+                }
             )
 
             AnimatedVisibility(visible = selected == DeliveryType.MY_DELIVERY) {

@@ -1,11 +1,13 @@
 package com.example.ozmade.main.user.profile.data
 
 data class UserProfile(
-    val id: String,
-    val name: String = "",
+    val id: Int,
+    val name: String,
+    val address: String,
     val phone: String = "",
-    val avatarUrl: String? = null,
-    val address: String = ""
+    val addressLat: Double? = null,
+    val addressLng: Double? = null,
+    val avatarUrl: String? = null
 )
 
 

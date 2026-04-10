@@ -17,15 +17,19 @@ class ProductDetailsViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     fun load(productId: Int) {
-        _uiState.value = ProductDetailsUiState.Loading
         viewModelScope.launch {
-            runCatching {
+            _uiState.value = ProductDetailsUiState.Loading
+            try {
                 val product = repo.getProductDetails(productId)
-                val liked = repo.isLiked(productId)
-                ProductDetailsUiState.Data(product, liked)
+                _uiState.value = ProductDetailsUiState.Data(
+                    product = product,
+                    liked = repo.isLiked(productId)
+                )
+            } catch (e: Exception) {
+                _uiState.value = ProductDetailsUiState.Error(
+                    e.message ?: "Ошибка загрузки товара"
+                )
             }
-                .onSuccess { _uiState.value = it }
-                .onFailure { _uiState.value = ProductDetailsUiState.Error(it.message ?: "Ошибка загрузки товара") }
         }
     }
 

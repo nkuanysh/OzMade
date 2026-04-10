@@ -2,7 +2,7 @@ package com.example.ozmade.main.userHome.details
 
 data class DeliveryInfoUi(
     val pickupEnabled: Boolean = false,
-    val pickupTime: String? = null, // "12:00-18:00"
+    val pickupTime: String? = null,
     val freeDeliveryEnabled: Boolean = false,
     val freeDeliveryText: String? = null,
     val intercityEnabled: Boolean = false,
@@ -10,7 +10,14 @@ data class DeliveryInfoUi(
     val centerAddress: String? = null,
     val centerLat: Double? = null,
     val centerLng: Double? = null,
-    val radiusKm: Double? = null
+    val radiusKm: Double? = null,
+
+    val buyerSavedAddress: String? = null,
+    val buyerSavedAddressLat: Double? = null,
+    val buyerSavedAddressLng: Double? = null,
+
+    val isBuyerInsideDeliveryZone: Boolean? = null
+
 )
 data class SellerUi(
     val id: Int,

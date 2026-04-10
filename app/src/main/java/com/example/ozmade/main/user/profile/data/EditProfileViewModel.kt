@@ -13,7 +13,10 @@ data class EditProfileState(
     val saving: Boolean = false,
     val name: String = "",
     val address: String = "",
+    val addressLat: Double? = null,
+    val addressLng: Double? = null,
     val avatarUrl: String = "",
+    val selectedUri: android.net.Uri? = null,
     val error: String? = null
 )
 
@@ -38,6 +41,8 @@ class EditProfileViewModel @Inject constructor(
                         loading = false,
                         name = user.name,
                         address = user.address,
+                        addressLat = user.addressLat,
+                        addressLng = user.addressLng,
                         avatarUrl = user.avatarUrl.orEmpty()
                     )
                 }
@@ -58,8 +63,29 @@ class EditProfileViewModel @Inject constructor(
         _state.value = _state.value.copy(address = v)
     }
 
+    fun onAddressPicked(address: String, lat: Double, lng: Double) {
+        _state.value = _state.value.copy(
+            address = address,
+            addressLat = lat,
+            addressLng = lng,
+            error = null
+        )
+    }
+
+    fun clearPickedAddress() {
+        _state.value = _state.value.copy(
+            address = "",
+            addressLat = null,
+            addressLng = null
+        )
+    }
+
     fun onAvatarUrlChange(v: String) {
         _state.value = _state.value.copy(avatarUrl = v)
+    }
+
+    fun onAvatarPicked(uri: android.net.Uri) {
+        _state.value = _state.value.copy(selectedUri = uri)
     }
 
     fun save(onSuccess: () -> Unit) {
@@ -72,22 +98,28 @@ class EditProfileViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(saving = true, error = null)
             runCatching {
+                val uploadedUrl = s.selectedUri?.let { uri ->
+                    repo.uploadAvatar(uri)
+                }
+
+                val finalAvatarUrl = uploadedUrl ?: s.avatarUrl.trim().ifBlank { null }
+
                 repo.updateMyProfile(
                     name = s.name.trim(),
                     address = s.address.trim(),
-                    avatarUrl = s.avatarUrl.trim().ifBlank { null }
+                    addressLat = s.addressLat,
+                    addressLng = s.addressLng,
+                    avatarUrl = finalAvatarUrl
+                )
+            }.onSuccess {
+                _state.value = _state.value.copy(saving = false)
+                onSuccess()
+            }.onFailure {
+                _state.value = _state.value.copy(
+                    saving = false,
+                    error = it.message ?: "Не удалось сохранить"
                 )
             }
-                .onSuccess {
-                    _state.value = _state.value.copy(saving = false)
-                    onSuccess()
-                }
-                .onFailure {
-                    _state.value = _state.value.copy(
-                        saving = false,
-                        error = it.message ?: "Не удалось сохранить"
-                    )
-                }
         }
     }
 }

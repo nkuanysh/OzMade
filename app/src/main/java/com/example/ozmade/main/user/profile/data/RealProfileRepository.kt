@@ -23,42 +23,45 @@ class RealProfileRepository @Inject constructor(
     override val profileFlow: StateFlow<UserProfile?> = _profileFlow.asStateFlow()
 
     override suspend fun getMyProfile(): UserProfile {
-        // ✅ FIRST: Sync user with backend (create/update user record)
         val syncResponse = api.syncUser()
         if (!syncResponse.isSuccessful) {
             throw Exception("Sync failed: ${syncResponse.code()}")
         }
 
-        // ✅ THEN: Get profile from backend
         val response = api.getProfile()
-        if (response.isSuccessful) {
-            val profile = response.body()?.toDomain() ?: throw Exception("Empty body")
-            _profileFlow.value = profile
-            return profile
-        } else {
+        if (!response.isSuccessful) {
             throw Exception("Error ${response.code()}")
         }
+
+        val profile = response.body()?.toDomain() ?: throw Exception("Empty body")
+        _profileFlow.value = profile
+        return profile
     }
 
     override suspend fun updateMyProfile(
         name: String,
         address: String,
+        addressLat: Double?,
+        addressLng: Double?,
         avatarUrl: String?
     ): UserProfile {
         val response = api.updateProfile(
             UpdateProfileRequest(
                 name = name,
                 address = address,
+                addressLat = addressLat,
+                addressLng = addressLng,
                 avatarUrl = avatarUrl
             )
         )
-        if (response.isSuccessful) {
-            val profile = response.body()?.toDomain() ?: throw Exception("Empty body")
-            _profileFlow.value = profile
-            return profile
-        } else {
+
+        if (!response.isSuccessful) {
             throw Exception("Error ${response.code()}")
         }
+
+        val profile = response.body()?.toDomain() ?: throw Exception("Empty body")
+        _profileFlow.value = profile
+        return profile
     }
 
     override suspend fun getMyOrders(): List<com.example.ozmade.network.model.OrderDto> {
@@ -71,22 +74,52 @@ class RealProfileRepository @Inject constructor(
         return if (resp.isSuccessful) resp.body().orEmpty() else emptyList()
     }
 
+    override suspend fun uploadAvatar(uri: android.net.Uri): String = runCatching {
+        val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
+        val extension = android.webkit.MimeTypeMap.getSingleton()
+            .getExtensionFromMimeType(mimeType)
+            ?.let { ".$it" }
+            ?: ".jpg"
+
+        val tempFile = java.io.File.createTempFile("avatar_upload_", extension, context.cacheDir)
+
+        try {
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                tempFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            } ?: error("Не удалось открыть изображение")
+
+            val resp = api.getUploadProductPhotoUrl(mimeType)
+            if (!resp.isSuccessful) throw Exception("Error getting upload URL: ${resp.code()}")
+            
+            val uploadInfo = resp.body() ?: throw Exception("Empty body")
+            val uUrl = uploadInfo.uploadUrl ?: error("Server returned null uploadUrl")
+            val fUrl = uploadInfo.fileUrl ?: error("Server returned null fileUrl")
+
+            val uploadService = com.example.ozmade.network.upload.UploadService()
+            uploadService.putFile(uUrl, tempFile, mimeType).getOrThrow()
+
+            fUrl
+        } finally {
+            tempFile.delete()
+        }
+    }.getOrThrow()
+
     @OptIn(ExperimentalCoilApi::class)
     override suspend fun logout() {
         _profileFlow.value = null
-        // 1. Clear FCM token on backend
+
         runCatching {
             api.updateFCMToken(FCMTokenRequest(""))
         }
 
-        // 2. Clear physical cache directory
         try {
             context.cacheDir.deleteRecursively()
         } catch (e: Exception) {
             e.printStackTrace()
         }
 
-        // 3. Clear Coil image cache
         try {
             context.imageLoader.diskCache?.clear()
             context.imageLoader.memoryCache?.clear()
@@ -96,20 +129,14 @@ class RealProfileRepository @Inject constructor(
     }
 }
 
-// маппер DTO -> Domain
 private fun com.example.ozmade.network.model.ProfileDto.toDomain(): UserProfile {
-    // We use safe calls and Elvis operator to ensure no nulls are passed 
-    // to non-nullable UserProfile fields, which prevents the constructor crash.
-    val phoneStr = phoneNumber ?: ""
-    val nameStr = name?.takeIf { it.isNotBlank() } 
-        ?: email?.takeIf { it.isNotBlank() } 
-        ?: phoneStr.ifBlank { "User" }
-
     return UserProfile(
-        id = id.toString(),
-        name = nameStr,
-        phone = phoneStr,
-        avatarUrl = avatarUrl,
-        address = address ?: ""
+        id = id,
+        name = name?.takeIf { it.isNotBlank() } ?: "User",
+        address = address ?: "",
+        phone = phoneNumber ?: "",
+        addressLat = addressLat,
+        addressLng = addressLng,
+        avatarUrl = avatarUrl
     )
 }

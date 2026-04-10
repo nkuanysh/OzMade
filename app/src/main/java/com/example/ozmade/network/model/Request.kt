@@ -15,20 +15,12 @@ data class ReportRequest(
 )
 
 data class UpdateProfileRequest(
-    @SerializedName("name")
-    val name: String? = null,
-    @SerializedName("address")
-    val address: String? = null,
-    @SerializedName("first_name")
-    val firstName: String? = null,
-    @SerializedName("last_name")
-    val lastName: String? = null,
-    @SerializedName("city")
-    val city: String? = null,
-    @SerializedName("avatar_url")
-    val avatarUrl: String? = null
+    val name: String,
+    val address: String,
+    @SerializedName("address_lat") val addressLat: Double?,
+    @SerializedName("address_lng") val addressLng: Double?,
+    @SerializedName("photo_url") val avatarUrl: String?
 )
-
 data class ProductRequest(
     @SerializedName("Name")
     val name: String,

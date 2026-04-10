@@ -1,5 +1,6 @@
 package com.example.ozmade.main.userHome.details
 
+import android.location.Location
 import android.util.Log
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
@@ -496,17 +497,48 @@ private fun DeliveryBlock(delivery: DeliveryInfoUi) {
     OutlinedCard(
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+        )
     ) {
-        Column(Modifier.padding(16.dp).fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             if (delivery.freeDeliveryEnabled) {
-                DeliveryRow(icon = Icons.Default.CheckCircle, label = "Доставка курьером", value = delivery.freeDeliveryText ?: "Бесплатно", isFree = true)
+                val zoneText = when (delivery.isBuyerInsideDeliveryZone) {
+                    true -> "Вы в зоне доставки"
+                    false -> "Вы вне зоны доставки"
+                    null -> delivery.radiusKm?.let { "${it.toInt()} км" } ?: "Не указано"
+                }
+
+                DeliveryRow(
+                    icon = if (delivery.isBuyerInsideDeliveryZone == false) Icons.Default.Public else Icons.Default.CheckCircle,
+                    label = "Доставка курьером",
+                    value = zoneText,
+                    isFree = delivery.isBuyerInsideDeliveryZone != false
+                )
             }
+
             if (delivery.pickupEnabled) {
-                DeliveryRow(icon = Icons.Default.LocationOn, label = "Самовывоз: ${delivery.pickupAddress}", value = "Бесплатно", isFree = true)
+                DeliveryRow(
+                    icon = Icons.Default.LocationOn,
+                    label = "Самовывоз: ${delivery.pickupAddress}",
+                    value = "Бесплатно",
+                    isFree = true
+                )
             }
+
             if (delivery.intercityEnabled) {
-                DeliveryRow(icon = Icons.Default.Public, label = "Межгород", value = "Доступно", isFree = false)
+                DeliveryRow(
+                    icon = Icons.Default.Public,
+                    label = "Межгород",
+                    value = "Доступно",
+                    isFree = false
+                )
             }
         }
     }
