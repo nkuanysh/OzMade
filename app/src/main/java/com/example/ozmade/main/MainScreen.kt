@@ -42,6 +42,7 @@ import com.example.ozmade.main.userHome.details.ProductDetailsRoute
 import com.example.ozmade.main.userHome.reviews.ReviewsRoute
 import com.example.ozmade.main.userHome.seller.SellerRoute
 import com.example.ozmade.main.userHome.seller.reviews.SellerReviewsRoute
+import com.example.ozmade.main.user.orderflow.ui.DeliveryChooseRoute2
 import kotlinx.coroutines.launch
 
 private sealed class BottomItem(
@@ -180,7 +181,9 @@ fun MainScreen(
                 composable(BottomItem.Home.route) {
                     HomeRoute(
                         onOpenProduct = { pid -> navController.navigate("product/$pid") },
-                        onOpenCategory = { title -> navController.navigate("category/0?title=$title") }
+                        onOpenCategory = { catId -> 
+                            navController.navigate("category/0?title=$catId") 
+                        }
                     )
                 }
                 composable(BottomItem.Favorites.route) {
@@ -275,8 +278,10 @@ fun MainScreen(
                     )
                 ) { backStackEntry ->
                     val categoryId = backStackEntry.arguments?.getInt("categoryId") ?: 0
+                    val title = backStackEntry.arguments?.getString("title") ?: ""
+                    
                     CategoryRoute(
-                        categoryId = categoryId.toString(),
+                        categoryId = if (title.isNotEmpty()) title else categoryId.toString(),
                         onBack = { navController.popBackStack() },
                         onOpenProduct = { pid -> navController.navigate("product/$pid") }
                     )
@@ -296,8 +301,31 @@ fun MainScreen(
                             val encPTitle = Uri.encode(productTitle)
                             navController.navigate("chat/0/$sellerId/$prodId?sellerName=$encSName&productTitle=$encPTitle&price=${price.toInt()}")
                         },
-                        onOpenDelivery = { _, _ -> },
+                        onOpenDelivery = { pid, quantity -> 
+                            navController.navigate("delivery_choose/$pid/$quantity")
+                        },
                         onOpenReviews = { pid -> navController.navigate("reviews/$pid") }
+                    )
+                }
+
+                composable(
+                    "delivery_choose/{productId}/{quantity}",
+                    arguments = listOf(
+                        navArgument("productId") { type = NavType.IntType },
+                        navArgument("quantity") { type = NavType.IntType }
+                    )
+                ) { backStackEntry ->
+                    val productId = backStackEntry.arguments?.getInt("productId") ?: 0
+                    val quantity = backStackEntry.arguments?.getInt("quantity") ?: 1
+                    DeliveryChooseRoute2(
+                        productId = productId,
+                        quantity = quantity,
+                        onBack = { navController.popBackStack() },
+                        onCreated = {
+                            navController.navigate("orders_history") {
+                                popUpTo("product/$productId") { inclusive = true }
+                            }
+                        }
                     )
                 }
 
