@@ -20,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val api: OzMadeApi,
-    private val repo: ProductRepository
+    private val repo: ProductRepository,
+    private val homeRepo: HomeRepository
 ) : ViewModel() {
 
     private val TAG = "HomeViewModel"
@@ -40,9 +41,11 @@ class HomeViewModel @Inject constructor(
             try {
                 coroutineScope {
                     val productsRespDeferred = async { api.getProducts() }
+                    val recsDeferred = async { runCatching { homeRepo.getRecommendations(20) }.getOrDefault(emptyList()) }
                     val favoritesDeferred = async { runCatching { repo.getFavorites() }.getOrDefault(emptyList()) }
 
                     val productsResp = productsRespDeferred.await()
+                    val recommendations = recsDeferred.await()
                     val favorites = favoritesDeferred.await()
                     val favoriteIds = favorites.map { it.id }.toSet()
 
@@ -74,6 +77,7 @@ class HomeViewModel @Inject constructor(
 
                         _uiState.value = HomeUiState.Data(
                             products = products,
+                            recommendations = recommendations,
                             categories = listOf(
                                 Category("food", "Еда"),
                                 Category("clothes", "Одежда"),
@@ -106,7 +110,13 @@ class HomeViewModel @Inject constructor(
                     val newProducts = currentState.products.map {
                         it.copy(liked = favoriteIds.contains(it.id))
                     }
-                    _uiState.value = currentState.copy(products = newProducts)
+                    val newRecs = currentState.recommendations.map {
+                        it.copy(liked = favoriteIds.contains(it.id))
+                    }
+                    _uiState.value = currentState.copy(
+                        products = newProducts,
+                        recommendations = newRecs
+                    )
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "refreshFavorites error", e)
@@ -168,7 +178,13 @@ class HomeViewModel @Inject constructor(
                     val newProducts = currentState.products.map {
                         if (it.id == productId) it.copy(liked = isLikedNow) else it
                     }
-                    _uiState.value = currentState.copy(products = newProducts)
+                    val newRecs = currentState.recommendations.map {
+                        if (it.id == productId) it.copy(liked = isLikedNow) else it
+                    }
+                    _uiState.value = currentState.copy(
+                        products = newProducts,
+                        recommendations = newRecs
+                    )
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "toggleLike: Error", e)
