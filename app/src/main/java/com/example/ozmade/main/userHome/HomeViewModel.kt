@@ -191,4 +191,11 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    fun onTabSelected(tab: HomeTab) {
+        val currentState = _uiState.value
+        if (currentState is HomeUiState.Data) {
+            _uiState.value = currentState.copy(selectedTab = tab)
+        }
+    }
 }

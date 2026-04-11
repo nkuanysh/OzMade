@@ -36,6 +36,11 @@ data class Product(
     val liked: Boolean = false
 )
 
+enum class HomeTab {
+    ALL_PRODUCTS,
+    RECOMMENDATIONS
+}
+
 sealed class HomeUiState {
     data object Loading : HomeUiState()
     data class Data(
@@ -43,7 +48,8 @@ sealed class HomeUiState {
         val recommendations: List<Product> = emptyList(),
         val categories: List<Category>,
         val ads: List<AdBanner>,
-        val searchQuery: String = ""
+        val searchQuery: String = "",
+        val selectedTab: HomeTab = HomeTab.ALL_PRODUCTS
     ) : HomeUiState()
     data class Error(val message: String) : HomeUiState()
 }
