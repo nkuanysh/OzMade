@@ -32,13 +32,21 @@ class BuyerOrdersViewModel @Inject constructor(
     fun postReview(productId: Int, rating: Int, text: String, onComplete: () -> Unit) {
         viewModelScope.launch {
             Log.d("BuyerOrdersViewModel", "Posting review: prodId=$productId, rating=$rating, text=$text")
+            
+            // Critical fix: Ensure rating is not 0 and text is not empty
+            if (rating < 1 || text.isBlank()) {
+                Log.e("BuyerOrdersViewModel", "Invalid rating ($rating) or empty text")
+                return@launch
+            }
+
             productRepo.postComment(productId, rating, text)
                 .onSuccess { 
                     Log.d("BuyerOrdersViewModel", "Review posted successfully")
                     onComplete() 
                 }
                 .onFailure { e ->
-                    Log.e("BuyerOrdersViewModel", "Failed to post review", e)
+                    Log.e("BuyerOrdersViewModel", "Failed to post review. Error message: ${e.message}")
+                    e.printStackTrace()
                 }
         }
     }
