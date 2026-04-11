@@ -3,15 +3,12 @@ package com.example.ozmade.network.model
 import com.google.gson.annotations.SerializedName
 
 data class CommentRequest(
-    @SerializedName("Rating")
-    val rating: Int,
-    @SerializedName("Content")
-    val content: String
+    @SerializedName(value = "Content", alternate = ["content"]) val content: String,
+    @SerializedName("Rating") val rating: Int
 )
 
 data class ReportRequest(
-    @SerializedName("Reason")
-    val reason: String
+    @SerializedName("Reason") val reason: String
 )
 
 data class UpdateProfileRequest(
@@ -21,35 +18,22 @@ data class UpdateProfileRequest(
     @SerializedName("address_lng") val addressLng: Double?,
     @SerializedName(value = "AvatarURL", alternate = ["photo_url", "avatar_url", "avatarUrl"]) val avatarUrl: String?
 )
+
 data class ProductRequest(
-    @SerializedName("Name")
-    val name: String,
-    @SerializedName("Description")
-    val description: String,
-    @SerializedName("Price")
-    val price: Double,
-    @SerializedName("Type")
-    val type: String,
-    @SerializedName("Categories")
-    val categories: List<String>,
-    @SerializedName("ImageUrl")
-    val imageUrl: String?,
-    @SerializedName("Images")
-    val images: List<String>?,
-    @SerializedName("Weight")
-    val weight: String?,
-    @SerializedName("HeightCm")
-    val heightCm: String?,
-    @SerializedName("WidthCm")
-    val widthCm: String?,
-    @SerializedName("DepthCm")
-    val depthCm: String?,
-    @SerializedName("Composition")
-    val composition: String?,
-    @SerializedName("YouTubeUrl")
-    val youtubeUrl: String?,
-    @SerializedName("address")
-    val address: String? = null
+    @SerializedName("Name") val name: String,
+    @SerializedName("Description") val description: String,
+    @SerializedName("Price") val price: Double,
+    @SerializedName("Type") val type: String,
+    @SerializedName("Categories") val categories: List<String>,
+    @SerializedName("ImageUrl") val imageUrl: String?,
+    @SerializedName("Images") val images: List<String>?,
+    @SerializedName("Weight") val weight: String?,
+    @SerializedName("HeightCm") val heightCm: String?,
+    @SerializedName("WidthCm") val widthCm: String?,
+    @SerializedName("DepthCm") val depthCm: String?,
+    @SerializedName("Composition") val composition: String?,
+    @SerializedName("YouTubeUrl") val youtubeUrl: String?,
+    @SerializedName("address") val address: String? = null
 )
 
 data class UpdateSellerProfileRequest(
@@ -93,14 +77,15 @@ data class SellerRegistrationRequestDto(
     @SerializedName("IdCardUrl") val idCardUrl: String? = null,
     @SerializedName("AvatarURL") val logoUrl: String? = null
 )
+
 data class ChatSendMessageRequest(
-    @SerializedName("content") val content: String
+    @SerializedName(value = "content", alternate = ["Content"]) val content: String
 )
 
 data class CreateChatRequest(
-    @SerializedName("seller_id") val sellerId: Int? = null,
-    @SerializedName("product_id") val productId: Int? = null,
-    @SerializedName("content") val content: String? = null
+    @SerializedName(value = "seller_id", alternate = ["SellerID"]) val sellerId: Int? = null,
+    @SerializedName(value = "product_id", alternate = ["ProductID"]) val productId: Int? = null,
+    @SerializedName(value = "content", alternate = ["Content"]) val content: String? = null
 )
 
 data class FCMTokenRequest(
