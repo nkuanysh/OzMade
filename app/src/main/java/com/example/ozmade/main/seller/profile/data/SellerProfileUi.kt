@@ -9,7 +9,7 @@ data class SellerProfileUi(
     val address: String?,
     val categories: List<String>?,
     val status: String,
-    val avatarUrl: String?,
+    val photoUrl: String?,
     val totalProducts: Int,
     val rating: Double,
     val ratingsCount: Int,

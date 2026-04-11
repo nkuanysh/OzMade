@@ -128,7 +128,7 @@ private fun SellerProfileContent(
                 color = Color(0xFFEEEEEE)
             ) {
                 AsyncImage(
-                    model = ImageUtils.formatImageUrl(profile.avatarUrl),
+                    model = ImageUtils.formatProfilePhotoUrl(profile.photoUrl),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop

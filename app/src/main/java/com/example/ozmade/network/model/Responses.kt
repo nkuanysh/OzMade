@@ -105,7 +105,7 @@ data class ProfileDto(
     @SerializedName(value = "Name", alternate = ["name"])
     val name: String? = null,
     @SerializedName(value = "photo_url", alternate = ["AvatarURL", "avatar_url", "avatarUrl"])
-    val avatarUrl: String? = null,
+    val photoUrl: String? = null,
     @SerializedName(value = "Address", alternate = ["address"])
     val address: String? = null,
     @SerializedName(value = "Role", alternate = ["role"])
@@ -114,9 +114,8 @@ data class ProfileDto(
     val isSeller: Boolean? = null,
     @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"])
     val createdAt: String? = null,
-    @SerializedName("address_lat") val addressLat: Double?,
-    @SerializedName("address_lng") val addressLng: Double?,
-
+    @SerializedName("address_lat") val addressLat: Double? = null,
+    @SerializedName("address_lng") val addressLng: Double? = null
 )
 
 data class FavoriteStatusResponse(
@@ -141,7 +140,7 @@ data class SellerProfileDto(
     @SerializedName(value = "TotalProducts", alternate = ["total_products", "totalProducts"]) val totalProducts: Int,
     @SerializedName(value = "Rating", alternate = ["rating", "average_rating"]) val rating: Double? = null,
     @SerializedName(value = "OrdersCount", alternate = ["orders_count", "ordersCount", "total_orders"]) val ordersCount: Int? = null,
-    @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl", "logo_url", "ImageName"]) val avatarUrl: String? = null,
+    @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl", "logo_url", "ImageName", "photo_url"]) val photoUrl: String? = null,
     @SerializedName("about") val about: String? = null,
     @SerializedName(value = "city", alternate = ["City"]) val city: String? = null,
     @SerializedName(value = "address", alternate = ["Address"]) val address: String? = null,

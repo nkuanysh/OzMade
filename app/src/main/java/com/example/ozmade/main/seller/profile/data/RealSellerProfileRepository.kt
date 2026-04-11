@@ -33,7 +33,7 @@ class RealSellerProfileRepository @Inject constructor(
             address = pDto.address,
             categories = pDto.categories,
             status = pDto.status,
-            avatarUrl = pDto.avatarUrl,
+            photoUrl = pDto.photoUrl,
             totalProducts = pDto.totalProducts,
             rating = qDto?.averageRating ?: pDto.rating ?: 0.0,
             ratingsCount = qDto?.ratingsCount ?: 0,

@@ -10,7 +10,7 @@ interface ProfileRepository {
         address: String,
         addressLat: Double?,
         addressLng: Double?,
-        avatarUrl: String?
+        photoUrl: String?
     ): UserProfile
     suspend fun logout()
     suspend fun getMyOrders(): List<com.example.ozmade.network.model.OrderDto>

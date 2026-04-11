@@ -54,7 +54,7 @@ class SellerStoreSettingsViewModel @Inject constructor(
                         city = profile.city ?: "",
                         address = profile.address ?: "",
                         selectedCategories = profile.categories ?: emptyList(),
-                        logoUrl = profile.avatarUrl
+                        logoUrl = profile.photoUrl
                     )
                 }
             } else {
