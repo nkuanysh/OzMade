@@ -1,10 +1,11 @@
 package com.example.ozmade.main.userHome.seller.reviews
 
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -36,28 +37,34 @@ fun SellerReviewsScreen(
     onBack: () -> Unit,
     onRetry: () -> Unit,
     onOpenProduct: (Int) -> Unit
-
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = {
                     val title = when (uiState) {
-                        is SellerReviewsUiState.Data -> "Отзывы продавца ${uiState.header.reviewsCount}"
-                        else -> "Отзывы продавца"
+                        is SellerReviewsUiState.Data -> "Отзывы о продавце (${uiState.header.reviewsCount})"
+                        else -> "Отзывы о продавце"
                     }
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.titleLarge.copy(fontSize = 18.sp)
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = null)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
 
         when (uiState) {
@@ -67,20 +74,29 @@ fun SellerReviewsScreen(
                         .padding(padding)
                         .fillMaxSize(),
                     contentAlignment = Alignment.Center
-                ) { CircularProgressIndicator() }
+                ) { CircularProgressIndicator(strokeWidth = 3.dp) }
             }
 
             is SellerReviewsUiState.Error -> {
                 Column(
                     modifier = Modifier
                         .padding(padding)
-                        .padding(16.dp)
+                        .padding(24.dp)
                         .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(uiState.message, color = MaterialTheme.colorScheme.error)
-                    Spacer(Modifier.height(12.dp))
-                    Button(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = uiState.message,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                    Spacer(Modifier.height(16.dp))
+                    Button(
+                        onClick = onRetry,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
                         Text("Повторить")
                     }
                 }
@@ -91,17 +107,30 @@ fun SellerReviewsScreen(
                     modifier = Modifier
                         .padding(padding)
                         .fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    contentPadding = PaddingValues(bottom = 24.dp),
+                    verticalArrangement = Arrangement.spacedBy(1.dp)
                 ) {
                     item {
                         SellerReviewsHeader(header = uiState.header)
                     }
 
+                    item {
+                        HorizontalDivider(
+                            thickness = 8.dp,
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                        )
+                    }
+
                     items(uiState.reviews, key = { it.id }) { r ->
                         SellerReviewCard(
                             review = r,
-                            onOpenProduct = onOpenProduct                        )
+                            onOpenProduct = onOpenProduct
+                        )
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            thickness = 0.5.dp,
+                            color = MaterialTheme.colorScheme.outlineVariant
+                        )
                     }
                 }
             }
@@ -111,44 +140,71 @@ fun SellerReviewsScreen(
 
 @Composable
 private fun SellerReviewsHeader(header: SellerReviewsHeaderUi) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(20.dp)
     ) {
-        Column(Modifier.padding(14.dp)) {
-            Text(
-                text = header.sellerName,
-                style = MaterialTheme.typography.titleLarge
-            )
+        Text(
+            text = header.sellerName,
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+        )
+        
+        Spacer(Modifier.height(16.dp))
 
-            Spacer(Modifier.height(10.dp))
-
-            // рейтинг слева, справа колонка: звёзды + "оценок" снизу
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = String.format("%.1f", header.averageRating),
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold)
-                )
-
-                Spacer(Modifier.width(14.dp))
-
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    StarsRow(rating = header.averageRating, size = 20.dp)
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        text = "${header.ratingsCount} оценок",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.displayMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                }
+                )
+                StarsRow(rating = header.averageRating, size = 18.dp)
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "${header.ratingsCount} оценок",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(Modifier.width(32.dp))
+
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                RatingBar(5, 0.85f)
+                RatingBar(4, 0.10f)
+                RatingBar(3, 0.03f)
+                RatingBar(2, 0.01f)
+                RatingBar(1, 0.01f)
             }
         }
+    }
+}
+
+@Composable
+private fun RatingBar(stars: Int, progress: Float) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            text = stars.toString(),
+            style = MaterialTheme.typography.labelSmall,
+            modifier = Modifier.width(12.dp)
+        )
+        Spacer(Modifier.width(8.dp))
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier
+                .weight(1f)
+                .height(6.dp)
+                .clip(CircleShape),
+            color = Color(0xFFFFC107),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant
+        )
     }
 }
 
@@ -157,57 +213,86 @@ private fun SellerReviewCard(
     review: SellerReviewUi,
     onOpenProduct: (Int) -> Unit
 ) {
-    Card(shape = RoundedCornerShape(16.dp)) {
-        Column(Modifier.padding(14.dp)) {
-
-            // строка: дата слева, имя справа
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
                 Text(
-                    text = review.dateText,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = review.userName.take(1).uppercase(),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
-                Spacer(Modifier.weight(1f))
+            }
+            
+            Spacer(Modifier.width(12.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = review.userName,
-                    style = MaterialTheme.typography.titleMedium,
+                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
+                )
+                Text(
+                    text = review.dateText,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            StarsRow(rating = review.rating, size = 14.dp)
+        }
+
+        Spacer(Modifier.height(8.dp))
+        
+        // Product reference
+        Surface(
+            onClick = { onOpenProduct(review.productId) },
+            shape = RoundedCornerShape(8.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Товар: ",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = review.productTitle,
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
             }
-
-            Spacer(Modifier.height(8.dp))
-
-            // строка: товар (синий) + звёзды справа, если длинный - "..."
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = review.productTitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 10.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable { onOpenProduct(review.productId) }
-                )
-                StarsRow(rating = review.rating, size = 16.dp)
-            }
-
-            Spacer(Modifier.height(10.dp))
-
-            Text(
-                text = review.text,
-                style = MaterialTheme.typography.bodyLarge
-            )
         }
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = review.text,
+            style = MaterialTheme.typography.bodyMedium,
+            lineHeight = 20.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        )
     }
 }
 
-/**
- * 5 красивых жёлтых звёзд с половинкой
- */
 @Composable
 private fun StarsRow(rating: Double, size: Dp) {
     val full = floor(rating).toInt().coerceIn(0, 5)
@@ -226,26 +311,23 @@ private fun Star(
     filledFraction: Float,
     starSize: Dp
 ) {
-    val fill = Color(0xFFFFC107) // gold
-    val outline = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.22f)
+    val fill = Color(0xFFFFC107)
+    val outline = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
 
     val path = remember { Path() }
 
-    Canvas(
+    androidx.compose.foundation.Canvas(
         modifier = Modifier
             .size(starSize)
-            .padding(end = 4.dp)
+            .padding(end = 2.dp)
     ) {
+        path.reset()
         val w = size.width
         val h = size.height
         val cx = w / 2f
         val cy = h / 2f
-
-        // строим путь звезды под размер canvas
-        path.reset()
-        val outer = min(w, h) * 0.50f
-        val inner = outer * 0.50f
-
+        val outer = min(w, h) * 0.5f
+        val inner = outer * 0.45f
         val startAngle = -Math.PI / 2.0
         for (i in 0 until 10) {
             val r = if (i % 2 == 0) outer else inner
@@ -256,26 +338,11 @@ private fun Star(
         }
         path.close()
 
-        // контур пустой звезды
-        drawPath(
-            path = path,
-            color = outline,
-            style = Stroke(width = 1.6f)
-        )
+        drawPath(path = path, color = outline, style = Stroke(width = 1.dp.toPx()))
 
-        // заливка по проценту (полная/половина)
         if (filledFraction > 0f) {
-            clipRect(
-                left = 0f,
-                top = 0f,
-                right = w * filledFraction.coerceIn(0f, 1f),
-                bottom = h
-            ) {
-                drawPath(
-                    path = path,
-                    color = fill,
-                    style = Fill
-                )
+            clipRect(left = 0f, top = 0f, right = w * filledFraction, bottom = h) {
+                drawPath(path = path, color = fill, style = Fill)
             }
         }
     }

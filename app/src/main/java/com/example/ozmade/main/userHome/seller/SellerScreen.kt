@@ -1,5 +1,6 @@
 package com.example.ozmade.main.userHome.seller
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -10,12 +11,7 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -24,8 +20,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,31 +42,37 @@ fun SellerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Продавец") },
+                title = { Text("Продавец", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = null)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
+                )
             )
-        }
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
 
         when (uiState) {
             is SellerUiState.Loading -> {
                 Box(Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
+                    CircularProgressIndicator(strokeWidth = 3.dp)
                 }
             }
 
             is SellerUiState.Error -> {
                 Column(
-                    modifier = Modifier.padding(padding).padding(16.dp).fillMaxSize(),
-                    verticalArrangement = Arrangement.Center
+                    modifier = Modifier.padding(padding).padding(24.dp).fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(uiState.message, color = MaterialTheme.colorScheme.error)
-                    Spacer(Modifier.height(12.dp))
-                    Button(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
+                    Text(uiState.message, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
+                    Spacer(Modifier.height(16.dp))
+                    Button(onClick = onRetry, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
                         Text("Повторить")
                     }
                 }
@@ -92,26 +96,23 @@ fun SellerScreen(
                 LazyVerticalGrid(
                     state = gridState,
                     columns = GridCells.Fixed(2),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
-                        top = 16.dp,
-                        bottom = 16.dp
+                        top = 8.dp,
+                        bottom = 32.dp
                     ),
                     modifier = Modifier.padding(padding).fillMaxSize()
                 ) {
-                    // Блок продавца (2 колонки)
                     item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) {
                         SellerHeaderBlock(
                             seller = seller,
                             onOpenReviews = { onOpenSellerReviews(seller.id) }
                         )
-
                     }
 
-                    // Поиск (2 колонки)
                     item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(2) }) {
                         OutlinedTextField(
                             value = search,
@@ -120,18 +121,19 @@ fun SellerScreen(
                                 onSearchChanged(it)
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("Поиск товаров продавца") },
+                            placeholder = { Text("Поиск в магазине") },
                             singleLine = true,
-                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                            shape = RoundedCornerShape(12.dp),
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFFFF9800)) },
+                            shape = RoundedCornerShape(16.dp),
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                                focusedBorderColor = Color(0xFFFF9800),
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface
                             )
                         )
                     }
 
-                    // Товары
                     items(filteredProducts, key = { it.id }) { p ->
                         SellerProductCard(
                             product = p,
@@ -151,14 +153,24 @@ private fun SellerHeaderBlock(
     seller: SellerHeaderUi,
     onOpenReviews: () -> Unit
 ) {
-    Card(
-        shape = RoundedCornerShape(24.dp),
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+    // Определяем имя для показа (игнорируем числовые названия магазинов типа "47")
+    val displayName = remember(seller.name, seller.storeName) {
+        val sName = seller.storeName ?: ""
+        if (sName.isBlank() || sName.all { it.isDigit() }) {
+            seller.name
+        } else {
+            sName
+        }
+    }
+
+    Surface(
+        shape = RoundedCornerShape(32.dp),
+        color = Color(0xFFFFF9F0),
+        modifier = Modifier.fillMaxWidth()
     ) {
         Column(
             Modifier
-                .padding(20.dp)
+                .padding(24.dp)
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -167,7 +179,7 @@ private fun SellerHeaderBlock(
                 modifier = Modifier
                     .size(90.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
+                    .background(Color(0xFFF0E6FF)),
                 contentAlignment = Alignment.Center
             ) {
                 if (!seller.avatarUrl.isNullOrEmpty()) {
@@ -175,29 +187,32 @@ private fun SellerHeaderBlock(
                         model = seller.avatarUrl,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        onError = { Log.e("SellerUI", "Avatar fail: ${seller.avatarUrl}") }
                     )
                 } else {
                     Text(
-                        text = seller.name.take(1).uppercase(),
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        text = displayName.take(1).uppercase(),
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.Black,
+                        color = Color(0xFF673AB7)
                     )
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
             Text(
-                text = seller.storeName ?: seller.name,
-                style = MaterialTheme.typography.headlineSmall,
+                text = displayName,
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                textAlign = TextAlign.Center
             )
 
-            if (!seller.storeName.isNullOrEmpty()) {
+            // Если отображаем название магазина, можно показать имя мастера ниже
+            if (displayName != seller.name && seller.name.isNotBlank()) {
                 Text(
-                    text = seller.name,
+                    text = "Мастер: ${seller.name}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -205,50 +220,22 @@ private fun SellerHeaderBlock(
 
             Spacer(Modifier.height(8.dp))
 
-            if (seller.status.isNotEmpty()) {
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    contentColor = MaterialTheme.colorScheme.primary
-                ) {
-                    Text(
-                        text = seller.status,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
+            // Статус
+            val (statusText, statusColor) = when (seller.status.lowercase()) {
+                "pending" -> "Проверяется" to Color(0xFFFF9800)
+                "active" -> "Активен" to Color(0xFF4CAF50)
+                else -> (if (seller.status.isBlank()) "Новый мастер" else seller.status) to Color(0xFF607D8B)
             }
 
-            // Добавляем уровень/прогресс если есть
-            if (!seller.levelTitle.isNullOrEmpty() || (seller.levelProgress ?: 0f) > 0f) {
-                Spacer(Modifier.height(12.dp))
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = seller.levelTitle ?: "Уровень",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                    if ((seller.levelProgress ?: 0f) > 0f) {
-                        Spacer(Modifier.height(4.dp))
-                        LinearProgressIndicator(
-                            progress = { seller.levelProgress ?: 0f },
-                            modifier = Modifier.width(120.dp).height(6.dp).clip(CircleShape),
-                            color = MaterialTheme.colorScheme.secondary,
-                            trackColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
-                        )
-                    }
-                }
-            }
-
-            if (!seller.description.isNullOrEmpty()) {
-                Spacer(Modifier.height(16.dp))
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = statusColor.copy(alpha = 0.15f),
+                contentColor = statusColor
+            ) {
                 Text(
-                    text = seller.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
+                    text = statusText,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
                 )
             }
 
@@ -256,62 +243,46 @@ private fun SellerHeaderBlock(
 
             // Статистика
             Row(
-                Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                StatItem(
-                    value = "${seller.ordersCount}",
-                    label = "заказов",
-                    modifier = Modifier.weight(1f)
-                )
-
-                VerticalDivider(modifier = Modifier.height(30.dp), thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
-
+                StatItem(value = "${seller.ordersCount}", label = "заказов", modifier = Modifier.weight(1f))
+                
+                Box(Modifier.width(1.dp).height(30.dp).background(Color.LightGray.copy(0.5f)))
+                
                 StatItem(
                     value = String.format("%.1f", seller.rating),
-                    label = "${seller.reviewsCount} отзывов",
-                    modifier = Modifier
-                        .weight(1f)
-                        .clickable(onClick = onOpenReviews),
+                    label = "рейтинг",
+                    modifier = Modifier.weight(1f).clickable { onOpenReviews() },
                     isHighlight = true
                 )
 
-                VerticalDivider(modifier = Modifier.height(30.dp), thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
+                Box(Modifier.width(1.dp).height(30.dp).background(Color.LightGray.copy(0.5f)))
 
-                StatItem(
-                    value = "${seller.daysWithOzMade}",
-                    label = "дней с нами",
-                    modifier = Modifier.weight(1f)
-                )
+                StatItem(value = "${seller.daysWithOzMade}", label = "дней", modifier = Modifier.weight(1f))
+            }
+
+            if (!seller.city.isNullOrBlank()) {
+                Spacer(Modifier.height(16.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.LocationOn, null, modifier = Modifier.size(16.dp), tint = Color.Gray)
+                    Text(" ${seller.city}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun StatItem(
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier,
-    isHighlight: Boolean = false
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
+private fun StatItem(value: String, label: String, modifier: Modifier = Modifier, isHighlight: Boolean = false) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = value,
             style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = if (isHighlight) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+            fontWeight = FontWeight.Black,
+            color = if (isHighlight) Color(0xFFFF9800) else Color.Black
         )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
+        Text(text = label, style = MaterialTheme.typography.labelSmall, color = Color.Gray)
     }
 }
 
@@ -323,116 +294,53 @@ private fun SellerProductCard(
     onClick: () -> Unit
 ) {
     Card(
-        shape = RoundedCornerShape(16.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
         Column {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp)
-            ) {
+            Box(modifier = Modifier.fillMaxWidth().aspectRatio(0.9f)) {
                 if (!product.imageUrl.isNullOrEmpty()) {
                     AsyncImage(
                         model = product.imageUrl,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        onError = { Log.e("SellerUI", "Product img fail: ${product.imageUrl}") }
                     )
                 } else {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            Icons.Default.Search,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                        )
+                    Box(Modifier.fillMaxSize().background(Color(0xFFF5F5F5)), contentAlignment = Alignment.Center) {
+                        Icon(Icons.Default.Image, null, modifier = Modifier.size(40.dp), tint = Color.LightGray)
                     }
                 }
-
-                IconButton(
+                
+                Surface(
                     onClick = onToggleLike,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.8f))
+                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).size(32.dp),
+                    shape = CircleShape,
+                    color = Color.White.copy(0.9f)
                 ) {
                     Icon(
-                        imageVector = if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = null,
-                        tint = if (liked) Color.Red else Color.Gray,
-                        modifier = Modifier.size(20.dp)
+                        if (liked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        null,
+                        modifier = Modifier.padding(7.dp),
+                        tint = if (liked) Color.Red else Color.Gray
                     )
                 }
             }
 
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text(
-                    text = "${product.price} ₸",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
-                )
-
-                Text(
-                    text = product.title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.heightIn(min = 40.dp)
-                )
-
+            Column(Modifier.padding(12.dp)) {
+                Text("${product.price} ₸", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+                Text(product.title, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                
                 Spacer(Modifier.height(8.dp))
-
+                
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = product.city,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                if (product.rating > 0) {
-                    Row(
-                        modifier = Modifier.padding(top = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        repeat(5) { index ->
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = null,
-                                modifier = Modifier.size(12.dp),
-                                tint = if (index < product.rating.toInt()) Color(0xFFFFB400) else Color.LightGray
-                            )
-                        }
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = String.format("%.1f", product.rating),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    Icon(Icons.Default.Star, null, modifier = Modifier.size(14.dp), tint = Color(0xFFFFB400))
+                    Text(" ${product.rating}", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                 }
             }
         }
     }
 }
-

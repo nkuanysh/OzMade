@@ -229,7 +229,7 @@ fun ProductDetailsScreen(
                             .padding(horizontal = 12.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFFB400), modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFF9800), modifier = Modifier.size(20.dp))
                         Text(" ${formatRating(product.rating)} ", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
                         VerticalDivider(modifier = Modifier.height(16.dp).padding(horizontal = 8.dp))
                         Text(
@@ -295,7 +295,7 @@ fun ProductDetailsScreen(
                         DeliveryBlock(product.delivery)
                     }
 
-                    InfoSection(title = "Продавец", icon = Icons.Outlined.Storefront) {
+                    InfoSection(title = "Продавец", icon = Icons.Default.Store, iconColor = Color(0xFFFF9800)) {
                         SellerBlock(product.seller, onClick = { onOpenSeller(product.seller.id) })
                     }
 
@@ -406,10 +406,15 @@ private fun extractYoutubeVideoId(url: String?): String? {
 }
 
 @Composable
-private fun InfoSection(title: String, icon: ImageVector, content: @Composable () -> Unit) {
+private fun InfoSection(
+    title: String, 
+    icon: ImageVector, 
+    iconColor: Color = MaterialTheme.colorScheme.primary,
+    content: @Composable () -> Unit
+) {
     Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(icon, contentDescription = null, modifier = Modifier.size(22.dp), tint = MaterialTheme.colorScheme.primary)
+            Icon(icon, contentDescription = null, modifier = Modifier.size(22.dp), tint = iconColor)
             Spacer(Modifier.width(10.dp))
             Text(text = title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
         }
@@ -556,30 +561,94 @@ private fun DeliveryRow(icon: ImageVector, label: String, value: String, isFree:
 
 @Composable
 private fun SellerBlock(seller: SellerUi, onClick: () -> Unit) {
-    ElevatedCard(
+    Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp, 
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+        ),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Surface(modifier = Modifier.size(52.dp), shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Аватар (буква на фиолетовом фоне)
+            Surface(
+                modifier = Modifier.size(56.dp),
+                shape = CircleShape,
+                color = Color(0xFFE6DFFF) // Тот самый светло-фиолетовый
+            ) {
                 if (!seller.avatarUrl.isNullOrBlank()) {
-                    AsyncImage(model = seller.avatarUrl, contentDescription = null, contentScale = ContentScale.Crop)
+                    AsyncImage(
+                        model = seller.avatarUrl,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 } else {
                     Box(contentAlignment = Alignment.Center) {
-                        Text(seller.name.take(1).uppercase(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
+                        Text(
+                            text = seller.name.take(1).uppercase(),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF4B0082)
+                        )
                     }
                 }
             }
+
             Spacer(Modifier.width(16.dp))
+
             Column(Modifier.weight(1f)) {
-                Text(text = seller.name, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
-                Text(text = seller.address, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(
+                    text = seller.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                Spacer(Modifier.height(4.dp))
+                
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Star,
+                        contentDescription = null,
+                        modifier = Modifier.size(14.dp),
+                        tint = Color(0xFFFF9800)
+                    )
+                    Text(
+                        text = " ${formatRating(seller.rating)} ",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "• ${seller.completedOrders} заказов",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                Spacer(Modifier.height(2.dp))
+                
+                Text(
+                    text = seller.address,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.outline)
+
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = Color(0xFFFF9800), // Оранжевая стрелочка
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }
 
-private fun formatRating(rating: Double): String = if (rating == 0.0) "Новый" else "%.1f".format(rating)
+private fun formatRating(rating: Double): String = if (rating == 0.0) "0.0" else "%.1f".format(rating)
