@@ -35,6 +35,7 @@ import com.example.ozmade.main.user.profile.ProfileScreen
 import com.example.ozmade.main.user.profile.about.AboutAppScreen
 import com.example.ozmade.main.user.profile.notification.NotificationsScreen
 import com.example.ozmade.main.user.orders.BuyerOrdersRoute
+import com.example.ozmade.main.user.orders.BuyerOrderDetailsRoute
 import com.example.ozmade.main.user.profile.support.SupportChatScreen
 import com.example.ozmade.main.user.profile.support.SupportScreen
 import com.example.ozmade.main.userHome.HomeRoute
@@ -46,8 +47,6 @@ import com.example.ozmade.main.userHome.seller.reviews.SellerReviewsRoute
 import com.example.ozmade.main.user.orderflow.ui.DeliveryChooseRoute2
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.ozmade.main.seller.data.SellerRepositoryImpl
-import javax.inject.Inject
 
 private sealed class BottomItem(
     val route: String,
@@ -73,9 +72,6 @@ fun MainScreen(
     pushPrice: Int = 0,
     deepLinkProductId: Int = 0,
     sellerRepository: SellerRepository = hiltViewModel<com.example.ozmade.main.seller.onboarding.SellerGateViewModel>().let { 
-        // Note: Using a workaround to get repository if needed, but better to check profile directly
-        // However, for MainScreen we can just check if profile exists on the fly
-        // or rely on sellerStore after a check
         it.repo 
     }
 ) {
@@ -91,7 +87,6 @@ fun MainScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     LaunchedEffect(Unit) {
-        // Sync local registration state with server
         val exists = sellerRepository.sellerProfileExists()
         if (exists) {
             sellerStore.setSellerRegistered(true)
@@ -102,7 +97,6 @@ fun MainScreen(
         isCheckingRegistration = false
     }
 
-    // Wait until preference is loaded to avoid flickering
     if (isSellerModePref == null || isCheckingRegistration) return
 
     LaunchedEffect(openChatFromPush, pushChatId) {
@@ -273,7 +267,23 @@ fun MainScreen(
                 composable("orders_history") {
                     BuyerOrdersRoute(
                         onBack = { navController.popBackStack() },
-                        onOpenOrder = { /* TODO */ }
+                        onOpenOrder = { oid -> navController.navigate("order_details/$oid") }
+                    )
+                }
+                composable(
+                    "order_details/{orderId}",
+                    arguments = listOf(navArgument("orderId") { type = NavType.IntType })
+                ) { backStackEntry ->
+                    val orderId = backStackEntry.arguments?.getInt("orderId") ?: 0
+                    BuyerOrderDetailsRoute(
+                        orderId = orderId,
+                        onBack = { navController.popBackStack() },
+                        onChat = { sellerId, sellerName, prodId, productTitle, price ->
+                            val encSName = Uri.encode(sellerName)
+                            val encPTitle = Uri.encode(productTitle)
+                            navController.navigate("chat/0/$sellerId/$prodId?sellerName=$encSName&productTitle=$encPTitle&price=$price")
+                        },
+                        onOpenProduct = { pid -> navController.navigate("product/$pid") }
                     )
                 }
                 composable("support") {

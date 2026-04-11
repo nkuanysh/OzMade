@@ -31,6 +31,7 @@ class RealBuyerOrdersRepository @Inject constructor(
                 quantity = dto.quantity,
                 totalCost = dto.totalCost,
 
+                sellerId = dto.sellerId,
                 sellerName = dto.sellerName,
 
                 deliveryType = dto.deliveryType,

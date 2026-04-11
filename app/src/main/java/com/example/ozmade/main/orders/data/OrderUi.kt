@@ -12,6 +12,7 @@ data class OrderUi(
     val quantity: Int,
     val totalCost: Double,
 
+    val sellerId: Int?,
     val sellerName: String?,
 
     val deliveryType: String, // PICKUP/MY_DELIVERY/INTERCITY
