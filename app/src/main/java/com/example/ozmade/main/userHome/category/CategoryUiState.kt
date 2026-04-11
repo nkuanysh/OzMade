@@ -8,7 +8,9 @@ sealed class CategoryUiState {
     data class Data(
         val category: Category,
         val headerQuote: String,
-        val products: List<Product>
+        val products: List<Product>,
+        val searchQuery: String = "",
+        val filteredProducts: List<Product> = products
     ) : CategoryUiState()
     data class Error(val message: String) : CategoryUiState()
 }

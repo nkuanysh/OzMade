@@ -28,8 +28,13 @@ class CategoryViewModel @Inject constructor(
                 
                 // 2. Get the category details (to show title/icon)
                 val homeData = repo.getHome()
-                val category = homeData.categories.firstOrNull { it.id == categoryId }
+                var category = homeData.categories.firstOrNull { it.id == categoryId }
                     ?: com.example.ozmade.main.userHome.Category(id = categoryId, title = categoryId.replaceFirstChar { it.uppercase() })
+
+                // If no iconUrl from repo, provide a thematic background image
+                if (category.iconUrl.isNullOrEmpty()) {
+                    category = category.copy(iconUrl = imageForCategory(categoryId))
+                }
 
                 val quote = quoteForCategory(categoryId)
 
@@ -44,13 +49,42 @@ class CategoryViewModel @Inject constructor(
         }
     }
 
+    fun onSearchQueryChanged(query: String) {
+        val currentState = _uiState.value
+        if (currentState is CategoryUiState.Data) {
+            val filtered = if (query.isBlank()) {
+                currentState.products
+            } else {
+                currentState.products.filter { 
+                    it.title.contains(query, ignoreCase = true) || 
+                    it.city.contains(query, ignoreCase = true)
+                }
+            }
+            _uiState.value = currentState.copy(
+                searchQuery = query,
+                filteredProducts = filtered
+            )
+        }
+    }
+
+    private fun imageForCategory(id: String): String = when (id) {
+        "food" -> "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80"
+        "clothes" -> "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=800&q=80"
+        "art" -> "https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&q=80"
+        "craft" -> "https://images.unsplash.com/photo-1528150177508-7cc0c36cda5c?w=800&q=80"
+        "gifts" -> "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&q=80"
+        "holiday", "holidays" -> "https://images.unsplash.com/photo-1511272444580-d667c485207c?w=800&q=80"
+        "home" -> "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&q=80"
+        else -> "https://images.unsplash.com/photo-1516054101730-80436893699b?w=800&q=80"
+    }
+
     private fun quoteForCategory(id: String): String = when (id) {
         "food" -> "Кулинария — это искусство, а искусство — это взрыв!"
         "clothes" -> "Стиль — это способ сказать кто ты, не говоря ни слова."
         "art" -> "Искусство начинается там, где заканчиваются слова."
         "craft" -> "Ручная работа — это душа, которую можно потрогать."
         "gifts" -> "Лучший подарок — сделанный с теплом."
-        "holidays" -> "Праздник — это эмоции, упакованные в детали."
+        "holiday", "holidays" -> "Праздник — это эмоции, упакованные в детали."
         "home" -> "Дом начинается с вещей, которые хочется любить."
         else -> "Найди то, что сделано с душой."
     }
@@ -64,7 +98,13 @@ class CategoryViewModel @Inject constructor(
                     val newProducts = currentState.products.map {
                         if (it.id == productId) it.copy(liked = isLikedNow) else it
                     }
-                    _uiState.value = currentState.copy(products = newProducts)
+                    val newFiltered = currentState.filteredProducts.map {
+                        if (it.id == productId) it.copy(liked = isLikedNow) else it
+                    }
+                    _uiState.value = currentState.copy(
+                        products = newProducts,
+                        filteredProducts = newFiltered
+                    )
                 }
             } catch (e: Exception) {
                 // ignore

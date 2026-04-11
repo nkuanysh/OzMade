@@ -21,6 +21,7 @@ fun CategoryRoute(
         onBack = onBack,
         onRetry = { viewModel.load(categoryId) },
         onOpenProduct = onOpenProduct,
-        onToggleLike = { viewModel.toggleLike(it) }
+        onToggleLike = { viewModel.toggleLike(it) },
+        onSearchQueryChanged = { viewModel.onSearchQueryChanged(it) }
     )
 }

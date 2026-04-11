@@ -34,7 +34,8 @@ fun CategoryScreen(
     onBack: () -> Unit,
     onRetry: () -> Unit,
     onOpenProduct: (Int) -> Unit,
-    onToggleLike: (Int) -> Unit = {}
+    onToggleLike: (Int) -> Unit = {},
+    onSearchQueryChanged: (String) -> Unit = {}
 ) {
     Scaffold { padding ->
         when (uiState) {
@@ -97,12 +98,31 @@ fun CategoryScreen(
                         item(span = { GridItemSpan(2) }) {
                             CategoryHeader(
                                 title = uiState.category.title,
-                                quote = uiState.headerQuote
+                                quote = uiState.headerQuote,
+                                imageUrl = uiState.category.iconUrl
+                            )
+                        }
+
+                        // Поиск
+                        item(span = { GridItemSpan(2) }) {
+                            OutlinedTextField(
+                                value = uiState.searchQuery,
+                                onValueChange = onSearchQueryChanged,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                placeholder = { Text("Поиск в этой категории") },
+                                leadingIcon = { Icon(Icons.Default.Search, null) },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                                )
                             )
                         }
 
                         // Товары
-                        items(uiState.products, key = { it.id }) { p ->
+                        items(uiState.filteredProducts, key = { it.id }) { p ->
                             CategoryProductCard(
                                 product = p,
                                 onClick = { onOpenProduct(p.id) },
@@ -110,7 +130,7 @@ fun CategoryScreen(
                             )
                         }
 
-                        if (uiState.products.isEmpty()) {
+                        if (uiState.filteredProducts.isEmpty()) {
                             item(span = { GridItemSpan(2) }) {
                                 Column(
                                     Modifier
@@ -119,14 +139,16 @@ fun CategoryScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
                                     Icon(
-                                        Icons.Default.Inbox,
+                                        Icons.Default.SearchOff,
                                         contentDescription = null,
                                         modifier = Modifier.size(64.dp),
                                         tint = MaterialTheme.colorScheme.outline
                                     )
                                     Spacer(Modifier.height(16.dp))
                                     Text(
-                                        text = "В этой категории пока нет товаров",
+                                        text = if (uiState.searchQuery.isEmpty()) 
+                                            "В этой категории пока нет товаров" 
+                                            else "Ничего не найдено",
                                         style = MaterialTheme.typography.bodyLarge,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -164,12 +186,13 @@ fun CategoryScreen(
 @Composable
 private fun CategoryHeader(
     title: String,
-    quote: String
+    quote: String,
+    imageUrl: String? = null
 ) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(160.dp)
+            .height(180.dp)
             .clip(RoundedCornerShape(24.dp))
             .background(
                 Brush.linearGradient(
@@ -180,6 +203,16 @@ private fun CategoryHeader(
                 )
             )
     ) {
+        if (imageUrl != null) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                alpha = 0.4f
+            )
+        }
+
         Column(
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -197,7 +230,7 @@ private fun CategoryHeader(
                 Text(
                     text = quote,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f),
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -212,7 +245,7 @@ private fun CategoryHeader(
                 .align(Alignment.TopEnd)
                 .offset(x = 20.dp, y = (-20).dp)
                 .size(120.dp),
-            tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.1f)
+            tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.15f)
         )
     }
 }
