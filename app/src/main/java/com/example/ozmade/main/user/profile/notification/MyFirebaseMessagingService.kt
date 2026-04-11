@@ -13,128 +13,171 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.example.ozmade.MainActivity
 import com.example.ozmade.R
+import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.network.model.FCMTokenRequest
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.util.UUID
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MyFirebaseMessagingService : FirebaseMessagingService() {
 
+    @Inject
+    lateinit var api: OzMadeApi
+
     companion object {
-        private const val CHANNEL_ID = "ozmade_chat_messages"
-        private const val CHANNEL_NAME = "Chat messages"
-        private const val CHANNEL_DESCRIPTION = "Notifications about new chat messages"
+        private const val CHANNEL_CHAT_ID = "ozmade_chat_messages"
+        private const val CHANNEL_ORDERS_ID = "ozmade_orders"
+        private const val CHANNEL_NAME_CHAT = "Чат и сообщения"
+        private const val CHANNEL_NAME_ORDERS = "Заказы и коды"
     }
 
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
+        createNotificationChannels()
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         super.onMessageReceived(remoteMessage)
 
-        Log.d("FCM", "Message data = ${remoteMessage.data}")
-        Log.d("FCM", "Notification title = ${remoteMessage.notification?.title}")
-        Log.d("FCM", "Notification body = ${remoteMessage.notification?.body}")
-
         val data = remoteMessage.data
+        Log.d("FCM", "Message received. Data: $data")
 
-        val chatId = data["chat_id"]?.toIntOrNull()
-        val sellerId = data["seller_id"]?.toIntOrNull() ?: 0
-        val productId = data["product_id"]?.toIntOrNull() ?: 0
-        val sellerName = data["seller_name"] ?: "Продавец"
-        val productTitle = data["product_title"] ?: "Товар"
-        val price = data["price"]?.toIntOrNull() ?: 0
+        val type = data["type"] ?: "CHAT"
+        val title = remoteMessage.notification?.title ?: data["title"] ?: "OzMade"
+        val body = remoteMessage.notification?.body ?: data["body"] ?: ""
 
-        val title = remoteMessage.notification?.title
-            ?: data["title"]
-            ?: "Новое сообщение"
-
-        val body = remoteMessage.notification?.body
-            ?: data["body"]
-            ?: "У вас новое сообщение в чате"
-
-        showChatNotification(
-            title = title,
-            body = body,
-            chatId = chatId,
-            sellerId = sellerId,
-            productId = productId,
-            sellerName = sellerName,
-            productTitle = productTitle,
-            price = price
+        // Сохраняем в локальную историю
+        NotificationStorage.add(
+            NotificationItem(
+                id = UUID.randomUUID().toString(),
+                title = title,
+                body = body,
+                type = type,
+                orderId = data["order_id"]?.toIntOrNull()
+            )
         )
+
+        // Показываем системное уведомление
+        if (type == "ORDER" || data.containsKey("order_id")) {
+            val orderId = data["order_id"]?.toIntOrNull() ?: 0
+            showOrderNotification(title, body, orderId, data)
+        } else {
+            val chatId = data["chat_id"]?.toIntOrNull()
+            showChatNotification(title, body, chatId, data)
+        }
     }
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        Log.d("FCM", "New token: $token")
+        Log.d("FCM", "New token generated: $token")
+        // Отправляем новый токен на сервер, чтобы не потерять связь
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                api.updateFCMToken(FCMTokenRequest(token))
+            } catch (e: Exception) {
+                Log.e("FCM", "Failed to update token on server", e)
+            }
+        }
     }
 
-    private fun showChatNotification(
-        title: String,
-        body: String,
-        chatId: Int?,
-        sellerId: Int,
-        productId: Int,
-        sellerName: String,
-        productTitle: String,
-        price: Int
-    ) {
+    private fun showOrderNotification(title: String, body: String, orderId: Int, data: Map<String, String>) {
         val intent = Intent(this, MainActivity::class.java).apply {
-            putExtra("open_chat", true)
-            putExtra("chat_id", chatId ?: 0)
-            putExtra("seller_id", sellerId)
-            putExtra("product_id", productId)
-            putExtra("seller_name", sellerName)
-            putExtra("product_title", productTitle)
-            putExtra("price", price)
+            putExtra("open_order_history", true)
+            putExtra("notification_title", title)
+            putExtra("notification_body", body)
+            putExtra("notification_type", "ORDER")
+            // Прокидываем все данные из push
+            data.forEach { (k, v) -> putExtra(k, v) }
             addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
         }
 
         val pendingIntent = PendingIntent.getActivity(
             this,
-            chatId ?: System.currentTimeMillis().toInt(),
+            (orderId + System.currentTimeMillis().toInt()),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(this, CHANNEL_ORDERS_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentTitle(title)
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setContentIntent(pendingIntent)
             .build()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val granted = ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-
-            if (!granted) {
-                Log.w("FCM", "POST_NOTIFICATIONS permission not granted")
-                return
-            }
-        }
-
-        NotificationManagerCompat.from(this).notify(chatId ?: 1, notification)
+        notifySafely(orderId + 1000, notification)
     }
 
-    private fun createNotificationChannel() {
+    private fun showChatNotification(title: String, body: String, chatId: Int?, data: Map<String, String>) {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            putExtra("open_chat", true)
+            putExtra("notification_title", title)
+            putExtra("notification_body", body)
+            putExtra("notification_type", "CHAT")
+            data.forEach { (k, v) -> putExtra(k, v) }
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            (chatId ?: System.currentTimeMillis().toInt()),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_CHAT_ID)
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(body))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        notifySafely(chatId ?: 1, notification)
+    }
+
+    private fun notifySafely(id: Int, notification: android.app.Notification) {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                    return
+                }
+            }
+            NotificationManagerCompat.from(this).notify(id, notification)
+        } catch (e: Exception) {
+            Log.e("FCM", "Error showing notification", e)
+        }
+    }
+
+    private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = CHANNEL_DESCRIPTION
+            val manager = getSystemService(NotificationManager::class.java)
+            
+            val chatChannel = NotificationChannel(CHANNEL_CHAT_ID, CHANNEL_NAME_CHAT, NotificationManager.IMPORTANCE_HIGH).apply {
+                enableLights(true)
+                enableVibration(true)
+            }
+            
+            val orderChannel = NotificationChannel(CHANNEL_ORDERS_ID, CHANNEL_NAME_ORDERS, NotificationManager.IMPORTANCE_HIGH).apply {
+                enableLights(true)
+                enableVibration(true)
             }
 
-            val manager = getSystemService(NotificationManager::class.java)
-            manager.createNotificationChannel(channel)
+            manager.createNotificationChannel(chatChannel)
+            manager.createNotificationChannel(orderChannel)
         }
     }
 }

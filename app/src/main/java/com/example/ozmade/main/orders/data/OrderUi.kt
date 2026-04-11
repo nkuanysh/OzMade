@@ -27,7 +27,8 @@ data class OrderUi(
     val shippingLng: Double? = null,
     val shippingComment: String? = null,
 
-    val confirmCode: String?
+    val confirmCode: String?,
+    val isReviewed: Boolean = false
 )
 
 object OrderStatus {

@@ -32,7 +32,8 @@ fun AppNavHost(
     pushSellerName: String = "Продавец",
     pushProductTitle: String = "Товар",
     pushPrice: Int = 0,
-    deepLinkProductId: Int = 0
+    deepLinkProductId: Int = 0,
+    openOrderHistory: Boolean = false
 ) {
     val context = LocalContext.current
     val langStore = remember { LanguageStore(context) }
@@ -127,7 +128,8 @@ fun AppNavHost(
                 pushSellerName = pushSellerName,
                 pushProductTitle = pushProductTitle,
                 pushPrice = pushPrice,
-                deepLinkProductId = deepLinkProductId
+                deepLinkProductId = deepLinkProductId,
+                openOrderHistoryFromPush = openOrderHistory
             )
         }
     }

@@ -288,7 +288,7 @@ data class SellerQualityDto(
     @SerializedName(value = "days_with_ozmade", alternate = ["daysWithOzMade"]) val daysWithOzMade: Int,
     @SerializedName(value = "average_rating", alternate = ["averageRating", "rating", "AverageRating"]) val averageRating: Double,
     @SerializedName(value = "ratings_count", alternate = ["ratingsCount", "RatingsCount"]) val ratingsCount: Int,
-    @SerializedName(value = "reviews_count", alternate = ["reviewsCount", "ReviewsCount"]) val reviewsCount: Int,
+    @SerializedName(value = "reviews_count", alternate = ["reviewsCount", "ReviewsCount"]) val reviews_count: Int,
     @SerializedName(value = "reviews", alternate = ["Reviews"]) val reviews: List<SellerReviewItemDto>
 )
 
@@ -377,5 +377,6 @@ data class OrderDto(
     @SerializedName(value = "ShippingLat", alternate = ["shipping_lat", "shippingLat"]) val shippingLat: Double? = null,
     @SerializedName(value = "ShippingLng", alternate = ["shipping_lng", "shippingLng"]) val shippingLng: Double? = null,
     @SerializedName(value = "ShippingComment", alternate = ["shipping_comment", "shippingComment"]) val shippingComment: String? = null,
-    @SerializedName(value = "ConfirmCode", alternate = ["confirm_code", "confirmCode"]) val confirmCode: String? = null
+    @SerializedName(value = "ConfirmCode", alternate = ["confirm_code", "confirmCode"]) val confirmCode: String? = null,
+    @SerializedName(value = "IsReviewed", alternate = ["is_reviewed", "isReviewed"]) val isReviewed: Boolean = false
 )
