@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.auth.SessionStore
 import com.example.ozmade.network.model.ChatSendMessageRequest
+import com.example.ozmade.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -50,7 +51,8 @@ class RealSellerChatRepository @Inject constructor(
                 chatId = chat.id,
                 buyerId = chat.buyerId,
                 // Используем имя из чата, если оно там есть
-                buyerName = chat.sellerName ?: "Покупатель #${chat.buyerId}",
+                buyerName = chat.buyerName ?: chat.sellerName ?: "Покупатель #${chat.buyerId}",
+                buyerAvatarUrl = ImageUtils.formatProfilePhotoUrl(chat.buyerPhoto),
                 lastMessage = last?.content ?: "Нет новых сообщений",
                 lastTimeText = formatTime(last?.createdAt ?: chat.updatedAt)
             )

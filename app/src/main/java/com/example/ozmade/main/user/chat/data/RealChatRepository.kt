@@ -5,6 +5,7 @@ import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.auth.SessionStore
 import com.example.ozmade.network.model.ChatSendMessageRequest
 import com.example.ozmade.network.model.CreateChatRequest
+import com.example.ozmade.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -53,7 +54,8 @@ class RealChatRepository @Inject constructor(
                 productId = c.productId ?: 0,
                 productTitle = c.productName ?: "Без названия",
                 productPrice = 0, 
-                productImageUrl = c.productImage,
+                productImageUrl = ImageUtils.formatImageUrl(c.productImage),
+                sellerAvatarUrl = ImageUtils.formatProfilePhotoUrl(c.seller?.avatarUrl),
                 lastMessage = last?.content ?: "Напишите сообщение...",
                 lastTimeText = formatTime(last?.createdAt ?: c.updatedAt ?: c.createdAt),
                 isOnline = false

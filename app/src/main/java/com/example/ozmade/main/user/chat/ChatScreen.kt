@@ -282,24 +282,49 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit, accentColor: C
             )
         },
         supportingContent = {
-            Text(
-                text = thread.lastMessage,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Column {
+                Text(
+                    text = thread.productTitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = thread.lastMessage,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         },
         leadingContent = {
-            AsyncImage(
-                model = thread.productImageUrl,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentScale = ContentScale.Crop,
-                error = null
-            )
+            Box(modifier = Modifier.size(52.dp)) {
+                // Seller Avatar
+                AsyncImage(
+                    model = thread.sellerAvatarUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentScale = ContentScale.Crop
+                )
+                
+                // Small Product Image Badge
+                AsyncImage(
+                    model = thread.productImageUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(20.dp)
+                        .align(Alignment.BottomEnd)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color.White)
+                        .padding(1.dp)
+                        .clip(RoundedCornerShape(3.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            }
         },
         trailingContent = {
             Column(horizontalAlignment = Alignment.End) {

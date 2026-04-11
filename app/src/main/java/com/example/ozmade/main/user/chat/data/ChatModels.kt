@@ -8,6 +8,7 @@ data class ChatThreadUi(
     val productTitle: String,
     val productPrice: Int,
     val productImageUrl: String? = null,
+    val sellerAvatarUrl: String? = null,
     val lastMessage: String,
     val lastTimeText: String,
     val isOnline: Boolean = false // Добавили реальное поле статуса

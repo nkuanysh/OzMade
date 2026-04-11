@@ -161,6 +161,8 @@ data class ChatDto(
     @SerializedName(value="ProductID", alternate=["product_id","productId"]) val productId: Int? = null,
     @SerializedName(value="ProductName", alternate=["product_name","productName"]) val productName: String? = null,
     @SerializedName(value="ProductImage", alternate=["product_image", "productImage", "ImageName"]) val productImage: String? = null,
+    @SerializedName("buyer_name") val buyerName: String? = null,
+    @SerializedName("buyer_photo") val buyerPhoto: String? = null,
     @SerializedName(value="Messages", alternate=["messages"]) val messages: List<MessageDto>?,
     @SerializedName("deleted_by_buyer") val deletedByBuyer: Boolean = false,
     @SerializedName("deleted_by_seller") val deletedBySeller: Boolean = false,
