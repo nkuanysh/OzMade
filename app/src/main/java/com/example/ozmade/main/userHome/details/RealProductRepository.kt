@@ -25,23 +25,13 @@ class RealProductRepository @Inject constructor(
         if (!resp.isSuccessful) error("Не удалось загрузить товар (${resp.code()})")
         val dto = resp.body() ?: error("Пустой ответ от сервера")
 
-        // Prioritize the images list, as the main ImageName field
-        // sometimes contains a broken bucket-level signed URL.
         val rawImages: List<String> =
             dto.images?.takeIf { it.isNotEmpty() }
                 ?: listOfNotNull(dto.imageUrl)
 
-        Log.d(TAG, "getProductDetails: productId=$productId, rawImages size=${rawImages.size}")
-
         val images = rawImages.map {
-            val formatted = ImageUtils.formatImageUrl(it)
-            Log.d(TAG, "  -> Formatted image: $formatted")
-            formatted
+            ImageUtils.formatImageUrl(it)
         }.filter { it.isNotBlank() }
-
-        if (images.isEmpty()) {
-            Log.w(TAG, "getProductDetails: No valid images found after formatting!")
-        }
 
         val specs = buildList<Pair<String, String>> {
             dto.weight?.takeIf { it.isNotBlank() }?.let { add("Вес" to it) }
@@ -56,28 +46,31 @@ class RealProductRepository @Inject constructor(
         val buyerLat = profile.addressLat
         val buyerLng = profile.addressLng
 
-        val sellerId = dto.sellerId ?: dto.seller?.id ?: 0
-        val sellerProfile = if (sellerId != 0) {
-            runCatching { api.getSellerPage(sellerId).body()?.seller }.getOrNull()
-        } else null
-
         val sellerIdFromDto = dto.sellerId ?: dto.seller?.id ?: 0
-
-        // Sometimes the sync endpoint provides the correct user_id that matches seller_id
         val syncResp = runCatching { api.syncUser() }.getOrNull()
         val myUserId = syncResp?.body()?.userId ?: profile.id
-
         val isMine = sellerIdFromDto == myUserId || sellerIdFromDto == profile.id
 
-        Log.d(TAG, "Check ownership: sellerId=$sellerIdFromDto, myUserId=$myUserId, profileId=${profile.id}, isMine=$isMine")
+        // Улучшенный подсчет отзывов: берем максимум из всех возможных полей
+        val actualReviewsCount = maxOf(
+            dto.reviewsCount ?: 0,
+            dto.ratingsCount ?: 0,
+            dto.comments?.size ?: 0
+        )
+
+        // Улучшенный подсчет заказов
+        val actualOrdersCount = maxOf(
+            dto.ordersCount ?: 0,
+            dto.seller?.completedOrders ?: 0
+        )
 
         return ProductDetailsUi(
             id = dto.id,
             title = dto.title,
             price = dto.price ?: 0.0,
             rating = dto.averageRating ?: 0.0,
-            reviewsCount = dto.reviewsCount ?: dto.comments?.size ?: 0,
-            ordersCount = dto.ordersCount ?: dto.seller?.completedOrders ?: 0,
+            reviewsCount = actualReviewsCount,
+            ordersCount = actualOrdersCount,
             images = images,
             youtubeUrl = dto.youtubeUrl,
             description = dto.description,
@@ -127,46 +120,35 @@ class RealProductRepository @Inject constructor(
 
     override suspend fun toggleLike(productId: Int): Boolean = withContext(Dispatchers.IO) {
         val response = api.toggleFavorite(productId)
-
-        if (!response.isSuccessful) {
-            error("Не удалось изменить избранное (${response.code()})")
-        }
-
+        if (!response.isSuccessful) error("Не удалось изменить избранное")
+        
         when (response.body()?.status?.lowercase()) {
             "added" -> true
             "removed" -> false
-            else -> {
-                api.getFavorites().body()?.any { it.id == productId } == true
-            }
+            else -> api.getFavorites().body()?.any { it.id == productId } == true
         }
     }
 
     override suspend fun getFavorites(): List<FavoriteProductUi> = withContext(Dispatchers.IO) {
         val response = api.getFavorites()
-        if (!response.isSuccessful) error("Не удалось загрузить избранное (${response.code()})")
-
-        val list = response.body().orEmpty()
-
-        list.map { dto ->
-            val img = ImageUtils.formatImageUrl(
-                dto.images?.firstOrNull() ?: dto.imageUrl
-            )
+        if (!response.isSuccessful) error("Не удалось загрузить избранное")
+        response.body().orEmpty().map { dto ->
             FavoriteProductUi(
                 id = dto.id,
                 title = dto.title ?: dto.name ?: "Без названия",
                 price = dto.price ?: 0.0,
-                imageUrl = img,
+                imageUrl = ImageUtils.formatImageUrl(dto.images?.firstOrNull() ?: dto.imageUrl),
                 address = dto.address ?: "",
                 rating = dto.averageRating ?: 0.0,
-                ordersCount = dto.ordersCount ?: 0,
-                reviewsCount = dto.reviewsCount ?: 0
+                ordersCount = maxOf(dto.ordersCount ?: 0, 0),
+                reviewsCount = maxOf(dto.reviewsCount ?: 0, dto.ratingsCount ?: 0)
             )
         }
     }
 
-    override suspend fun postComment(productId: Int, rating: Int, text: String): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun postComment(productId: Int, rating: Int, text: String, orderId: Int?): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val resp = api.postComment(productId, com.example.ozmade.network.model.CommentRequest(text, rating))
+            val resp = api.postComment(productId, com.example.ozmade.network.model.CommentRequest(text, rating, orderId))
             if (resp.isSuccessful) Result.success(Unit)
             else Result.failure(Exception("Error ${resp.code()}"))
         } catch (e: Exception) {
@@ -176,7 +158,7 @@ class RealProductRepository @Inject constructor(
 
     override suspend fun reportProduct(productId: Int, reason: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val resp = api.reportProduct(productId.toInt(), com.example.ozmade.network.model.ReportRequest(reason))
+            val resp = api.reportProduct(productId, com.example.ozmade.network.model.ReportRequest(reason))
             if (resp.isSuccessful) Result.success(Unit)
             else Result.failure(Exception("Error ${resp.code()}"))
         } catch (e: Exception) {
@@ -184,16 +166,10 @@ class RealProductRepository @Inject constructor(
         }
     }
 
-    private fun isInsideDeliveryZone(
-        buyerLat: Double?,
-        buyerLng: Double?,
-        sellerLat: Double?,
-        sellerLng: Double?,
-        radiusKm: Double?
-    ): Boolean? {
-        if (buyerLat == null || buyerLng == null || sellerLat == null || sellerLng == null || radiusKm == null) return null
-        val results = FloatArray(1)
-        android.location.Location.distanceBetween(buyerLat, buyerLng, sellerLat, sellerLng, results)
-        return (results[0] / 1000f) <= radiusKm
+    private fun isInsideDeliveryZone(lat1: Double?, lng1: Double?, lat2: Double?, lng2: Double?, r: Double?): Boolean? {
+        if (lat1 == null || lng1 == null || lat2 == null || lng2 == null || r == null) return null
+        val res = FloatArray(1)
+        android.location.Location.distanceBetween(lat1, lng1, lat2, lng2, res)
+        return (res[0] / 1000f) <= r
     }
 }

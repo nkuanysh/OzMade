@@ -309,7 +309,7 @@ fun BuyerOrderDetailsRoute(
                             ReviewDialog(
                                 onDismiss = { showDialog = false },
                                 onSubmit = { rating, text ->
-                                    viewModel.postReview(order.productId, rating, text) {
+                                    viewModel.postReview(order.id, order.productId, rating, text) {
                                         showDialog = false
                                         viewModel.load() // Перезагружаем заказы, чтобы обновить флаг isReviewed
                                     }

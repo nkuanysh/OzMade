@@ -2,9 +2,14 @@ package com.example.ozmade.network.model
 
 import com.google.gson.annotations.SerializedName
 
+/**
+ * Request for posting a review/comment.
+ * Using PascalCase field names as observed in successful responses and typical for this backend.
+ */
 data class CommentRequest(
-    @SerializedName(value = "Content", alternate = ["content"]) val content: String,
-    @SerializedName("Rating") val rating: Int
+    @SerializedName("Text") val text: String,
+    @SerializedName("Rating") val rating: Int,
+    @SerializedName("OrderID") val orderId: Int? = null
 )
 
 data class ReportRequest(

@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.orders.data.OrderStatus
-import com.example.ozmade.network.model.CreateOrderRequest
+import com.example.ozmade.main.orders.data.OrderUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,24 +24,49 @@ class BuyerOrdersViewModel @Inject constructor(
         viewModelScope.launch {
             _ui.value = BuyerOrdersUiState.Loading
             runCatching { repo.getMyOrders() }
-                .onSuccess { _ui.value = BuyerOrdersUiState.Data(it.sortedByDescending { o -> o.id }) }
+                .onSuccess { orders ->
+                    val sorted = orders.sortedWith(
+                        compareBy<OrderUi> { getStatusPriority(it.status) }
+                            .thenByDescending { it.id }
+                    )
+                    _ui.value = BuyerOrdersUiState.Data(sorted)
+                }
                 .onFailure { _ui.value = BuyerOrdersUiState.Error(it.message ?: "Ошибка") }
         }
     }
 
-    fun postReview(productId: Int, rating: Int, text: String, onComplete: () -> Unit) {
+    private fun getStatusPriority(status: String): Int {
+        return when (status) {
+            OrderStatus.PENDING_SELLER -> 0
+            OrderStatus.CONFIRMED -> 1
+            OrderStatus.READY_OR_SHIPPED -> 2
+            OrderStatus.COMPLETED -> 3
+            else -> 4 // CANCELLED, EXPIRED
+        }
+    }
+
+    fun postReview(orderId: Int, productId: Int, rating: Int, text: String, onComplete: () -> Unit) {
         viewModelScope.launch {
-            Log.d("BuyerOrdersViewModel", "Posting review: prodId=$productId, rating=$rating, text=$text")
+            Log.d("BuyerOrdersViewModel", "Posting review: orderId=$orderId, prodId=$productId, rating=$rating, text=$text")
             
-            // Critical fix: Ensure rating is not 0 and text is not empty
             if (rating < 1 || text.isBlank()) {
                 Log.e("BuyerOrdersViewModel", "Invalid rating ($rating) or empty text")
                 return@launch
             }
 
-            productRepo.postComment(productId, rating, text)
+            productRepo.postComment(productId, rating, text, orderId)
                 .onSuccess { 
                     Log.d("BuyerOrdersViewModel", "Review posted successfully")
+                    
+                    // Обновляем локальное состояние, чтобы кнопка сразу исчезла
+                    val current = _ui.value
+                    if (current is BuyerOrdersUiState.Data) {
+                        val updated = current.orders.map { 
+                            if (it.id == orderId) it.copy(isReviewed = true) else it
+                        }
+                        _ui.value = BuyerOrdersUiState.Data(updated)
+                    }
+
                     onComplete() 
                 }
                 .onFailure { e ->
@@ -63,7 +88,7 @@ class BuyerOrdersViewModel @Inject constructor(
         }
     }
 
-    fun findById(id: Int): com.example.ozmade.main.orders.data.OrderUi? {
+    fun findById(id: Int): OrderUi? {
         val st = _ui.value
         return (st as? BuyerOrdersUiState.Data)?.orders?.firstOrNull { it.id == id }
     }

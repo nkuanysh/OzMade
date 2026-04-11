@@ -1,6 +1,7 @@
 package com.example.ozmade.main.seller.quality.data
 
 import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.network.model.SellerReviewItemDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -14,7 +15,29 @@ class RealSellerQualityRepository @Inject constructor(
 ) : SellerQualityRepository {
 
     override suspend fun load(): SellerQualityUi = withContext(Dispatchers.IO) {
-        // 1. Get profile to find the seller ID
+        // Try to load dedicated quality stats first
+        val qualityResp = runCatching { api.getSellerQuality() }.getOrNull()
+        if (qualityResp != null && qualityResp.isSuccessful) {
+            val dto = qualityResp.body()!!
+            val level = computeLevel(
+                orders = dto.ordersCount ?: 0,
+                rating = dto.averageRating ?: 0.0,
+                reviews = dto.reviews_count ?: 0,
+                days = dto.daysWithOzMade ?: 0
+            )
+            return@withContext SellerQualityUi(
+                sellerName = dto.sellerName ?: "",
+                levelTitle = level.title,
+                levelProgress = level.progress,
+                levelHint = level.hint,
+                averageRating = dto.averageRating ?: 0.0,
+                ratingsCount = dto.ratingsCount ?: 0,
+                reviewsCount = dto.reviews_count ?: 0,
+                reviews = dto.reviews?.map { r -> mapToUi(r) } ?: emptyList()
+            )
+        }
+
+        // Fallback: 1. Get profile to find the seller ID
         val profileResp = api.getSellerProfile()
         if (!profileResp.isSuccessful) error("Не удалось загрузить профиль (${profileResp.code()})")
         val profile = profileResp.body() ?: error("Пустой ответ профиля")
@@ -27,8 +50,8 @@ class RealSellerQualityRepository @Inject constructor(
         // 3. Compute stats
         val ordersCount = profile.ordersCount ?: 0
         val averageRating = header?.averageRating ?: profile.rating ?: 0.0
-        val reviewsCount = header?.reviewsCount ?: 0
-        val ratingsCount = header?.ratingsCount ?: 0
+        val reviewsCount = header?.reviewsCount ?: dtoReviewsCount(reviewsDto?.reviews) ?: 0
+        val ratingsCount = header?.ratingsCount ?: reviewsCount
         val daysWithOzMade = profile.daysWithOzMade ?: 0
 
         val level = computeLevel(
@@ -48,18 +71,22 @@ class RealSellerQualityRepository @Inject constructor(
             ratingsCount = ratingsCount,
 
             reviewsCount = reviewsCount,
-            reviews = reviewsDto?.reviews?.map { r ->
-                SellerQualityReviewUi(
-                    id = r.id,
-                    userName = r.userName,
-                    productId = r.productId,
-                    productTitle = r.productTitle,
-                    rating = r.rating,
-                    dateText = r.createdAt,
-                    text = r.text
-                )
-            } ?: emptyList()
+            reviews = reviewsDto?.reviews?.map { r -> mapToUi(r) } ?: emptyList()
         )
+    }
+
+    private fun mapToUi(r: SellerReviewItemDto) = SellerQualityReviewUi(
+        id = r.id,
+        userName = r.userName ?: r.user?.name ?: "Пользователь",
+        productId = r.productId ?: 0,
+        productTitle = r.productTitle ?: "Товар",
+        rating = r.rating ?: 0.0,
+        dateText = r.createdAt ?: "",
+        text = r.text ?: ""
+    )
+
+    private fun dtoReviewsCount(list: List<SellerReviewItemDto>?): Int? {
+        return list?.size?.takeIf { it > 0 }
     }
 
     private data class Level(val title: String, val progress: Float, val hint: String)

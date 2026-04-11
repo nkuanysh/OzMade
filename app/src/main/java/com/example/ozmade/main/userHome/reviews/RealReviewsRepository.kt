@@ -24,11 +24,11 @@ class RealReviewsRepository @Inject constructor(
         val reviews = dto.reviews?.map { r: ReviewItemDto ->
             ReviewUi(
                 id = r.id,
-                userName = r.userName,
-                rating = r.rating,
-                dateText = r.createdAt,
-                text = r.text,
-                photoUrl = com.example.ozmade.utils.ImageUtils.formatProfilePhotoUrl(r.photoUrl)
+                userName = r.userName ?: r.user?.name ?: "Пользователь",
+                rating = r.rating ?: 0.0,
+                dateText = r.createdAt ?: "",
+                text = r.text ?: "",
+                photoUrl = com.example.ozmade.utils.ImageUtils.formatProfilePhotoUrl(r.photoUrl ?: r.user?.photoUrl)
             )
         } ?: emptyList()
 

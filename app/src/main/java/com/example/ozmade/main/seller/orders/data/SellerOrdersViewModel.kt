@@ -2,6 +2,7 @@ package com.example.ozmade.main.seller.orders.data
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ozmade.main.orders.data.OrderStatus
 import com.example.ozmade.main.orders.data.OrderUi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,8 +22,24 @@ class SellerOrdersViewModel @Inject constructor(
         viewModelScope.launch {
             _ui.value = SellerOrdersUiState.Loading
             runCatching { repo.getOrders() }
-                .onSuccess { _ui.value = SellerOrdersUiState.Data(it.sortedByDescending { o -> o.id }) }
+                .onSuccess { orders ->
+                    val sorted = orders.sortedWith(
+                        compareBy<OrderUi> { getStatusPriority(it.status) }
+                            .thenByDescending { it.id }
+                    )
+                    _ui.value = SellerOrdersUiState.Data(sorted)
+                }
                 .onFailure { _ui.value = SellerOrdersUiState.Error(it.message ?: "Ошибка") }
+        }
+    }
+
+    private fun getStatusPriority(status: String): Int {
+        return when (status) {
+            OrderStatus.PENDING_SELLER -> 0
+            OrderStatus.CONFIRMED -> 1
+            OrderStatus.READY_OR_SHIPPED -> 2
+            OrderStatus.COMPLETED -> 3
+            else -> 4
         }
     }
 

@@ -34,10 +34,10 @@ data class ProductDto(
     @SerializedName(value = "ViewCount", alternate = ["view_count", "viewCount"]) val viewCount: Int? = null,
     @SerializedName(value = "AverageRating", alternate = ["average_rating", "averageRating", "rating", "Rating"]) val averageRating: Double? = null,
     @SerializedName(value = "RatingsCount", alternate = ["ratings_count", "ratingsCount"]) val ratingsCount: Int? = null,
-    @SerializedName(value = "OrdersCount", alternate = ["orders_count", "ordersCount", "total_orders", "completed_orders", "completedOrders"]) val ordersCount: Int? = null,
-    @SerializedName(value = "ReviewsCount", alternate = ["reviews_count", "reviewsCount", "comments_count"]) val reviewsCount: Int? = null,
+    @SerializedName(value = "OrdersCount", alternate = ["orders_count", "ordersCount", "total_orders"]) val ordersCount: Int? = null,
+    @SerializedName(value = "ReviewsCount", alternate = ["reviews_count", "reviewsCount", "comments_count", "total_reviews"]) val reviewsCount: Int? = null,
     @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String? = null,
-    @SerializedName("Comments") val comments: List<CommentDto>? = null,
+    @SerializedName(value = "Comments", alternate = ["comments"]) val comments: List<CommentDto>? = null,
     @SerializedName(value = "IsActive", alternate = ["is_active", "isActive", "is_hidden"]) val isActive: Boolean? = null,
     @SerializedName(value = "ShareLink", alternate = ["share_link", "shareLink"]) val shareLink: String? = null
 )
@@ -78,9 +78,9 @@ data class ProductDetailsDto(
     val youtubeUrl: String? = null,
     @SerializedName(value = "AverageRating", alternate = ["average_rating", "averageRating", "rating", "Rating"]) val averageRating: Double? = null,
     @SerializedName(value = "RatingsCount", alternate = ["ratings_count", "ratingsCount"]) val ratingsCount: Int? = null,
-    @SerializedName(value = "OrdersCount", alternate = ["orders_count", "ordersCount", "total_orders", "completed_orders", "completedOrders"]) val ordersCount: Int? = null,
-    @SerializedName(value = "ReviewsCount", alternate = ["reviews_count", "reviewsCount", "comments_count"]) val reviewsCount: Int? = null,
-    @SerializedName("Comments") val comments: List<CommentDto>? = null,
+    @SerializedName(value = "OrdersCount", alternate = ["orders_count", "ordersCount", "total_orders"]) val ordersCount: Int? = null,
+    @SerializedName(value = "ReviewsCount", alternate = ["reviews_count", "reviewsCount", "comments_count", "total_reviews"]) val reviewsCount: Int? = null,
+    @SerializedName(value = "Comments", alternate = ["comments"]) val comments: List<CommentDto>? = null,
     @SerializedName("SellerName") val sellerName: String? = null,
     @SerializedName("delivery") val delivery: DeliveryInfoDto? = null,
     @SerializedName("seller") val seller: SellerInfoDto? = null,
@@ -93,8 +93,9 @@ data class CommentDto(
     @SerializedName(value = "UserID", alternate = ["user_id", "userId"]) val userId: Int,
     @SerializedName(value = "ProductID", alternate = ["product_id", "productId"]) val productId: Int,
     @SerializedName(value = "Rating", alternate = ["rating"]) val rating: Int,
-    @SerializedName(value = "Text", alternate = ["text"]) val text: String,
-    @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String?
+    @SerializedName(value = "Text", alternate = ["text", "comment", "content", "message"]) val text: String,
+    @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String?,
+    @SerializedName(value = "User", alternate = ["user"]) val user: ProfileDto? = null
 )
 
 data class AuthSyncResponse(
@@ -103,7 +104,7 @@ data class AuthSyncResponse(
 )
 
 data class ProfileDto(
-    @SerializedName("ID") val id: Int,
+    @SerializedName(value = "ID", alternate = ["id"]) val id: Int,
     @SerializedName(value = "FirebaseUID", alternate = ["firebase_uid", "firebaseUid"])
     val firebaseUid: String? = null,
     @SerializedName(value = "PhoneNumber", alternate = ["phone_number", "phoneNumber"])
@@ -147,7 +148,7 @@ data class SellerProfileDto(
     @SerializedName(value = "Status", alternate = ["status"]) val status: String,
     @SerializedName(value = "TotalProducts", alternate = ["total_products", "totalProducts"]) val totalProducts: Int,
     @SerializedName(value = "Rating", alternate = ["rating", "average_rating"]) val rating: Double? = null,
-    @SerializedName(value = "OrdersCount", alternate = ["orders_count", "ordersCount", "total_orders"]) val ordersCount: Int? = null,
+    @SerializedName(value = "OrdersCount", alternate = ["orders_count", "ordersCount", "total_orders", "completed_orders", "completedOrders"]) val ordersCount: Int? = null,
     @SerializedName(value = "photo_url", alternate = ["AvatarURL", "avatar_url", "avatarUrl", "logo_url", "ImageName"]) val photoUrl: String? = null,
     @SerializedName("about") val about: String? = null,
     @SerializedName(value = "city", alternate = ["City"]) val city: String? = null,
@@ -206,7 +207,7 @@ data class SellerPageDto(
     @SerializedName(value = "status", alternate = ["Status"]) val status: String? = null,
     @SerializedName(value = "orders_count", alternate = ["ordersCount", "OrdersCount", "total_orders", "completed_orders", "completedOrders"]) val ordersCount: Int? = null,
     @SerializedName(value = "rating", alternate = ["average_rating", "averageRating", "AverageRating", "Rating"]) val rating: Double? = null,
-    @SerializedName(value = "reviews_count", alternate = ["reviewsCount", "ReviewsCount"]) val reviewsCount: Int? = null,
+    @SerializedName(value = "reviews_count", alternate = ["reviewsCount", "ReviewsCount", "comments_count"]) val reviewsCount: Int? = null,
     @SerializedName(value = "ratings_count", alternate = ["ratingsCount", "RatingsCount"]) val ratingsCount: Int? = null,
     @SerializedName(value = "days_with_ozmade", alternate = ["daysWithOzMade", "DaysWithOzMade"]) val daysWithOzMade: Int? = null,
     @SerializedName(value = "photo_url", alternate = ["avatar_url", "avatarUrl", "AvatarURL", "logo_url", "ImageName", "PhotoURL"]) val photoUrl: String? = null,
@@ -217,8 +218,8 @@ data class SellerPageDto(
     @SerializedName(value = "level_title", alternate = ["levelTitle", "LevelTitle"]) val levelTitle: String? = null,
     @SerializedName(value = "level_progress", alternate = ["levelProgress", "LevelProgress"]) val levelProgress: Float? = null,
     @SerializedName(value = "level_hint", alternate = ["levelHint", "LevelHint"]) val levelHint: String? = null,
-    @SerializedName(value = "Header", alternate = ["header"]) val header: SellerReviewsHeaderDto?,
-    @SerializedName(value = "Reviews", alternate = ["reviews"]) val reviews: List<SellerReviewItemDto>?,
+    @SerializedName(value = "Header", alternate = ["header", "Summary", "summary"]) val header: SellerReviewsHeaderDto? = null,
+    @SerializedName(value = "Reviews", alternate = ["reviews", "comments", "Comments", "ReviewsList"]) val reviews: List<SellerReviewItemDto>? = null,
 
 
 )
@@ -270,37 +271,38 @@ data class CategoryDto(
 )
 
 data class ProductReviewsDto(
-    @SerializedName(value = "Summary", alternate = ["summary"]) val summary: ReviewsSummaryDto?,
-    @SerializedName(value = "Reviews", alternate = ["reviews"]) val reviews: List<ReviewItemDto>?
+    @SerializedName(value = "Summary", alternate = ["summary", "header", "Header"]) val summary: ReviewsSummaryDto? = null,
+    @SerializedName(value = "Reviews", alternate = ["reviews", "comments", "Comments", "data"]) val reviews: List<ReviewItemDto>? = null
 )
 
 data class ReviewsSummaryDto(
-    @SerializedName(value = "ProductID", alternate = ["product_id", "productId"]) val productId: Int,
-    @SerializedName(value = "AverageRating", alternate = ["average_rating", "averageRating"]) val averageRating: Double,
-    @SerializedName(value = "RatingsCount", alternate = ["ratings_count", "ratingsCount"]) val ratingsCount: Int,
-    @SerializedName(value = "ReviewsCount", alternate = ["reviews_count", "reviewsCount"]) val reviewsCount: Int,
-    @SerializedName(value = "Count", alternate = ["count"]) val count: Int
+    @SerializedName(value = "ProductID", alternate = ["product_id", "productId"]) val productId: Int? = null,
+    @SerializedName(value = "AverageRating", alternate = ["average_rating", "averageRating"]) val averageRating: Double? = null,
+    @SerializedName(value = "RatingsCount", alternate = ["ratings_count", "ratingsCount"]) val ratingsCount: Int? = null,
+    @SerializedName(value = "ReviewsCount", alternate = ["reviews_count", "reviewsCount", "count", "Count"]) val reviewsCount: Int? = null,
+    @SerializedName(value = "Count", alternate = ["count"]) val count: Int? = null
 )
 
 data class ReviewItemDto(
     @SerializedName(value = "ID", alternate = ["id"]) val id: Int,
-    @SerializedName(value = "UserName", alternate = ["user_name", "userName"]) val userName: String,
-    @SerializedName(value = "ProductID", alternate = ["product_id", "productId"]) val productId: Int,
-    @SerializedName(value = "ProductTitle", alternate = ["product_title", "productTitle"]) val productTitle: String,
-    @SerializedName(value = "Rating", alternate = ["rating"]) val rating: Double,
-    @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String,
-    @SerializedName(value = "Text", alternate = ["text"]) val text: String,
-    @SerializedName(value = "photo_url", alternate = ["user_photo", "avatar_url"]) val photoUrl: String? = null
+    @SerializedName(value = "UserName", alternate = ["user_name", "userName", "name"]) val userName: String? = null,
+    @SerializedName(value = "ProductID", alternate = ["product_id", "productId"]) val productId: Int? = null,
+    @SerializedName(value = "ProductTitle", alternate = ["product_title", "productTitle"]) val productTitle: String? = null,
+    @SerializedName(value = "Rating", alternate = ["rating"]) val rating: Double? = null,
+    @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String? = null,
+    @SerializedName(value = "Text", alternate = ["text", "comment", "content", "message"]) val text: String? = null,
+    @SerializedName(value = "photo_url", alternate = ["user_photo", "avatar_url"]) val photoUrl: String? = null,
+    @SerializedName(value = "User", alternate = ["user"]) val user: ProfileDto? = null
 )
 
 data class SellerQualityDto(
-    @SerializedName(value = "seller_name", alternate = ["sellerName", "Name"]) val sellerName: String,
-    @SerializedName(value = "orders_count", alternate = ["ordersCount", "total_orders"]) val ordersCount: Int,
-    @SerializedName(value = "days_with_ozmade", alternate = ["daysWithOzMade"]) val daysWithOzMade: Int,
-    @SerializedName(value = "average_rating", alternate = ["averageRating", "rating", "AverageRating"]) val averageRating: Double,
-    @SerializedName(value = "ratings_count", alternate = ["ratingsCount", "RatingsCount"]) val ratingsCount: Int,
-    @SerializedName(value = "reviews_count", alternate = ["reviewsCount", "ReviewsCount"]) val reviews_count: Int,
-    @SerializedName(value = "reviews", alternate = ["Reviews"]) val reviews: List<SellerReviewItemDto>
+    @SerializedName(value = "seller_name", alternate = ["sellerName", "Name"]) val sellerName: String? = null,
+    @SerializedName(value = "orders_count", alternate = ["ordersCount", "total_orders"]) val ordersCount: Int? = null,
+    @SerializedName(value = "days_with_ozmade", alternate = ["daysWithOzMade"]) val daysWithOzMade: Int? = null,
+    @SerializedName(value = "average_rating", alternate = ["averageRating", "rating", "AverageRating"]) val averageRating: Double? = null,
+    @SerializedName(value = "ratings_count", alternate = ["ratingsCount", "RatingsCount"]) val ratingsCount: Int? = null,
+    @SerializedName(value = "reviews_count", alternate = ["reviewsCount", "ReviewsCount"]) val reviews_count: Int? = null,
+    @SerializedName(value = "reviews", alternate = ["Reviews", "comments", "Comments"]) val reviews: List<SellerReviewItemDto>? = null
 )
 
 data class SellerDeliveryDto(
@@ -347,22 +349,23 @@ data class SellerInfoDto(
 //)
 
 data class SellerReviewsHeaderDto(
-    @SerializedName(value = "SellerID", alternate = ["seller_id", "sellerId"]) val sellerId: Int,
-    @SerializedName(value = "SellerName", alternate = ["seller_name", "sellerName"]) val sellerName: String,
-    @SerializedName(value = "ReviewsCount", alternate = ["reviews_count", "reviewsCount"]) val reviewsCount: Int,
-    @SerializedName(value = "AverageRating", alternate = ["average_rating", "averageRating"]) val averageRating: Double,
-    @SerializedName(value = "RatingsCount", alternate = ["ratings_count", "ratingsCount"]) val ratingsCount: Int
+    @SerializedName(value = "SellerID", alternate = ["seller_id", "sellerId"]) val sellerId: Int? = null,
+    @SerializedName(value = "SellerName", alternate = ["seller_name", "sellerName"]) val sellerName: String? = null,
+    @SerializedName(value = "ReviewsCount", alternate = ["reviews_count", "reviewsCount", "count", "Count"]) val reviewsCount: Int? = null,
+    @SerializedName(value = "AverageRating", alternate = ["average_rating", "averageRating"]) val averageRating: Double? = null,
+    @SerializedName(value = "RatingsCount", alternate = ["ratings_count", "ratingsCount"]) val ratingsCount: Int? = null
 )
 
 data class SellerReviewItemDto(
     @SerializedName(value = "ID", alternate = ["id"]) val id: Int,
-    @SerializedName(value = "UserName", alternate = ["user_name", "userName"]) val userName: String,
-    @SerializedName(value = "ProductID", alternate = ["product_id", "productId"]) val productId: Int,
-    @SerializedName(value = "ProductTitle", alternate = ["product_title", "productTitle"]) val productTitle: String,
-    @SerializedName(value = "Rating", alternate = ["rating"]) val rating: Double,
-    @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String,
-    @SerializedName(value = "Text", alternate = ["text"]) val text: String,
-    @SerializedName(value = "photo_url", alternate = ["user_photo", "avatar_url"]) val photoUrl: String? = null
+    @SerializedName(value = "UserName", alternate = ["user_name", "userName", "name"]) val userName: String? = null,
+    @SerializedName(value = "ProductID", alternate = ["product_id", "productId"]) val productId: Int? = null,
+    @SerializedName(value = "ProductTitle", alternate = ["product_title", "productTitle"]) val productTitle: String? = null,
+    @SerializedName(value = "Rating", alternate = ["rating"]) val rating: Double? = null,
+    @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String? = null,
+    @SerializedName(value = "Text", alternate = ["text", "comment", "content", "message"]) val text: String? = null,
+    @SerializedName(value = "photo_url", alternate = ["user_photo", "avatar_url"]) val photoUrl: String? = null,
+    @SerializedName(value = "User", alternate = ["user"]) val user: ProfileDto? = null
 )
 
 data class OrderDto(
@@ -371,7 +374,7 @@ data class OrderDto(
     @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String,
     @SerializedName(value = "ProductID", alternate = ["product_id", "productId"]) val productId: Int,
     @SerializedName(value = "ProductTitle", alternate = ["product_title", "productTitle"]) val productTitle: String? = null,
-    @SerializedName(value = "ProductImageUrl", alternate = ["product_image_url", "productImageUrl", "ImageName"]) val productImageUrl: String? = null,
+    @SerializedName(value = "ProductImageUrl", alternate = ["product_image_url", "productImageUrl", "ImageName", "product_image", "image", "image_url", "imageUrl"]) val productImageUrl: String? = null,
     @SerializedName(value = "Price", alternate = ["price"]) val price: Double? = null,
     @SerializedName(value = "Quantity", alternate = ["quantity"]) val quantity: Int,
     @SerializedName(value = "TotalCost", alternate = ["total_cost", "totalCost"]) val totalCost: Double,
