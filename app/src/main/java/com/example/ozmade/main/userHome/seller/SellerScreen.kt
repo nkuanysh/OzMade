@@ -221,10 +221,10 @@ private fun SellerHeaderBlock(
             Spacer(Modifier.height(8.dp))
 
             // Статус
-            val (statusText, statusColor) = when (seller.status.lowercase()) {
+            val (levelTitle, statusColor) = when (seller.levelTitle?.lowercase()) {
                 "pending" -> "Проверяется" to Color(0xFFFF9800)
                 "active" -> "Активен" to Color(0xFF4CAF50)
-                else -> (if (seller.status.isBlank()) "Новый мастер" else seller.status) to Color(0xFF607D8B)
+                else -> (if (seller.levelTitle?.isBlank() ?: true) "Новый мастер" else seller.levelTitle) to Color(0xFF607D8B)
             }
 
             Surface(
@@ -233,7 +233,7 @@ private fun SellerHeaderBlock(
                 contentColor = statusColor
             ) {
                 Text(
-                    text = statusText,
+                    text = levelTitle,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.ExtraBold)
                 )

@@ -7,7 +7,7 @@ data class UserProfile(
     val phone: String = "",
     val addressLat: Double? = null,
     val addressLng: Double? = null,
-    val avatarUrl: String? = null
+    val photoUrl: String? = null
 )
 
 

@@ -37,6 +37,17 @@ object ImageUtils {
     }
 
     /**
+     * Formats a raw profile photo URL or filename from the backend into a valid link.
+     */
+    fun formatProfilePhotoUrl(url: String?): String {
+        if (url.isNullOrBlank()) return ""
+        val filename = extractFilename(url.trim()) ?: ""
+        if (filename.isBlank()) return url
+        
+        return "https://storage.googleapis.com/oz-made/products/$filename"
+    }
+
+    /**
      * Extracts the filename from a URL or returns the input if it's already a filename.
      */
     fun extractFilename(input: String?): String? {

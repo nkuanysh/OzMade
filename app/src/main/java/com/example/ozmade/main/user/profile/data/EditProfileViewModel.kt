@@ -15,7 +15,7 @@ data class EditProfileState(
     val address: String = "",
     val addressLat: Double? = null,
     val addressLng: Double? = null,
-    val avatarUrl: String = "",
+    val photoUrl: String = "",
     val selectedUri: android.net.Uri? = null,
     val error: String? = null
 )
@@ -43,7 +43,7 @@ class EditProfileViewModel @Inject constructor(
                         address = user.address,
                         addressLat = user.addressLat,
                         addressLng = user.addressLng,
-                        avatarUrl = com.example.ozmade.utils.ImageUtils.formatImageUrl(user.avatarUrl)
+                        photoUrl = com.example.ozmade.utils.ImageUtils.formatProfilePhotoUrl(user.photoUrl)
                     )
                 }
                 .onFailure {
@@ -80,8 +80,8 @@ class EditProfileViewModel @Inject constructor(
         )
     }
 
-    fun onAvatarUrlChange(v: String) {
-        _state.value = _state.value.copy(avatarUrl = v)
+    fun onPhotoUrlChange(v: String) {
+        _state.value = _state.value.copy(photoUrl = v)
     }
 
     fun onAvatarPicked(uri: android.net.Uri) {
@@ -102,8 +102,8 @@ class EditProfileViewModel @Inject constructor(
                     repo.uploadAvatar(uri)
                 }
 
-                val finalAvatarUrl = uploadedUrl ?: if (s.avatarUrl.isNotBlank()) {
-                    com.example.ozmade.utils.ImageUtils.extractFilename(s.avatarUrl)
+                val finalPhotoUrl = uploadedUrl ?: if (s.photoUrl.isNotBlank()) {
+                    com.example.ozmade.utils.ImageUtils.extractFilename(s.photoUrl)
                 } else {
                     null
                 }
@@ -113,7 +113,7 @@ class EditProfileViewModel @Inject constructor(
                     address = s.address.trim(),
                     addressLat = s.addressLat,
                     addressLng = s.addressLng,
-                    avatarUrl = finalAvatarUrl
+                    photoUrl = finalPhotoUrl
                 )
             }.onSuccess {
                 _state.value = _state.value.copy(saving = false)

@@ -117,9 +117,9 @@ fun EditProfileScreen(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                 ) {
-                    if (state.selectedUri != null || state.avatarUrl.isNotBlank()) {
+                    if (state.selectedUri != null || state.photoUrl.isNotBlank()) {
                         AsyncImage(
-                            model = state.selectedUri ?: state.avatarUrl,
+                            model = state.selectedUri ?: state.photoUrl,
                             contentDescription = null,
                             modifier = Modifier
                                 .fillMaxSize()

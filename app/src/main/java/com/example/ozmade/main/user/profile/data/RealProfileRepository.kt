@@ -43,7 +43,7 @@ class RealProfileRepository @Inject constructor(
         address: String,
         addressLat: Double?,
         addressLng: Double?,
-        avatarUrl: String?
+        photoUrl: String?
     ): UserProfile {
         val response = api.updateProfile(
             UpdateProfileRequest(
@@ -51,7 +51,7 @@ class RealProfileRepository @Inject constructor(
                 address = address,
                 addressLat = addressLat,
                 addressLng = addressLng,
-                avatarUrl = avatarUrl
+                photoUrl = photoUrl
             )
         )
 
@@ -137,6 +137,6 @@ private fun com.example.ozmade.network.model.ProfileDto.toDomain(): UserProfile 
         phone = phoneNumber ?: "",
         addressLat = addressLat,
         addressLng = addressLng,
-        avatarUrl = avatarUrl
+        photoUrl = photoUrl
     )
 }

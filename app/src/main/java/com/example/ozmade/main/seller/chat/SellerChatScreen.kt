@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.ozmade.main.seller.chat.data.SellerChatThreadUi
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -148,19 +149,16 @@ private fun SellerThreadItem(thread: SellerChatThreadUi, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Avatar
-            Surface(
-                modifier = Modifier.size(56.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = thread.buyerName.take(1).uppercase(),
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
+            AsyncImage(
+                model = thread.buyerAvatarUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                error = null // Or a placeholder with the first letter
+            )
 
             Spacer(Modifier.width(16.dp))
 

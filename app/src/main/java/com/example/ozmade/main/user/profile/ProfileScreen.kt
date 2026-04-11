@@ -78,7 +78,7 @@ fun ProfileScreen(
                     ProfileHeader(
                         name = state.user.name,
                         phone = state.user.phone,
-                        avatarUrl = state.user.avatarUrl,
+                        photoUrl = state.user.photoUrl,
                         onEdit = onEditProfile
                     )
                 }
@@ -159,7 +159,10 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun ProfileHeader(name: String, phone: String, avatarUrl: String?, onEdit: () -> Unit) {
+private fun ProfileHeader(name: String, phone: String, photoUrl: String?, onEdit: () -> Unit) {
+    val formattedPhotoUrl = remember(photoUrl) {
+        com.example.ozmade.utils.ImageUtils.formatProfilePhotoUrl(photoUrl)
+    }
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -170,9 +173,9 @@ private fun ProfileHeader(name: String, phone: String, avatarUrl: String?, onEdi
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                if (!avatarUrl.isNullOrBlank()) {
+                if (!formattedPhotoUrl.isBlank()) {
                     AsyncImage(
-                        model = avatarUrl,
+                        model = formattedPhotoUrl,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize().clip(CircleShape),
                         contentScale = ContentScale.Crop
