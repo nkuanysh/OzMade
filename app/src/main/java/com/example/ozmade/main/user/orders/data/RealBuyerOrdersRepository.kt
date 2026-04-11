@@ -46,7 +46,8 @@ class RealBuyerOrdersRepository @Inject constructor(
                 shippingLng = dto.shippingLng,
                 shippingComment = dto.shippingComment,
 
-                confirmCode = dto.confirmCode
+                confirmCode = dto.confirmCode,
+                isReviewed = dto.isReviewed
             )
         }
     }

@@ -81,13 +81,15 @@ fun ProductDetailsScreen(
 
     Scaffold(
         bottomBar = {
-            BottomActionsBar(
-                onChat = onChat,
-                onOrder = {
-                    orderQuantity = 1
-                    showOrderSheet = true
-                }
-            )
+            if (!product.isMine) {
+                BottomActionsBar(
+                    onChat = onChat,
+                    onOrder = {
+                        orderQuantity = 1
+                        showOrderSheet = true
+                    }
+                )
+            }
         }
     ) { padding ->
         Box(
@@ -305,7 +307,7 @@ fun ProductDetailsScreen(
                         SellerBlock(product.seller, onClick = { onOpenSeller(product.seller.id) })
                     }
 
-                    Spacer(Modifier.height(120.dp))
+                    Spacer(Modifier.height(if (product.isMine) 40.dp else 120.dp))
                 }
             }
 

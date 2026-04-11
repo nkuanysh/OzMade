@@ -26,6 +26,9 @@ class MainActivity : ComponentActivity() {
     private val price = mutableStateOf(0)
     private val deepLinkProductId = mutableStateOf(0)
     private val deepLinkChatId = mutableStateOf(0)
+    
+    // For Order notifications
+    private val openOrderHistory = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,8 +48,12 @@ class MainActivity : ComponentActivity() {
                         pushSellerName = sellerName.value,
                         pushProductTitle = productTitle.value,
                         pushPrice = price.value,
-                        deepLinkProductId = deepLinkProductId.value
+                        deepLinkProductId = deepLinkProductId.value,
+                        openOrderHistory = openOrderHistory.value
                     )
+                    
+                    // Reset flag after passing to NavHost if needed, 
+                    // but usually AppNavHost handles it via LaunchedEffect
                 }
             }
         }
@@ -63,10 +70,14 @@ class MainActivity : ComponentActivity() {
         openChat.value = intent?.getBooleanExtra("open_chat", false) ?: false
         chatId.value = intent?.getIntExtra("chat_id", 0) ?: 0
         sellerId.value = intent?.getIntExtra("seller_id", 0) ?: 0
-        productId.value = intent?.getIntExtra("product_id", 0) ?: 0
+        productId.value = intent?.getIntExtra("productId", 0) ?: 0 // Fixed casing just in case
+        if (productId.value == 0) productId.value = intent?.getIntExtra("product_id", 0) ?: 0
+        
         sellerName.value = intent?.getStringExtra("seller_name") ?: "Продавец"
         productTitle.value = intent?.getStringExtra("product_title") ?: "Товар"
         price.value = intent?.getIntExtra("price", 0) ?: 0
+
+        openOrderHistory.value = intent?.getBooleanExtra("open_order_history", false) ?: false
 
         // Deep Link data
         val data: Uri? = intent?.data

@@ -295,24 +295,42 @@ fun BuyerOrderDetailsRoute(
                 }
 
                 OrderStatus.COMPLETED -> {
-                    var showDialog by remember { mutableStateOf(false) }
-                    Button(
-                        onClick = { showDialog = true },
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text("Оставить отзыв", fontWeight = FontWeight.Bold)
-                    }
+                    if (!order.isReviewed) {
+                        var showDialog by remember { mutableStateOf(false) }
+                        Button(
+                            onClick = { showDialog = true },
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Text("Оставить отзыв", fontWeight = FontWeight.Bold)
+                        }
 
-                    if (showDialog) {
-                        ReviewDialog(
-                            onDismiss = { showDialog = false },
-                            onSubmit = { rating, text ->
-                                viewModel.postReview(order.productId, rating, text) {
-                                    showDialog = false
+                        if (showDialog) {
+                            ReviewDialog(
+                                onDismiss = { showDialog = false },
+                                onSubmit = { rating, text ->
+                                    viewModel.postReview(order.productId, rating, text) {
+                                        showDialog = false
+                                        viewModel.load() // Перезагружаем заказы, чтобы обновить флаг isReviewed
+                                    }
                                 }
-                            }
-                        )
+                            )
+                        }
+                    } else {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color(0xFFE8F5E9)
+                        ) {
+                            Text(
+                                "Вы уже оставили отзыв",
+                                modifier = Modifier.padding(16.dp),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color(0xFF2E7D32),
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
                 

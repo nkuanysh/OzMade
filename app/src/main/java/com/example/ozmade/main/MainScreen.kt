@@ -71,6 +71,7 @@ fun MainScreen(
     pushProductTitle: String = "Товар",
     pushPrice: Int = 0,
     deepLinkProductId: Int = 0,
+    openOrderHistoryFromPush: Boolean = false,
     sellerRepository: SellerRepository = hiltViewModel<com.example.ozmade.main.seller.onboarding.SellerGateViewModel>().let { 
         it.repo 
     }
@@ -107,6 +108,12 @@ fun MainScreen(
             navController.navigate(
                 "chat/$pushChatId/$pushSellerId/$pushProductId?sellerName=$encSellerName&productTitle=$encProductTitle&price=$pushPrice"
             )
+        }
+    }
+
+    LaunchedEffect(openOrderHistoryFromPush) {
+        if (openOrderHistoryFromPush) {
+            navController.navigate("orders_history")
         }
     }
 
