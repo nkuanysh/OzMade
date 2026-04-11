@@ -231,19 +231,25 @@ fun ProductDetailsScreen(
                     ) {
                         Icon(Icons.Default.Star, contentDescription = null, tint = Color(0xFFFF9800), modifier = Modifier.size(20.dp))
                         Text(" ${formatRating(product.rating)} ", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
-                        VerticalDivider(modifier = Modifier.height(16.dp).padding(horizontal = 8.dp))
-                        Text(
-                            text = "${product.reviewsCount} отзывов",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier.clickable { onOpenReviews(product.id) }
-                        )
-                        VerticalDivider(modifier = Modifier.height(16.dp).padding(horizontal = 8.dp))
-                        Text(
-                            "${product.ordersCount} заказов",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        
+                        if (product.reviewsCount > 0) {
+                            VerticalDivider(modifier = Modifier.height(16.dp).padding(horizontal = 8.dp))
+                            Text(
+                                text = "${product.reviewsCount} отзывов",
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.clickable { onOpenReviews(product.id) }
+                            )
+                        }
+
+                        if (product.ordersCount > 0) {
+                            VerticalDivider(modifier = Modifier.height(16.dp).padding(horizontal = 8.dp))
+                            Text(
+                                "${product.ordersCount} заказов",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
 
                     Spacer(Modifier.height(24.dp))
@@ -623,11 +629,13 @@ private fun SellerBlock(seller: SellerUi, onClick: () -> Unit) {
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    Text(
-                        text = "• ${seller.completedOrders} заказов",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (seller.completedOrders > 0) {
+                        Text(
+                            text = "• ${seller.completedOrders} заказов",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
                 
                 Spacer(Modifier.height(2.dp))

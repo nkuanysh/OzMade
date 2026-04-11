@@ -33,9 +33,13 @@ data class ProductDto(
     @SerializedName("WhatsAppLink") val whatsappLink: String? = null,
     @SerializedName(value = "ViewCount", alternate = ["view_count", "viewCount"]) val viewCount: Int? = null,
     @SerializedName(value = "AverageRating", alternate = ["average_rating", "averageRating", "rating", "Rating"]) val averageRating: Double? = null,
+    @SerializedName(value = "RatingsCount", alternate = ["ratings_count", "ratingsCount"]) val ratingsCount: Int? = null,
+    @SerializedName(value = "OrdersCount", alternate = ["orders_count", "ordersCount", "total_orders", "completed_orders", "completedOrders"]) val ordersCount: Int? = null,
+    @SerializedName(value = "ReviewsCount", alternate = ["reviews_count", "reviewsCount", "comments_count"]) val reviewsCount: Int? = null,
     @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String? = null,
     @SerializedName("Comments") val comments: List<CommentDto>? = null,
-    @SerializedName(value = "IsActive", alternate = ["is_active", "isActive"]) val isActive: Boolean? = null
+    @SerializedName(value = "IsActive", alternate = ["is_active", "isActive", "is_hidden"]) val isActive: Boolean? = null,
+    @SerializedName(value = "ShareLink", alternate = ["share_link", "shareLink"]) val shareLink: String? = null
 )
 
 data class ProductDetailsDto(
@@ -73,11 +77,15 @@ data class ProductDetailsDto(
     @SerializedName(value = "YouTubeUrl", alternate = ["youtube_url", "youtubeUrl", "YouTubeURL"])
     val youtubeUrl: String? = null,
     @SerializedName(value = "AverageRating", alternate = ["average_rating", "averageRating", "rating", "Rating"]) val averageRating: Double? = null,
+    @SerializedName(value = "RatingsCount", alternate = ["ratings_count", "ratingsCount"]) val ratingsCount: Int? = null,
+    @SerializedName(value = "OrdersCount", alternate = ["orders_count", "ordersCount", "total_orders", "completed_orders", "completedOrders"]) val ordersCount: Int? = null,
+    @SerializedName(value = "ReviewsCount", alternate = ["reviews_count", "reviewsCount", "comments_count"]) val reviewsCount: Int? = null,
     @SerializedName("Comments") val comments: List<CommentDto>? = null,
     @SerializedName("SellerName") val sellerName: String? = null,
     @SerializedName("delivery") val delivery: DeliveryInfoDto? = null,
     @SerializedName("seller") val seller: SellerInfoDto? = null,
-    @SerializedName(value = "IsActive", alternate = ["is_active", "isActive"]) val isActive: Boolean? = null
+    @SerializedName(value = "IsActive", alternate = ["is_active", "isActive", "is_hidden"]) val isActive: Boolean? = null,
+    @SerializedName(value = "ShareLink", alternate = ["share_link", "shareLink"]) val shareLink: String? = null
 )
 
 data class CommentDto(
@@ -241,6 +249,8 @@ data class SellerProductDto(
     @SerializedName(value = "city", alternate = ["City"]) val city: String? = null,
     @SerializedName(value = "address", alternate = ["Address"]) val address: String? = null,
     @SerializedName(value = "rating", alternate = ["Rating", "average_rating", "AverageRating"]) val rating: Double? = null,
+    @SerializedName(value = "orders_count", alternate = ["ordersCount", "OrdersCount", "total_orders", "completed_orders", "completedOrders"]) val ordersCount: Int? = null,
+    @SerializedName(value = "reviews_count", alternate = ["reviewsCount", "ReviewsCount", "comments_count"]) val reviewsCount: Int? = null,
     @SerializedName(value = "imageUrl", alternate = ["image_url", "ImageName", "ImageURL", "photo_url", "PhotoURL"]) val imageUrl: String? = null,
     @SerializedName(value = "Images", alternate = ["images"]) val images: List<String>? = null
 )
@@ -314,7 +324,7 @@ data class DeliveryInfoDto(
     @SerializedName(value = "delivery_center_lat", alternate = ["deliveryCenterLat"]) val centerLat: Double? = null,
     @SerializedName(value = "delivery_center_lng", alternate = ["deliveryCenterLng"]) val centerLng: Double? = null,
     @SerializedName(value = "delivery_radius_km", alternate = ["deliveryRadiusKm"]) val radiusKm: Double? = null,
-    @SerializedName(value = "delivery_center_address", alternate = ["centerAddress"]) val centerAddress: String? = null,
+    @SerializedName(value = "delivery_center_address", alternate = ["centerAddress", "deliveryCenterAddress"]) val centerAddress: String? = null,
 
     @SerializedName(value = "buyer_saved_address", alternate = ["buyerSavedAddress"]) val buyerSavedAddress: String? = null,
     @SerializedName(value = "buyer_saved_address_lat", alternate = ["buyerSavedAddressLat"]) val buyerSavedAddressLat: Double? = null,

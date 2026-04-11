@@ -20,9 +20,9 @@ class RealSellerRepository @Inject constructor(
             name = sDto?.name ?: dto.name ?: "Продавец",
             storeName = sDto?.storeName ?: dto.storeName,
             status = sDto?.status ?: dto.status ?: sDto?.levelTitle ?: dto.levelTitle ?: "",
-            ordersCount = sDto?.ordersCount ?: dto.ordersCount ?: 0,
-            rating = sDto?.rating ?: dto.rating ?: 0.0,
-            reviewsCount = sDto?.reviewsCount ?: dto.reviewsCount ?: 0,
+            ordersCount = dto.ordersCount ?: sDto?.ordersCount ?: 0,
+            rating = dto.rating ?: sDto?.rating ?: 0.0,
+            reviewsCount = dto.reviewsCount ?: sDto?.reviewsCount ?: 0,
             daysWithOzMade = sDto?.daysWithOzMade ?: dto.daysWithOzMade ?: 0,
             photoUrl = ImageUtils.formatProfilePhotoUrl(sDto?.photoUrl ?: dto.photoUrl),
             city = sDto?.city ?: dto.city,
@@ -41,6 +41,8 @@ class RealSellerRepository @Inject constructor(
                 city = it.city ?: "",
                 address = it.address ?: "",
                 rating = it.rating ?: 0.0,
+                ordersCount = it.ordersCount ?: 0,
+                reviewsCount = it.reviewsCount ?: 0,
                 imageUrl = ImageUtils.formatImageUrl(it.images?.firstOrNull() ?: it.imageUrl)
             )
         } ?: emptyList()

@@ -25,6 +25,8 @@ data class SellerProductUi(
     val city: String,
     val address: String,
     val rating: Double,
+    val ordersCount: Int = 0,
+    val reviewsCount: Int = 0,
     val imageUrl: String? = null
 )
 

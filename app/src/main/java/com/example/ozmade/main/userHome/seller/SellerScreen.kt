@@ -331,14 +331,24 @@ private fun SellerProductCard(
             }
 
             Column(Modifier.padding(12.dp)) {
-                Text("${product.price} ₸", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black)
+                Text("${product.price.toInt()} ₸", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black, color = Color(0xFFFF9800))
                 Text(product.title, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 
                 Spacer(Modifier.height(8.dp))
                 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Star, null, modifier = Modifier.size(14.dp), tint = Color(0xFFFFB400))
-                    Text(" ${product.rating}", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.width(2.dp))
+                    Text(product.rating.toString(), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                    
+                    if (product.ordersCount > 0) {
+                        Spacer(Modifier.weight(1f))
+                        Text(
+                            text = "${product.ordersCount} зак.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Color.Gray
+                        )
+                    }
                 }
             }
         }

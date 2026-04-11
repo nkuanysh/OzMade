@@ -435,6 +435,14 @@ fun MarketProductCard(product: Product, onClick: () -> Unit, onFavoriteClick: ()
                         fontWeight = FontWeight.Bold,
                         color = Color.Gray
                     )
+                    if (product.ordersCount > 0) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "• ${product.ordersCount} заказов",
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
+                    }
                 }
             }
         }

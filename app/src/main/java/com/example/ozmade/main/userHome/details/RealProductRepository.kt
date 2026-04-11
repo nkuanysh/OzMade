@@ -61,8 +61,8 @@ class RealProductRepository @Inject constructor(
             title = dto.title,
             price = dto.price ?: 0.0,
             rating = dto.averageRating ?: 0.0,
-            reviewsCount = dto.comments?.size ?: 0,
-            ordersCount = dto.seller?.completedOrders ?: 0,
+            reviewsCount = dto.reviewsCount ?: dto.comments?.size ?: 0,
+            ordersCount = dto.ordersCount ?: dto.seller?.completedOrders ?: 0,
             images = images,
             youtubeUrl = dto.youtubeUrl,
             description = dto.description,
@@ -94,7 +94,7 @@ class RealProductRepository @Inject constructor(
                 name = dto.sellerName?.takeIf { it.isNotBlank() } ?: dto.seller?.name?.takeIf { it.isNotBlank() } ?: "Мастер",
                 address = dto.seller?.address ?: dto.address ?: "",
                 rating = dto.seller?.rating ?: 0.0,
-                completedOrders = dto.seller?.completedOrders ?: 0,
+                completedOrders = dto.ordersCount ?: dto.seller?.completedOrders ?: 0,
                 photoUrl = ImageUtils.formatProfilePhotoUrl(dto.seller?.photoUrl)
             )
         )
@@ -141,7 +141,9 @@ class RealProductRepository @Inject constructor(
                 price = dto.price ?: 0.0,
                 imageUrl = img,
                 address = dto.address ?: "",
-                rating = dto.averageRating ?: 0.0
+                rating = dto.averageRating ?: 0.0,
+                ordersCount = dto.ordersCount ?: 0,
+                reviewsCount = dto.reviewsCount ?: 0
             )
         }
     }

@@ -16,7 +16,7 @@ data class UpdateProfileRequest(
     @SerializedName("address") val address: String,
     @SerializedName("address_lat") val addressLat: Double?,
     @SerializedName("address_lng") val addressLng: Double?,
-    @SerializedName("photo_url") val photoUrl: String? = null
+    @SerializedName("PhotoUrl") val photoUrl: String? = null
 )
 
 data class ProductRequest(
@@ -37,7 +37,7 @@ data class ProductRequest(
 )
 
 data class UpdateSellerProfileRequest(
-    @SerializedName("photo_url") val photoUrl: String? = null,
+    @SerializedName("PhotoUrl") val photoUrl: String? = null,
     @SerializedName("Name") val name: String? = null,
     @SerializedName("DisplayName") val displayName: String? = null,
     @SerializedName("About") val about: String? = null,
@@ -76,7 +76,7 @@ data class SellerRegistrationRequestDto(
     @SerializedName("Categories") val categories: List<String>,
     @SerializedName("About") val about: String? = null,
     @SerializedName("IdCardUrl") val idCardUrl: String? = null,
-    @SerializedName("photo_url") val photoUrl: String? = null
+    @SerializedName("PhotoUrl") val photoUrl: String? = null
 )
 
 data class ChatSendMessageRequest(

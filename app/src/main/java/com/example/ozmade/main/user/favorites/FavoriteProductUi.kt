@@ -6,5 +6,7 @@ data class FavoriteProductUi(
     val price: Double,
     val imageUrl: String?,
     val address: String,
-    val rating: Double
+    val rating: Double,
+    val ordersCount: Int = 0,
+    val reviewsCount: Int = 0
 )

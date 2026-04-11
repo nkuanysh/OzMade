@@ -371,6 +371,15 @@ private fun CategoryProductCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
                     )
+                    if (product.ordersCount > 0) {
+                        Spacer(Modifier.weight(1f))
+                        Text(
+                            text = "${product.ordersCount} зак.",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }

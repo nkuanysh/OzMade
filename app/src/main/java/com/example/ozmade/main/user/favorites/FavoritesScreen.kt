@@ -249,6 +249,15 @@ private fun FavoriteProductCard(
                     modifier = Modifier.padding(top = 2.dp)
                 )
 
+                if (product.ordersCount > 0) {
+                    Text(
+                        text = "Заказов: ${product.ordersCount}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
                 Text(
                     text = product.address,
                     style = MaterialTheme.typography.labelSmall,

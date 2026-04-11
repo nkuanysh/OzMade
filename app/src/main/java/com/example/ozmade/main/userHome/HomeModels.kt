@@ -32,6 +32,8 @@ data class Product(
     val city: String = "",
     val address: String = "",
     val rating: Double = 4.5,
+    val reviewsCount: Int = 0,
+    val ordersCount: Int = 0,
     val categoryId: String = "",
     val liked: Boolean = false
 )
