@@ -56,6 +56,11 @@ class RealProductRepository @Inject constructor(
         val buyerLat = profile.addressLat
         val buyerLng = profile.addressLng
 
+        val sellerId = dto.sellerId ?: dto.seller?.id ?: 0
+        val sellerProfile = if (sellerId != 0) {
+            runCatching { api.getSellerPage(sellerId).body()?.seller }.getOrNull()
+        } else null
+
         return ProductDetailsUi(
             id = dto.id,
             title = dto.title,
@@ -90,12 +95,12 @@ class RealProductRepository @Inject constructor(
                 )
             ),
             seller = SellerUi(
-                id = (dto.sellerId ?: dto.seller?.id ?: 0),
-                name = dto.sellerName?.takeIf { it.isNotBlank() } ?: dto.seller?.name?.takeIf { it.isNotBlank() } ?: "Мастер",
-                address = dto.seller?.address ?: dto.address ?: "",
-                rating = dto.seller?.rating ?: 0.0,
-                completedOrders = dto.ordersCount ?: dto.seller?.completedOrders ?: 0,
-                photoUrl = ImageUtils.formatProfilePhotoUrl(dto.seller?.photoUrl)
+                id = sellerId,
+                name = dto.sellerName?.takeIf { it.isNotBlank() } ?: dto.seller?.name?.takeIf { it.isNotBlank() } ?: sellerProfile?.name ?: "Мастер",
+                address = dto.seller?.address ?: dto.address ?: sellerProfile?.address ?: "",
+                rating = dto.seller?.rating ?: sellerProfile?.rating ?: 0.0,
+                completedOrders = dto.ordersCount ?: dto.seller?.completedOrders ?: sellerProfile?.ordersCount ?: 0,
+                photoUrl = ImageUtils.formatProfilePhotoUrl(dto.seller?.photoUrl ?: sellerProfile?.photoUrl)
             )
         )
     }
