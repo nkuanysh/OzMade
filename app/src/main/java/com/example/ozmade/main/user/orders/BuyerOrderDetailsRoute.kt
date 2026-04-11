@@ -20,11 +20,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
 import com.example.ozmade.main.orders.data.DeliveryType
 import com.example.ozmade.main.orders.data.OrderStatus
@@ -44,8 +47,21 @@ fun BuyerOrderDetailsRoute(
 ) {
     val ui by viewModel.ui.collectAsState()
     val order = remember(ui, orderId) { viewModel.findById(orderId) }
+    val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(Unit) { viewModel.load() }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.load()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -299,6 +315,10 @@ fun BuyerOrderDetailsRoute(
                         )
                     }
                 }
+                
+                else -> {
+                    // Show nothing or default button for Cancelled/Expired
+                }
             }
             
             Spacer(Modifier.height(24.dp))
@@ -312,7 +332,7 @@ private fun StatusIndicator(status: String) {
         OrderStatus.PENDING_SELLER -> Color(0xFFFFA000)
         OrderStatus.CONFIRMED -> Color(0xFF1E88E5)
         OrderStatus.READY_OR_SHIPPED -> Color(0xFF43A047)
-        OrderStatus.COMPLETED -> Color(0xFF757575)
+        OrderStatus.COMPLETED -> Color(0xFF4CAF50)
         else -> Color(0xFFE53935)
     }
 
