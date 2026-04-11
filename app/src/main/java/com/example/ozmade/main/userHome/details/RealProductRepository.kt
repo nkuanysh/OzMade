@@ -92,7 +92,6 @@ class RealProductRepository @Inject constructor(
             seller = SellerUi(
                 id = (dto.sellerId ?: dto.seller?.id ?: 0),
                 name = dto.sellerName?.takeIf { it.isNotBlank() } ?: dto.seller?.name?.takeIf { it.isNotBlank() } ?: "Мастер",
-                avatarUrl = ImageUtils.formatImageUrl(dto.seller?.avatarUrl),
                 address = dto.seller?.address ?: dto.address ?: "",
                 rating = dto.seller?.rating ?: 0.0,
                 completedOrders = dto.seller?.completedOrders ?: 0
