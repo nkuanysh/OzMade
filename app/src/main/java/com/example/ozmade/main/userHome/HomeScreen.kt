@@ -110,6 +110,33 @@ fun HomeScreen(
 
                         item(span = { GridItemSpan(2) }) {
                             SectionHeader(
+                                title = "Рекомендации для вас",
+                                actionText = null,
+                                onActionClick = {},
+                                accentColor = orangeAccent
+                            )
+                        }
+
+                        item(span = { GridItemSpan(2) }) {
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                                contentPadding = PaddingValues(bottom = 8.dp)
+                            ) {
+                                items(uiState.recommendations) { product ->
+                                    Box(modifier = Modifier.width(180.dp)) {
+                                        MarketProductCard(
+                                            product = product,
+                                            onClick = { onOpenProduct(product.id) },
+                                            onFavoriteClick = { onFavoriteClick(product.id) },
+                                            accentColor = orangeAccent
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        item(span = { GridItemSpan(2) }) {
+                            SectionHeader(
                                 title = "Товары для вас",
                                 actionText = null,
                                 onActionClick = onSeeAllProductsClick,

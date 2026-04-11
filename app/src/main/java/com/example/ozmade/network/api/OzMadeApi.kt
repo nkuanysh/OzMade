@@ -153,6 +153,11 @@ interface OzMadeApi {
         @Body request: UpdateSellerDeliveryRequest
     ): Response<SellerDeliveryDto>
 
+    @GET("products/recommendations")
+    suspend fun getRecommendations(
+        @Query("limit") limit: Int? = 20
+    ): Response<List<ProductDto>>
+
     // buyer
     @POST("orders")
     suspend fun createOrder(@Body request: CreateOrderRequest): Response<OrderDto>
