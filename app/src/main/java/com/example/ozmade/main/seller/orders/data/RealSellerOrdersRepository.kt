@@ -32,14 +32,20 @@ class RealSellerOrdersRepository @Inject constructor(
                 quantity = dto.quantity,
                 totalCost = dto.totalCost,
 
+                sellerId = dto.sellerId,
                 sellerName = dto.sellerName,
 
                 deliveryType = dto.deliveryType,
                 pickupAddress = dto.pickupAddress,
                 pickupTime = dto.pickupTime,
                 zoneCenterAddress = dto.zoneCenterAddress,
+                zoneCenterLat = dto.zoneCenterLat,
+                zoneCenterLng = dto.zoneCenterLng,
                 zoneRadiusKm = dto.zoneRadiusKm,
                 shippingAddressText = dto.shippingAddressText,
+                shippingLat = dto.shippingLat,
+                shippingLng = dto.shippingLng,
+                shippingComment = dto.shippingComment,
 
                 confirmCode = dto.confirmCode
             )

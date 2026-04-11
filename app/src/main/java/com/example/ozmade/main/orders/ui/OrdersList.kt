@@ -1,11 +1,9 @@
 package com.example.ozmade.main.orders.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -19,9 +17,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.ozmade.main.orders.data.OrderStatus
 import com.example.ozmade.main.orders.data.OrderUi
 import com.example.ozmade.main.orders.data.deliveryTitle
 import com.example.ozmade.main.orders.data.statusTitle
+import com.example.ozmade.utils.ImageUtils
 
 @Composable
 fun OrdersList(
@@ -45,12 +45,12 @@ private fun OrderCard(
     order: OrderUi,
     onClick: () -> Unit
 ) {
-    val statusColor = when (order.status.lowercase()) {
-        "pending", "new" -> Color(0xFFFFA000) // Orange
-        "completed", "delivered" -> Color(0xFF4CAF50) // Green
-        "cancelled" -> Color(0xFFF44336) // Red
-        "shipping", "delivering" -> Color(0xFF2196F3) // Blue
-        else -> MaterialTheme.colorScheme.primary
+    val statusColor = when (order.status) {
+        OrderStatus.PENDING_SELLER -> Color(0xFFFFA000)
+        OrderStatus.CONFIRMED -> Color(0xFF1E88E5)
+        OrderStatus.READY_OR_SHIPPED -> Color(0xFF43A047)
+        OrderStatus.COMPLETED -> Color(0xFF757575)
+        else -> Color(0xFFE53935)
     }
 
     ElevatedCard(
@@ -95,7 +95,7 @@ private fun OrderCard(
             // Main Content: Image and Details
             Row(modifier = Modifier.fillMaxWidth()) {
                 AsyncImage(
-                    model = order.productImageUrl,
+                    model = ImageUtils.formatImageUrl(order.productImageUrl),
                     contentDescription = null,
                     modifier = Modifier
                         .size(80.dp)
@@ -117,7 +117,7 @@ private fun OrderCard(
                     Spacer(Modifier.height(4.dp))
                     
                     Text(
-                        text = "Продавец: ${order.sellerName}",
+                        text = "Продавец: ${order.sellerName ?: "Мастер"}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -137,6 +137,37 @@ private fun OrderCard(
                                 fontWeight = FontWeight.ExtraBold,
                                 color = MaterialTheme.colorScheme.primary
                             )
+                        )
+                    }
+                }
+            }
+
+            // Showing confirm code in the list if applicable
+            if (!order.confirmCode.isNullOrBlank() && 
+                (order.status == OrderStatus.CONFIRMED || order.status == OrderStatus.READY_OR_SHIPPED)) {
+                Spacer(Modifier.height(12.dp))
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "Код подтверждения: ",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        Text(
+                            text = order.confirmCode,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 2.sp
+                            ),
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
