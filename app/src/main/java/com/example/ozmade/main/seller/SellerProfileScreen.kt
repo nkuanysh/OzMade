@@ -145,7 +145,7 @@ private fun SellerProfileContent(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    text = profile.status.ifBlank { "Мастер" },
+                    text = profile.levelTitle?.ifBlank { "Мастер" } ?: "" ,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
@@ -287,7 +287,7 @@ private fun SellerStatsRow(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = profile.status.ifBlank { "Мастер" },
+                    text = profile.levelTitle?.ifBlank { "Мастер" } ?: "",
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 20.sp,
                     color = Color(0xFF2D2D2D),

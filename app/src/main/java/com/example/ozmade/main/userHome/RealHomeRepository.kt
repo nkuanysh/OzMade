@@ -85,6 +85,18 @@ class RealHomeRepository @Inject constructor(
             dto.toDomain(liked = favoriteIds.contains(dto.id))
         } ?: emptyList()
     }
+
+    override suspend fun getRecommendations(limit: Int): List<Product> {
+        val response = api.getRecommendations(limit = limit)
+        if (!response.isSuccessful) return emptyList()
+
+        val favoriteResp = runCatching { api.getFavorites() }.getOrNull()
+        val favoriteIds = favoriteResp?.body().orEmpty().map { it.id }.toSet()
+
+        return response.body()?.map { dto ->
+            dto.toDomain(liked = favoriteIds.contains(dto.id))
+        } ?: emptyList()
+    }
 }
 
 private fun AdDto.toDomain(): AdBanner =

@@ -136,11 +136,11 @@ interface OzMadeApi {
     suspend fun getSellerPage(@Path("id") sellerId: Int): Response<SellerPageDto>
 
     @GET("sellers/{id}/reviews")
-    suspend fun getSellerReviews(@Path("id") sellerId: Int): Response<SellerReviewsDto>
+    suspend fun getSellerReviews(@Path("id") sellerId: Int): Response<SellerPageDto>
 
     // Added to support seller quality view if seller/quality is 404
     @GET("seller/{id}/review")
-    suspend fun getSellerReviewLegacy(@Path("id") id: Int): Response<SellerReviewsDto>
+    suspend fun getSellerReviewLegacy(@Path("id") id: Int): Response<SellerPageDto>
 
     @GET("seller/quality")
     suspend fun getSellerQuality(): Response<SellerQualityDto>
@@ -152,6 +152,11 @@ interface OzMadeApi {
     suspend fun updateSellerDelivery(
         @Body request: UpdateSellerDeliveryRequest
     ): Response<SellerDeliveryDto>
+
+    @GET("products/recommendations")
+    suspend fun getRecommendations(
+        @Query("limit") limit: Int? = 20
+    ): Response<List<ProductDto>>
 
     // buyer
     @POST("orders")

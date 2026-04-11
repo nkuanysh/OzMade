@@ -4,4 +4,5 @@ interface HomeRepository {
     suspend fun getHome(): HomeResponse
     suspend fun toggleFavorite(productId: Int): Boolean
     suspend fun getProductsByCategory(type: String): List<Product>
+    suspend fun getRecommendations(limit: Int): List<Product>
 }

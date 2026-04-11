@@ -40,6 +40,7 @@ sealed class HomeUiState {
     data object Loading : HomeUiState()
     data class Data(
         val products: List<Product>,
+        val recommendations: List<Product> = emptyList(),
         val categories: List<Category>,
         val ads: List<AdBanner>,
         val searchQuery: String = ""

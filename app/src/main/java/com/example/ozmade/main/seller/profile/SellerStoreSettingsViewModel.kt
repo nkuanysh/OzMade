@@ -25,7 +25,8 @@ data class SellerStoreSettingsUiState(
     val photoUrl: String? = null,
     val localPhotoUri: Uri? = null,
     val error: String? = null,
-    val isSuccess: Boolean = false
+    val isSuccess: Boolean = false,
+    val levelTitle: String? = null,
 )
 
 @HiltViewModel
@@ -55,6 +56,7 @@ class SellerStoreSettingsViewModel @Inject constructor(
                         city = profile.city ?: "",
                         address = profile.address ?: "",
                         selectedCategories = profile.categories ?: emptyList(),
+                        levelTitle = profile.levelTitle,
                         photoUrl = ImageUtils.formatProfilePhotoUrl(profile.photoUrl)
                     )
                 }
