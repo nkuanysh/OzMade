@@ -37,7 +37,7 @@ fun SupportScreen(
     onOpenSupportChat: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val phoneNumber = "+77077077070"
+    val phoneNumber = "+77077077072"
     val faqSections = remember { buildFaq() }
     val orangeAccent = Color(0xFFFF9800)
 

@@ -158,16 +158,6 @@ fun ChatScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(bottom = 16.dp)
                         ) {
-                            // Техподдержка всегда сверху, только если поиск пуст
-                            if (state.searchQuery.isEmpty()) {
-                                item {
-                                    ChatSupportCard(onClick = onOpenSupportChat, accentColor = orangeColor)
-                                    HorizontalDivider(
-                                        modifier = Modifier.padding(horizontal = 16.dp),
-                                        color = MaterialTheme.colorScheme.outlineVariant
-                                    )
-                                }
-                            }
 
                             items(state.threads) { t ->
                                 ThreadCard(
@@ -239,33 +229,7 @@ private fun EmptyChatsPlaceholder(onNavigateToHome: () -> Unit, accentColor: Col
     }
 }
 
-@Composable
-private fun ChatSupportCard(onClick: () -> Unit, accentColor: Color) {
-    ListItem(
-        modifier = Modifier.clickable(onClick = onClick),
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        headlineContent = { Text("Служба поддержки", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface) },
-        supportingContent = { Text("Напишите нам, если возникли вопросы", maxLines = 1, color = MaterialTheme.colorScheme.onSurfaceVariant) },
-        leadingContent = {
-            Surface(
-                modifier = Modifier.size(48.dp),
-                shape = CircleShape,
-                color = accentColor.copy(alpha = 0.1f)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Default.SupportAgent,
-                        contentDescription = null,
-                        tint = accentColor
-                    )
-                }
-            }
-        },
-        trailingContent = {
-            Text("8:00–22:00", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-    )
-}
+
 
 @Composable
 private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit, accentColor: Color) {

@@ -36,7 +36,6 @@ import com.example.ozmade.main.user.profile.about.AboutAppScreen
 import com.example.ozmade.main.user.profile.notification.NotificationsScreen
 import com.example.ozmade.main.user.orders.BuyerOrdersRoute
 import com.example.ozmade.main.user.orders.BuyerOrderDetailsRoute
-import com.example.ozmade.main.user.profile.support.SupportChatScreen
 import com.example.ozmade.main.user.profile.support.SupportScreen
 import com.example.ozmade.main.userHome.HomeRoute
 import com.example.ozmade.main.userHome.category.CategoryRoute
@@ -72,8 +71,8 @@ fun MainScreen(
     pushPrice: Int = 0,
     deepLinkProductId: Int = 0,
     openOrderHistoryFromPush: Boolean = false,
-    sellerRepository: SellerRepository = hiltViewModel<com.example.ozmade.main.seller.onboarding.SellerGateViewModel>().let { 
-        it.repo 
+    sellerRepository: SellerRepository = hiltViewModel<com.example.ozmade.main.seller.onboarding.SellerGateViewModel>().let {
+        it.repo
     }
 ) {
     val context = LocalContext.current
@@ -81,7 +80,7 @@ fun MainScreen(
     val isSellerModePref by sellerStore.isSellerModeFlow.collectAsState(initial = null)
     var isRegistered by remember { mutableStateOf(false) }
     var isCheckingRegistration by remember { mutableStateOf(true) }
-    
+
     val scope = rememberCoroutineScope()
 
     val navController = rememberNavController()
@@ -208,8 +207,8 @@ fun MainScreen(
                 composable(BottomItem.Home.route) {
                     HomeRoute(
                         onOpenProduct = { pid -> navController.navigate("product/$pid") },
-                        onOpenCategory = { catId -> 
-                            navController.navigate("category/0?title=$catId") 
+                        onOpenCategory = { catId ->
+                            navController.navigate("category/0?title=$catId")
                         }
                     )
                 }
@@ -303,12 +302,16 @@ fun MainScreen(
                 composable("support") {
                     SupportScreen(
                         onClose = { navController.popBackStack() },
-                        onOpenSupportChat = { navController.navigate("support_chat") }
+                        onOpenSupportChat = {
+                            val encSName = Uri.encode("Служба поддержки")
+                            val encPTitle = Uri.encode("Поддержка")
+                            navController.navigate("chat/0/3/24?sellerName=$encSName&productTitle=$encPTitle&price=0")
+                        }
                     )
                 }
-                composable("support_chat") {
-                    SupportChatScreen(onBack = { navController.popBackStack() })
-                }
+//                composable("support_chat") {
+//                    SupportChatScreen(onBack = { navController.popBackStack() })
+//                }
                 composable("about") {
                     AboutAppScreen(onBack = { navController.popBackStack() })
                 }
@@ -325,7 +328,7 @@ fun MainScreen(
                 ) { backStackEntry ->
                     val categoryId = backStackEntry.arguments?.getInt("categoryId") ?: 0
                     val title = backStackEntry.arguments?.getString("title") ?: ""
-                    
+
                     CategoryRoute(
                         categoryId = if (title.isNotEmpty()) title else categoryId.toString(),
                         onBack = { navController.popBackStack() },
@@ -348,7 +351,7 @@ fun MainScreen(
                             val encPhoto = Uri.encode(sellerPhotoUrl ?: "")
                             navController.navigate("chat/0/$sellerId/$prodId?sellerName=$encSName&productTitle=$encPTitle&price=${price.toInt()}&sellerPhotoUrl=$encPhoto")
                         },
-                        onOpenDelivery = { pid, quantity -> 
+                        onOpenDelivery = { pid, quantity ->
                             navController.navigate("delivery_choose/$pid/$quantity")
                         },
                         onOpenReviews = { pid -> navController.navigate("reviews/$pid") }
