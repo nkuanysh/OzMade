@@ -196,7 +196,9 @@ interface OzMadeApi {
     ): Response<ChatDto>
 
     @GET("chats")
-    suspend fun getBuyerChats(): Response<List<ChatDto>>
+    suspend fun getBuyerChats(
+        @Query("role") role: String = "buyer"
+    ): Response<List<ChatDto>>
 
     @DELETE("chats/{chat_id}")
     suspend fun deleteChat(
@@ -214,8 +216,10 @@ interface OzMadeApi {
         @Body request: ChatSendMessageRequest
     ): Response<MessageDto>
 
-    @GET("seller/chats")
-    suspend fun getSellerChats(): Response<List<ChatDto>>
+    @GET("chats")
+    suspend fun getSellerChats(
+        @Query("role") role: String = "seller"
+    ): Response<List<ChatDto>>
 
     @GET("seller/chats/{chat_id}/messages")
     suspend fun getSellerChatMessages(

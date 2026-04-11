@@ -1,6 +1,10 @@
 package com.example.ozmade.main.seller.chat.data
 
 import android.util.Log
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.ZoneId
+import java.time.OffsetDateTime
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.auth.SessionStore
 import com.example.ozmade.network.model.ChatSendMessageRequest
@@ -28,8 +32,9 @@ class RealSellerChatRepository @Inject constructor(
         Log.d(TAG, "getThreads: myId=$myId, received ${chats.size} chats")
 
         // Filter: for seller view, we only show chats where we are the seller
+        // and ignore chats where we are the buyer
         val filtered = if (myId != null && myId > 0) {
-            chats.filter { it.sellerId == myId }
+            chats.filter { it.sellerId == myId && it.buyerId != myId }
         } else {
             chats
         }
@@ -106,11 +111,19 @@ class RealSellerChatRepository @Inject constructor(
     private fun formatTime(isoString: String?): String {
         if (isoString.isNullOrBlank()) return ""
         return try {
-            val parts = isoString.split("T")
-            if (parts.size < 2) return isoString
-            parts[1].take(5)
+            // Backend provides ISO 8601 like "2023-10-27T10:00:00Z" (UTC)
+            val odt = OffsetDateTime.parse(isoString)
+            val local = odt.atZoneSameInstant(ZoneId.systemDefault())
+            local.format(DateTimeFormatter.ofPattern("HH:mm"))
         } catch (e: Exception) {
-            isoString ?: ""
+            try {
+                // Fallback for simple parts if parsing fails
+                val parts = isoString.split("T")
+                if (parts.size < 2) return isoString
+                parts[1].take(5)
+            } catch (e2: Exception) {
+                isoString ?: ""
+            }
         }
     }
 }

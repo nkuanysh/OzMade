@@ -1,6 +1,10 @@
 package com.example.ozmade.main.user.chat.data
 
 import android.util.Log
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.ZoneId
+import java.time.OffsetDateTime
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.auth.SessionStore
 import com.example.ozmade.network.model.ChatSendMessageRequest
@@ -28,9 +32,11 @@ class RealChatRepository @Inject constructor(
 
         Log.d(TAG, "getThreads: myId=$myId, received ${chats.size} chats")
 
-        // Filter: for buyer view, we only show chats where we are the buyer
+        // Filter: for buyer view, we only show chats where we are the buyer.
+        // We exclude chats where we are also the seller (self-chats) to avoid seeing our own name in the buyer list.
+        // If it's a self-chat, it should only appear in the Seller list.
         val filtered = if (myId != null && myId > 0) {
-            chats.filter { it.buyerId == myId }
+            chats.filter { it.buyerId == myId && it.sellerId != myId }
         } else {
             chats
         }
@@ -43,8 +49,8 @@ class RealChatRepository @Inject constructor(
             // Fallback: if all messages filtered out but chat exists, show at least something
             val last = visibleMessages.maxByOrNull { it.id } ?: c.messages?.maxByOrNull { it.id }
 
-            val displayName = c.sellerName 
-                ?: "Продавец #${c.sellerId}"
+            // Use seller's name/shop name from DTO, fallback to seller ID
+            val displayName = c.sellerName ?: c.seller?.name ?: "Продавец #${c.sellerId}"
 
             ChatThreadUi(
                 chatId = c.id,
@@ -52,7 +58,7 @@ class RealChatRepository @Inject constructor(
                 sellerName = displayName,
                 productId = c.productId ?: 0,
                 productTitle = c.productName ?: "Без названия",
-                productPrice = 0, 
+                productPrice = c.productPrice ?: 0,
                 productImageUrl = ImageUtils.formatImageUrl(c.productImage),
                 sellerPhotoUrl = ImageUtils.formatProfilePhotoUrl(c.sellerPhoto),
                 lastMessage = last?.content ?: "Напишите сообщение...",
@@ -134,11 +140,19 @@ class RealChatRepository @Inject constructor(
     private fun formatTime(isoString: String?): String {
         if (isoString.isNullOrBlank()) return ""
         return try {
-            val parts = isoString.split("T")
-            if (parts.size < 2) return isoString
-            parts[1].take(5)
+            // Backend provides ISO 8601 like "2023-10-27T10:00:00Z" (UTC)
+            val odt = OffsetDateTime.parse(isoString)
+            val local = odt.atZoneSameInstant(ZoneId.systemDefault())
+            local.format(DateTimeFormatter.ofPattern("HH:mm"))
         } catch (e: Exception) {
-            isoString
+            try {
+                // Fallback for simple parts if parsing fails
+                val parts = isoString.split("T")
+                if (parts.size < 2) return isoString
+                parts[1].take(5)
+            } catch (e2: Exception) {
+                isoString
+            }
         }
     }
 }
