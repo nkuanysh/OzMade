@@ -40,8 +40,8 @@ data class ProductDetailsUi(
     val description: String,
     val specs: List<Pair<String, String>>,
     val delivery: DeliveryInfoUi,
-    val seller: SellerUi
-
+    val seller: SellerUi,
+    val isMine: Boolean = false
 )
 
 sealed class ProductDetailsUiState {

@@ -56,6 +56,16 @@ class RealProductRepository @Inject constructor(
         val buyerLat = profile.addressLat
         val buyerLng = profile.addressLng
 
+        val sellerIdFromDto = dto.sellerId ?: dto.seller?.id ?: 0
+        
+        // Sometimes the sync endpoint provides the correct user_id that matches seller_id
+        val syncResp = runCatching { api.syncUser() }.getOrNull()
+        val myUserId = syncResp?.body()?.userId ?: profile.id
+
+        val isMine = sellerIdFromDto == myUserId || sellerIdFromDto == profile.id
+
+        Log.d(TAG, "Check ownership: sellerId=$sellerIdFromDto, myUserId=$myUserId, profileId=${profile.id}, isMine=$isMine")
+
         return ProductDetailsUi(
             id = dto.id,
             title = dto.title,
@@ -90,13 +100,14 @@ class RealProductRepository @Inject constructor(
                 )
             ),
             seller = SellerUi(
-                id = (dto.sellerId ?: dto.seller?.id ?: 0),
+                id = sellerIdFromDto,
                 name = dto.sellerName?.takeIf { it.isNotBlank() } ?: dto.seller?.name?.takeIf { it.isNotBlank() } ?: "Мастер",
                 address = dto.seller?.address ?: dto.address ?: "",
                 rating = dto.seller?.rating ?: 0.0,
                 completedOrders = dto.seller?.completedOrders ?: 0,
                 photoUrl = ImageUtils.formatProfilePhotoUrl(dto.seller?.photoUrl)
-            )
+            ),
+            isMine = isMine
         )
     }
 
@@ -164,5 +175,18 @@ class RealProductRepository @Inject constructor(
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    private fun isInsideDeliveryZone(
+        buyerLat: Double?,
+        buyerLng: Double?,
+        sellerLat: Double?,
+        sellerLng: Double?,
+        radiusKm: Double?
+    ): Boolean? {
+        if (buyerLat == null || buyerLng == null || sellerLat == null || sellerLng == null || radiusKm == null) return null
+        val results = FloatArray(1)
+        android.location.Location.distanceBetween(buyerLat, buyerLng, sellerLat, sellerLng, results)
+        return (results[0] / 1000f) <= radiusKm
     }
 }
