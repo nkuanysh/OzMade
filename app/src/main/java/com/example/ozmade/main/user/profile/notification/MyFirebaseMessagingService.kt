@@ -47,10 +47,16 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
 
         val data = remoteMessage.data
         Log.d("FCM", "Message received. Data: $data")
+        Log.d("FCM", "Notification: ${remoteMessage.notification?.title} / ${remoteMessage.notification?.body}")
 
         val type = data["type"] ?: "CHAT"
-        val title = remoteMessage.notification?.title ?: data["title"] ?: "OzMade"
-        val body = remoteMessage.notification?.body ?: data["body"] ?: ""
+        val title = data["title"] ?: remoteMessage.notification?.title ?: "OzMade"
+        val body = data["body"] ?: remoteMessage.notification?.body ?: ""
+
+        if (title.isBlank() && body.isBlank()) {
+            Log.w("FCM", "Received empty notification")
+            return
+        }
 
         // Сохраняем в локальную историю
         NotificationStorage.add(
