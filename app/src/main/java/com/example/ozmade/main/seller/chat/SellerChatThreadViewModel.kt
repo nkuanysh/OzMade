@@ -41,7 +41,7 @@ class SellerChatThreadViewModel @Inject constructor(
     private var pollingJob: Job? = null
 
     sealed class SellerChatEvent {
-        object ChatDeleted : SellerChatEvent()
+        data object ChatDeleted : SellerChatEvent()
         data class ActionError(val message: String) : SellerChatEvent()
     }
 
@@ -82,14 +82,19 @@ class SellerChatThreadViewModel @Inject constructor(
 
     fun send(text: String) {
         val chatId = currentChatId ?: return
+        val currentState = _uiState.value
         viewModelScope.launch {
             runCatching {
                 repo.sendMessage(chatId, text)
                 repo.getMessages(chatId)
             }.onSuccess { msgs ->
-                _uiState.value = SellerChatThreadUiState.Data(chatId, buyerName, msgs)
+                if (currentState is SellerChatThreadUiState.Data) {
+                    _uiState.value = currentState.copy(messages = msgs)
+                } else {
+                    _uiState.value = SellerChatThreadUiState.Data(chatId, buyerName, msgs)
+                }
             }.onFailure {
-                _uiState.value = SellerChatThreadUiState.Error(it.message ?: "Ошибка")
+                _events.emit(SellerChatEvent.ActionError(it.message ?: "Ошибка при отправке"))
             }
         }
     }

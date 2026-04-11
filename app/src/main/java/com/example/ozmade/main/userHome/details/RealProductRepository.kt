@@ -148,7 +148,7 @@ class RealProductRepository @Inject constructor(
 
     override suspend fun postComment(productId: Int, rating: Int, text: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
-            val resp = api.postComment(productId, com.example.ozmade.network.model.CommentRequest(rating, text))
+            val resp = api.postComment(productId, com.example.ozmade.network.model.CommentRequest(text, rating))
             if (resp.isSuccessful) Result.success(Unit)
             else Result.failure(Exception("Error ${resp.code()}"))
         } catch (e: Exception) {

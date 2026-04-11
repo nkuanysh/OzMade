@@ -34,14 +34,22 @@ class SellerChatListViewModel @Inject constructor(
     }
 
     fun load() {
-        _uiState.value = SellerChatListUiState.Loading
+        // Only show loading if we don't have data yet
+        if (_uiState.value !is SellerChatListUiState.Data) {
+            _uiState.value = SellerChatListUiState.Loading
+        }
+        
         viewModelScope.launch {
             runCatching { repo.getThreads() }
-                .onSuccess { 
-                    _uiState.value = SellerChatListUiState.Data(it)
+                .onSuccess { threads ->
+                    _uiState.value = SellerChatListUiState.Data(threads)
                     startPolling()
                 }
-                .onFailure { _uiState.value = SellerChatListUiState.Error(it.message ?: "Ошибка") }
+                .onFailure { 
+                    if (_uiState.value !is SellerChatListUiState.Data) {
+                        _uiState.value = SellerChatListUiState.Error(it.message ?: "Ошибка загрузки")
+                    }
+                }
         }
     }
 
@@ -53,7 +61,12 @@ class SellerChatListViewModel @Inject constructor(
                 runCatching { repo.getThreads() }
                     .onSuccess { threads ->
                         val current = _uiState.value
-                        if (current is SellerChatListUiState.Data && current.threads != threads) {
+                        if (current is SellerChatListUiState.Data) {
+                            if (current.threads != threads) {
+                                _uiState.value = SellerChatListUiState.Data(threads)
+                            }
+                        } else {
+                            // Recover from Error/Loading state if polling succeeds
                             _uiState.value = SellerChatListUiState.Data(threads)
                         }
                     }

@@ -15,33 +15,49 @@ class RealSellerChatRepository @Inject constructor(
     private val sessionStore: SessionStore
 ) : SellerChatRepository {
 
+    private val TAG = "RealSellerChatRepo"
+
     override suspend fun getThreads(): List<SellerChatThreadUi> = withContext(Dispatchers.IO) {
         val resp = api.getSellerChats()
         if (!resp.isSuccessful) error("Не удалось загрузить чаты (${resp.code()})")
+        
+        val myId = sessionStore.myUserId()
         val chats = resp.body().orEmpty()
 
-        chats.mapNotNull { chat ->
-            // Фильтруем сообщения: только те, что созданы после последней очистки истории продавцом
-            val visibleMessages = chat.messages.orEmpty().filter { msg ->
-                chat.sellerClearedAt == null || msg.createdAt > chat.sellerClearedAt
+        Log.d(TAG, "getThreads: myId=$myId, received ${chats.size} chats")
+
+        // Filter: for seller view, we only show chats where we are the seller
+        val filtered = if (myId != null && myId > 0) {
+            chats.filter { it.sellerId == myId }
+        } else {
+            chats
+        }
+
+        filtered.mapNotNull { chat ->
+            // Если чат удален продавцом полностью, не показываем его
+            if (chat.deletedBySeller) return@mapNotNull null
+
+            // Фильтруем сообщения по времени очистки
+            val messages = chat.messages.orEmpty()
+            val visibleMessages = messages.filter { msg ->
+                chat.sellerClearedAt.isNullOrEmpty() || chat.sellerClearedAt.startsWith("0001") || msg.createdAt > chat.sellerClearedAt
             }
 
-            // Если после фильтрации сообщений не осталось, и чат был очищен/удален, не показываем его в списке
-            if (visibleMessages.isEmpty()) return@mapNotNull null
-
-            val last = visibleMessages.maxByOrNull { it.createdAt }
+            // Fallback to any message if visible list is empty but chat exists
+            val last = visibleMessages.maxByOrNull { it.id } ?: messages.maxByOrNull { it.id }
+            
             SellerChatThreadUi(
                 chatId = chat.id,
                 buyerId = chat.buyerId,
-                buyerName = "Покупатель #${chat.buyerId}",
-                lastMessage = last?.content ?: "",
-                lastTimeText = formatTime(last?.createdAt ?: "")
+                // Используем имя из чата, если оно там есть
+                buyerName = chat.sellerName ?: "Покупатель #${chat.buyerId}",
+                lastMessage = last?.content ?: "Нет новых сообщений",
+                lastTimeText = formatTime(last?.createdAt ?: chat.updatedAt)
             )
         }
     }
 
     override suspend fun getMessages(chatId: Int): List<SellerChatMessageUi> = withContext(Dispatchers.IO) {
-        // Получаем информацию о чате, чтобы узнать время очистки (sellerClearedAt)
         val chatsResp = api.getSellerChats()
         val chat = chatsResp.body()?.find { it.id == chatId }
         val clearedAt = chat?.sellerClearedAt
@@ -52,14 +68,16 @@ class RealSellerChatRepository @Inject constructor(
 
         val myId = sessionStore.myUserId()
 
+        Log.d(TAG, "getMessages: chatId=$chatId, myId=$myId, total=${dtos.size}, clearedAt=$clearedAt")
+
         dtos
-            .filter { clearedAt == null || it.createdAt > clearedAt }
+            .filter { clearedAt.isNullOrEmpty() || clearedAt.startsWith("0001") || it.createdAt > clearedAt }
             .map { dto ->
                 val role = dto.senderRole?.uppercase()
                 val isMine = if (myId != null && myId > 0) {
                     dto.senderId == myId
                 } else {
-                    role != "BUYER"
+                    role != "BUYER" && role != "USER"
                 }
 
                 SellerChatMessageUi(
@@ -81,14 +99,14 @@ class RealSellerChatRepository @Inject constructor(
         if (!resp.isSuccessful) error("Не удалось удалить историю (${resp.code()})")
     }
 
-    private fun formatTime(isoString: String): String {
-        if (isoString.isBlank()) return ""
+    private fun formatTime(isoString: String?): String {
+        if (isoString.isNullOrBlank()) return ""
         return try {
             val parts = isoString.split("T")
             if (parts.size < 2) return isoString
             parts[1].take(5)
         } catch (e: Exception) {
-            isoString
+            isoString ?: ""
         }
     }
 }

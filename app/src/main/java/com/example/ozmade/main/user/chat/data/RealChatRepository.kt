@@ -1,5 +1,6 @@
 package com.example.ozmade.main.user.chat.data
 
+import android.util.Log
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.auth.SessionStore
 import com.example.ozmade.network.model.ChatSendMessageRequest
@@ -15,25 +16,32 @@ class RealChatRepository @Inject constructor(
     private val sessionStore: SessionStore
 ) : ChatRepository {
 
+    private val TAG = "RealChatRepository"
+
     override suspend fun getThreads(): List<ChatThreadUi> = withContext(Dispatchers.IO) {
         val resp = api.getBuyerChats()
         if (!resp.isSuccessful) error("Не удалось загрузить чаты (${resp.code()})")
 
+        val myId = sessionStore.myUserId()
         val chats = resp.body().orEmpty()
 
-        chats.map { c ->
+        Log.d(TAG, "getThreads: myId=$myId, received ${chats.size} chats")
+
+        // Filter: for buyer view, we only show chats where we are the buyer
+        val filtered = if (myId != null && myId > 0) {
+            chats.filter { it.buyerId == myId }
+        } else {
+            chats
+        }
+
+        filtered.map { c ->
             val visibleMessages = c.messages.orEmpty().filter { msg ->
-                c.buyerClearedAt == null || msg.createdAt > c.buyerClearedAt
+                c.buyerClearedAt.isNullOrEmpty() || c.buyerClearedAt.startsWith("0001") || msg.createdAt > c.buyerClearedAt
             }
 
-            val last = visibleMessages.maxByOrNull { it.createdAt }
+            // Fallback: if all messages filtered out but chat exists, show at least something
+            val last = visibleMessages.maxByOrNull { it.id } ?: c.messages?.maxByOrNull { it.id }
 
-            // Пытаемся найти имя продавца/магазина в разных полях.
-            // Приоритет: 
-            // 1. Прямое поле sellerName в объекте чата
-            // 2. Поле name во вложенном объекте seller
-            // 3. productName (если это "Чат по товару", но обычно нам нужно имя продавца)
-            // 4. Заглушка
             val displayName = c.sellerName 
                 ?: c.seller?.name 
                 ?: "Продавец #${c.sellerId}"
@@ -46,14 +54,15 @@ class RealChatRepository @Inject constructor(
                 productTitle = c.productName ?: "Без названия",
                 productPrice = 0, 
                 productImageUrl = c.productImage,
-                lastMessage = last?.content ?: "Нет сообщений",
-                lastTimeText = formatTime(last?.createdAt ?: c.createdAt),
+                lastMessage = last?.content ?: "Напишите сообщение...",
+                lastTimeText = formatTime(last?.createdAt ?: c.updatedAt ?: c.createdAt),
                 isOnline = false
             )
         }.sortedByDescending { it.chatId }
     }
 
     override suspend fun getMessages(chatId: Int): List<ChatMessageUi> = withContext(Dispatchers.IO) {
+        // To get clearedAt, we need the chat object
         val chatsResp = api.getBuyerChats()
         val chat = chatsResp.body()?.find { it.id == chatId }
         val clearedAt = chat?.buyerClearedAt
@@ -62,15 +71,19 @@ class RealChatRepository @Inject constructor(
         if (!resp.isSuccessful) error("Не удалось загрузить сообщения (${resp.code()})")
 
         val myId = sessionStore.myUserId()
+        val messages = resp.body().orEmpty()
+        
+        Log.d(TAG, "getMessages: chatId=$chatId, myId=$myId, total messages=${messages.size}, clearedAt=$clearedAt")
 
-        resp.body().orEmpty()
-            .filter { clearedAt == null || it.createdAt > clearedAt }
+        messages
+            .filter { clearedAt.isNullOrEmpty() || clearedAt.startsWith("0001") || it.createdAt > clearedAt }
             .map { dto ->
                 val role = dto.senderRole?.uppercase()
+                // isMine is true if senderId matches our ID or if role is BUYER/USER
                 val isMine = if (myId != null && myId > 0) {
                     dto.senderId == myId
                 } else {
-                    role != "SELLER"
+                    role == "BUYER" || role == "USER"
                 }
 
                 ChatMessageUi(
@@ -87,6 +100,7 @@ class RealChatRepository @Inject constructor(
         content: String,
         existingChatId: Int?
     ): Int = withContext(Dispatchers.IO) {
+        Log.d(TAG, "sendMessageOrCreate: productId=$productId, existingChatId=$existingChatId")
 
         if (existingChatId == null || existingChatId == 0) {
             val resp = api.createBuyerChat(
@@ -115,8 +129,8 @@ class RealChatRepository @Inject constructor(
         if (!resp.isSuccessful) error("Не удалось очистить чат (${resp.code()})")
     }
 
-    private fun formatTime(isoString: String): String {
-        if (isoString.isBlank()) return ""
+    private fun formatTime(isoString: String?): String {
+        if (isoString.isNullOrBlank()) return ""
         return try {
             val parts = isoString.split("T")
             if (parts.size < 2) return isoString
