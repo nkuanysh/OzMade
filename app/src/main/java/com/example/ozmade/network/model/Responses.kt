@@ -153,6 +153,8 @@ data class SellerProfileDto(
 
 data class ChatDto(
     @SerializedName(value="ID", alternate=["id"]) val id: Int,
+    @SerializedName(value="CreatedAt", alternate=["created_at"]) val createdAt: String,
+    @SerializedName(value="UpdatedAt", alternate=["updated_at"]) val updatedAt: String,
     @SerializedName(value="SellerID", alternate=["seller_id","sellerId"]) val sellerId: Int,
     @SerializedName(value="BuyerID", alternate=["buyer_id","buyerId"]) val buyerId: Int,
     @SerializedName(value="ProductID", alternate=["product_id","productId"]) val productId: Int? = null,

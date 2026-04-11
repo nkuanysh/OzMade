@@ -21,35 +21,29 @@ class RealChatRepository @Inject constructor(
 
         val chats = resp.body().orEmpty()
 
-        chats.mapNotNull { c ->
-            // Фильтруем сообщения: только те, что были созданы после последнего "очищения" чата
+        chats.map { c ->
             val visibleMessages = c.messages.orEmpty().filter { msg ->
                 c.buyerClearedAt == null || msg.createdAt > c.buyerClearedAt
             }
-
-            // Если сообщений нет и чат помечен как удаленный (очищенный), скрываем его из списка
-            if (visibleMessages.isEmpty()) return@mapNotNull null
 
             val last = visibleMessages.maxByOrNull { it.createdAt }
 
             ChatThreadUi(
                 chatId = c.id,
                 sellerId = c.sellerId,
-                sellerName = "Продавец #${c.sellerId}",
+                sellerName = if (!c.productName.isNullOrBlank()) "Чат по товару" else "Продавец #${c.sellerId}",
                 productId = c.productId ?: 0,
-                productTitle = c.productName ?: "",
-                productPrice = 0,
+                productTitle = c.productName ?: "Без названия",
+                productPrice = 0, // В API пока нет цены в объекте чата
                 productImageUrl = c.productImage,
-                lastMessage = last?.content ?: "",
-                lastTimeText = formatTime(last?.createdAt ?: ""),
+                lastMessage = last?.content ?: "Нет сообщений",
+                lastTimeText = formatTime(last?.createdAt ?: c.createdAt),
                 isOnline = false
             )
-        }
+        }.sortedByDescending { it.chatId } // Показываем новые чаты сверху
     }
 
     override suspend fun getMessages(chatId: Int): List<ChatMessageUi> = withContext(Dispatchers.IO) {
-        // Сначала получаем список чатов, чтобы узнать время очистки (buyerClearedAt)
-        // В идеале это должен делать бэкенд, но мы готовим фронт.
         val chatsResp = api.getBuyerChats()
         val chat = chatsResp.body()?.find { it.id == chatId }
         val clearedAt = chat?.buyerClearedAt
@@ -84,7 +78,7 @@ class RealChatRepository @Inject constructor(
         existingChatId: Int?
     ): Int = withContext(Dispatchers.IO) {
 
-        if (existingChatId == null) {
+        if (existingChatId == null || existingChatId == 0) {
             val resp = api.createBuyerChat(
                 CreateChatRequest(
                     productId = productId,
