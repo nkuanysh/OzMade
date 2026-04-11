@@ -581,9 +581,9 @@ private fun SellerBlock(seller: SellerUi, onClick: () -> Unit) {
                 shape = CircleShape,
                 color = Color(0xFFE6DFFF) // Тот самый светло-фиолетовый
             ) {
-                if (!seller.avatarUrl.isNullOrBlank()) {
+                if (!seller.photoUrl.isNullOrBlank()) {
                     AsyncImage(
-                        model = seller.avatarUrl,
+                        model = seller.photoUrl,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()

@@ -21,6 +21,7 @@ sealed class SellerChatThreadUiState {
     data class Data(
         val chatId: Int,
         val buyerName: String,
+        val buyerPhotoUrl: String? = null,
         val messages: List<SellerChatMessageUi>
     ) : SellerChatThreadUiState()
 }
@@ -38,6 +39,7 @@ class SellerChatThreadViewModel @Inject constructor(
 
     private var currentChatId: Int? = null
     private var buyerName: String = ""
+    private var buyerPhotoUrl: String? = null
     private var pollingJob: Job? = null
 
     sealed class SellerChatEvent {
@@ -45,15 +47,16 @@ class SellerChatThreadViewModel @Inject constructor(
         data class ActionError(val message: String) : SellerChatEvent()
     }
 
-    fun open(chatId: Int, buyerName: String) {
+    fun open(chatId: Int, buyerName: String, buyerPhotoUrl: String? = null) {
         this.currentChatId = chatId
         this.buyerName = buyerName
+        this.buyerPhotoUrl = buyerPhotoUrl
 
         _uiState.value = SellerChatThreadUiState.Loading
         viewModelScope.launch {
             runCatching { repo.getMessages(chatId) }
                 .onSuccess { msgs ->
-                    _uiState.value = SellerChatThreadUiState.Data(chatId, buyerName, msgs)
+                    _uiState.value = SellerChatThreadUiState.Data(chatId, buyerName, buyerPhotoUrl, msgs)
                     startPolling(chatId)
                 }
                 .onFailure {
@@ -91,7 +94,7 @@ class SellerChatThreadViewModel @Inject constructor(
                 if (currentState is SellerChatThreadUiState.Data) {
                     _uiState.value = currentState.copy(messages = msgs)
                 } else {
-                    _uiState.value = SellerChatThreadUiState.Data(chatId, buyerName, msgs)
+                    _uiState.value = SellerChatThreadUiState.Data(chatId, buyerName, buyerPhotoUrl, msgs)
                 }
             }.onFailure {
                 _events.emit(SellerChatEvent.ActionError(it.message ?: "Ошибка при отправке"))

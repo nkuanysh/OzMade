@@ -22,8 +22,8 @@ data class SellerStoreSettingsUiState(
     val city: String = "",
     val address: String = "",
     val selectedCategories: List<String> = emptyList(),
-    val logoUrl: String? = null,
-    val localLogoUri: Uri? = null,
+    val photoUrl: String? = null,
+    val localPhotoUri: Uri? = null,
     val error: String? = null,
     val isSuccess: Boolean = false,
     val levelTitle: String? = null,
@@ -57,7 +57,7 @@ class SellerStoreSettingsViewModel @Inject constructor(
                         address = profile.address ?: "",
                         selectedCategories = profile.categories ?: emptyList(),
                         levelTitle = profile.levelTitle,
-                        logoUrl = ImageUtils.formatProfilePhotoUrl(profile.photoUrl)
+                        photoUrl = ImageUtils.formatProfilePhotoUrl(profile.photoUrl)
                     )
                 }
             } else {
@@ -72,7 +72,7 @@ class SellerStoreSettingsViewModel @Inject constructor(
     fun onAboutChange(about: String) = _uiState.update { it.copy(about = about) }
     fun onCityChange(city: String) = _uiState.update { it.copy(city = city) }
     fun onAddressChange(address: String) = _uiState.update { it.copy(address = address) }
-    fun onLogoSelected(uri: Uri) = _uiState.update { it.copy(localLogoUri = uri) }
+    fun onPhotoSelected(uri: Uri) = _uiState.update { it.copy(localPhotoUri = uri) }
     
     fun onCategoryToggle(category: String) {
         _uiState.update { state ->
@@ -91,9 +91,9 @@ class SellerStoreSettingsViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
             
             runCatching {
-                var finalPhotoUrl = currentState.logoUrl
+                var finalPhotoUrl = currentState.photoUrl
                 
-                currentState.localLogoUri?.let { uri ->
+                currentState.localPhotoUri?.let { uri ->
                     finalPhotoUrl = repository.uploadPhoto(uri).getOrThrow()
                 }
 

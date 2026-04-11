@@ -9,7 +9,7 @@ data class SellerHeaderUi(
     val rating: Double,
     val reviewsCount: Int,
     val daysWithOzMade: Int,
-    val avatarUrl: String? = null,
+    val photoUrl: String? = null,
     val city: String? = null,
     val description: String? = null,
     val categories: String? = null,

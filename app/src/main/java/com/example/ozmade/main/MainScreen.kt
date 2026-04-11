@@ -335,10 +335,11 @@ fun MainScreen(
                         productId = productId,
                         onBack = { navController.popBackStack() },
                         onOpenSeller = { sid -> navController.navigate("seller/$sid") },
-                        onChat = { sellerId, sellerName, prodId, productTitle, price ->
+                        onChat = { sellerId, sellerName, sellerPhotoUrl, prodId, productTitle, price ->
                             val encSName = Uri.encode(sellerName)
                             val encPTitle = Uri.encode(productTitle)
-                            navController.navigate("chat/0/$sellerId/$prodId?sellerName=$encSName&productTitle=$encPTitle&price=${price.toInt()}")
+                            val encPhoto = Uri.encode(sellerPhotoUrl ?: "")
+                            navController.navigate("chat/0/$sellerId/$prodId?sellerName=$encSName&productTitle=$encPTitle&price=${price.toInt()}&sellerPhotoUrl=$encPhoto")
                         },
                         onOpenDelivery = { pid, quantity -> 
                             navController.navigate("delivery_choose/$pid/$quantity")
@@ -405,14 +406,15 @@ fun MainScreen(
                 }
 
                 composable(
-                    "chat/{chatId}/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}",
+                    "chat/{chatId}/{sellerId}/{productId}?sellerName={sellerName}&productTitle={productTitle}&price={price}&sellerPhotoUrl={sellerPhotoUrl}",
                     arguments = listOf(
                         navArgument("chatId") { type = NavType.IntType },
                         navArgument("sellerId") { type = NavType.IntType },
                         navArgument("productId") { type = NavType.IntType },
                         navArgument("sellerName") { type = NavType.StringType },
                         navArgument("productTitle") { type = NavType.StringType },
-                        navArgument("price") { type = NavType.IntType }
+                        navArgument("price") { type = NavType.IntType },
+                        navArgument("sellerPhotoUrl") { type = NavType.StringType; nullable = true }
                     )
                 ) { backStackEntry ->
                     val chatId = backStackEntry.arguments?.getInt("chatId") ?: 0
@@ -421,12 +423,14 @@ fun MainScreen(
                     val sellerName = backStackEntry.arguments?.getString("sellerName") ?: ""
                     val productTitle = backStackEntry.arguments?.getString("productTitle") ?: ""
                     val price = backStackEntry.arguments?.getInt("price") ?: 0
+                    val sellerPhotoUrl = backStackEntry.arguments?.getString("sellerPhotoUrl")
 
                     ChatThreadRoute(
                         chatId = if (chatId == 0) null else chatId,
                         sellerId = sellerId,
                         productId = productId,
                         sellerName = sellerName,
+                        sellerPhotoUrl = sellerPhotoUrl,
                         productTitle = productTitle,
                         productPrice = price,
                         onBack = { navController.popBackStack() },

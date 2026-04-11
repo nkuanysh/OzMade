@@ -158,19 +158,21 @@ data class ChatDto(
     @SerializedName(value="CreatedAt", alternate=["created_at"]) val createdAt: String,
     @SerializedName(value="UpdatedAt", alternate=["updated_at"]) val updatedAt: String,
     @SerializedName(value="SellerID", alternate=["seller_id","sellerId"]) val sellerId: Int,
-    @SerializedName(value="SellerName", alternate=["seller_name","sellerName", "store_name", "storeName", "StoreName", "shop_name", "shopName", "ShopName", "display_name", "DisplayName"]) val sellerName: String? = null,
     @SerializedName(value="seller", alternate=["Seller"]) val seller: SellerInfoDto? = null,
     @SerializedName(value="BuyerID", alternate=["buyer_id","buyerId"]) val buyerId: Int,
     @SerializedName(value="ProductID", alternate=["product_id","productId"]) val productId: Int? = null,
     @SerializedName(value="ProductName", alternate=["product_name","productName"]) val productName: String? = null,
     @SerializedName(value="ProductImage", alternate=["product_image", "productImage", "ImageName"]) val productImage: String? = null,
+    @SerializedName(value ="phone_number", alternate = ["phoneNumber"]) val phoneNumber: String? = null,
+    @SerializedName(value = "seller_name", alternate=["SellerName", "sellerName", "store_name", "storeName", "StoreName", "shop_name", "shopName", "ShopName", "display_name", "DisplayName"]) val sellerName: String? = null,
+    @SerializedName("seller_photo") val sellerPhoto: String? = null,
     @SerializedName("buyer_name") val buyerName: String? = null,
     @SerializedName("buyer_photo") val buyerPhoto: String? = null,
-    @SerializedName(value="Messages", alternate=["messages"]) val messages: List<MessageDto>?,
     @SerializedName("deleted_by_buyer") val deletedByBuyer: Boolean = false,
     @SerializedName("deleted_by_seller") val deletedBySeller: Boolean = false,
     @SerializedName("buyer_cleared_at") val buyerClearedAt: String? = null,
-    @SerializedName("seller_cleared_at") val sellerClearedAt: String? = null
+    @SerializedName("seller_cleared_at") val sellerClearedAt: String? = null,
+    @SerializedName(value="Messages", alternate=["messages"]) val messages: List<MessageDto>? = null
 )
 
 data class MessageDto(
@@ -276,7 +278,8 @@ data class ReviewItemDto(
     @SerializedName(value = "ProductTitle", alternate = ["product_title", "productTitle"]) val productTitle: String,
     @SerializedName(value = "Rating", alternate = ["rating"]) val rating: Double,
     @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String,
-    @SerializedName(value = "Text", alternate = ["text"]) val text: String
+    @SerializedName(value = "Text", alternate = ["text"]) val text: String,
+    @SerializedName(value = "photo_url", alternate = ["user_photo", "avatar_url"]) val photoUrl: String? = null
 )
 
 data class SellerQualityDto(
@@ -347,7 +350,8 @@ data class SellerReviewItemDto(
     @SerializedName(value = "ProductTitle", alternate = ["product_title", "productTitle"]) val productTitle: String,
     @SerializedName(value = "Rating", alternate = ["rating"]) val rating: Double,
     @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String,
-    @SerializedName(value = "Text", alternate = ["text"]) val text: String
+    @SerializedName(value = "Text", alternate = ["text"]) val text: String,
+    @SerializedName(value = "photo_url", alternate = ["user_photo", "avatar_url"]) val photoUrl: String? = null
 )
 
 data class OrderDto(

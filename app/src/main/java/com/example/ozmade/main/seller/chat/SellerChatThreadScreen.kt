@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.example.ozmade.main.seller.chat.data.SellerChatMessageUi
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,6 +32,7 @@ import com.example.ozmade.main.seller.chat.data.SellerChatMessageUi
 fun SellerChatThreadRoute(
     chatId: Int,
     buyerName: String,
+    buyerPhotoUrl: String? = null,
     onBack: () -> Unit,
     viewModel: SellerChatThreadViewModel = hiltViewModel()
 ) {
@@ -45,7 +47,7 @@ fun SellerChatThreadRoute(
     }
 
     LaunchedEffect(chatId) {
-        viewModel.open(chatId, buyerName)
+        viewModel.open(chatId, buyerName, buyerPhotoUrl)
     }
 
     SellerChatThreadScreen(
@@ -78,27 +80,24 @@ private fun SellerChatThreadScreen(
         topBar = {
             TopAppBar(
                 title = {
+                    val data = uiState as? SellerChatThreadUiState.Data
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            modifier = Modifier.size(40.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                val name = (uiState as? SellerChatThreadUiState.Data)?.buyerName ?: "Ч"
-                                Text(
-                                    text = name.take(1).uppercase(),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                                )
-                            }
-                        }
+                        AsyncImage(
+                            model = data?.buyerPhotoUrl,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primaryContainer),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                            error = null
+                        )
 
                         Spacer(Modifier.width(12.dp))
 
                         Column {
                             Text(
-                                text = (uiState as? SellerChatThreadUiState.Data)?.buyerName ?: "Чат",
+                                text = data?.buyerName ?: "Чат",
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis

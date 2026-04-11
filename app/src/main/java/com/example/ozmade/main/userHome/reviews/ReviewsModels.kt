@@ -5,7 +5,8 @@ data class ReviewUi(
     val userName: String,
     val rating: Double, // 0..5 (может быть 3.5)
     val dateText: String, // пока текстом: "15.02.2026"
-    val text: String
+    val text: String,
+    val photoUrl: String? = null
 )
 
 data class ReviewsSummaryUi(

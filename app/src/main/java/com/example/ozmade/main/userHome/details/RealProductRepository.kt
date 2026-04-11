@@ -94,7 +94,8 @@ class RealProductRepository @Inject constructor(
                 name = dto.sellerName?.takeIf { it.isNotBlank() } ?: dto.seller?.name?.takeIf { it.isNotBlank() } ?: "Мастер",
                 address = dto.seller?.address ?: dto.address ?: "",
                 rating = dto.seller?.rating ?: 0.0,
-                completedOrders = dto.seller?.completedOrders ?: 0
+                completedOrders = dto.seller?.completedOrders ?: 0,
+                photoUrl = ImageUtils.formatProfilePhotoUrl(dto.seller?.photoUrl)
             )
         )
     }

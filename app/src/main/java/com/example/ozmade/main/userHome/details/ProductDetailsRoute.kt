@@ -9,7 +9,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 fun ProductDetailsRoute(
     productId: Int,
     onBack: () -> Unit,
-    onChat: (sellerId: Int, sellerName: String, productId: Int, productTitle: String, price: Double) -> Unit,
+    onChat: (sellerId: Int, sellerName: String, sellerPhotoUrl: String?, productId: Int, productTitle: String, price: Double) -> Unit,
     onOpenDelivery: (productId: Int, qty: Int) -> Unit,
     onOpenReviews: (Int) -> Unit,
     onOpenSeller: (Int) -> Unit,
@@ -55,6 +55,7 @@ fun ProductDetailsRoute(
                     onChat(
                         p.seller.id,
                         p.seller.name,
+                        p.seller.photoUrl,
                         p.id,
                         p.title,
                         p.price.toDouble()

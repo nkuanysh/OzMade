@@ -15,5 +15,5 @@ interface ProfileRepository {
     suspend fun logout()
     suspend fun getMyOrders(): List<com.example.ozmade.network.model.OrderDto>
     suspend fun getMyFavorites(): List<com.example.ozmade.network.model.ProductDto>
-    suspend fun uploadAvatar(uri: android.net.Uri): String
+    suspend fun uploadPhoto(uri: android.net.Uri): String
 }

@@ -22,7 +22,7 @@ data class DeliveryInfoUi(
 data class SellerUi(
     val id: Int,
     val name: String,
-    val avatarUrl: String? = null,
+    val photoUrl: String? = null,
     val address: String,
     val rating: Double,
     val completedOrders: Int
