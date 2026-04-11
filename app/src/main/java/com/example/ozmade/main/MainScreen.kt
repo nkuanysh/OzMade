@@ -167,12 +167,19 @@ fun MainScreen(
                                 label = { Text(item.label, fontSize = 10.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
                                 selected = selected,
                                 onClick = {
-                                    navController.navigate(item.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = true
+                                    if (selected) {
+                                        // If already on this tab, refresh by popping everything including current destination
+                                        navController.navigate(item.route) {
+                                            popUpTo(item.route) { inclusive = true }
                                         }
-                                        launchSingleTop = true
-                                        restoreState = true
+                                    } else {
+                                        navController.navigate(item.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = true
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        }
                                     }
                                 },
                                 colors = NavigationBarItemDefaults.colors(
