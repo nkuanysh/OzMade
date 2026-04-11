@@ -1,5 +1,6 @@
 package com.example.ozmade.main.user.orders.data
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.orders.data.OrderStatus
@@ -30,8 +31,15 @@ class BuyerOrdersViewModel @Inject constructor(
 
     fun postReview(productId: Int, rating: Int, text: String, onComplete: () -> Unit) {
         viewModelScope.launch {
+            Log.d("BuyerOrdersViewModel", "Posting review: prodId=$productId, rating=$rating, text=$text")
             productRepo.postComment(productId, rating, text)
-                .onSuccess { onComplete() }
+                .onSuccess { 
+                    Log.d("BuyerOrdersViewModel", "Review posted successfully")
+                    onComplete() 
+                }
+                .onFailure { e ->
+                    Log.e("BuyerOrdersViewModel", "Failed to post review", e)
+                }
         }
     }
 
