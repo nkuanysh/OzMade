@@ -37,16 +37,16 @@ data class ProductRequest(
 )
 
 data class UpdateSellerProfileRequest(
-    @SerializedName("PhotoUrl") val photoUrl: String? = null,
-    @SerializedName("Name") val name: String? = null,
-    @SerializedName("DisplayName") val displayName: String? = null,
-    @SerializedName("About") val about: String? = null,
-    @SerializedName("City") val city: String? = null,
-    @SerializedName("Address") val address: String? = null,
-    @SerializedName("FirstName") val firstName: String? = null,
-    @SerializedName("LastName") val lastName: String? = null,
-    @SerializedName("Categories") val categories: List<String>? = null,
-    @SerializedName("LevelTitle") val levelTitle: String? = null
+    @SerializedName("photo_url") val photoUrl: String? = null,
+    @SerializedName("name") val name: String? = null,
+    @SerializedName("display_name") val displayName: String? = null,
+    @SerializedName("description") val about: String? = null,
+    @SerializedName("city") val city: String? = null,
+    @SerializedName("address") val address: String? = null,
+    @SerializedName("first_name") val firstName: String? = null,
+    @SerializedName("last_name") val lastName: String? = null,
+    @SerializedName("categories") val categories: List<String>? = null,
+    @SerializedName("level_title") val levelTitle: String? = null
 )
 
 data class CreateOrderRequest(

@@ -5,6 +5,9 @@ data class SellerChatThreadUi(
     val buyerId: Int,
     val buyerName: String,
     val buyerPhotoUrl: String? = null,
+    val productId: Int = 0,
+    val productTitle: String = "",
+    val productImageUrl: String? = null,
     val lastMessage: String,
     val lastTimeText: String
 )

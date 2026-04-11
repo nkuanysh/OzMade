@@ -22,6 +22,9 @@ sealed class SellerChatThreadUiState {
         val chatId: Int,
         val buyerName: String,
         val buyerPhotoUrl: String? = null,
+        val productId: Int = 0,
+        val productTitle: String = "",
+        val productImageUrl: String? = null,
         val messages: List<SellerChatMessageUi>
     ) : SellerChatThreadUiState()
 }
@@ -54,9 +57,23 @@ class SellerChatThreadViewModel @Inject constructor(
 
         _uiState.value = SellerChatThreadUiState.Loading
         viewModelScope.launch {
-            runCatching { repo.getMessages(chatId) }
-                .onSuccess { msgs ->
-                    _uiState.value = SellerChatThreadUiState.Data(chatId, buyerName, buyerPhotoUrl, msgs)
+            runCatching { 
+                val msgs = repo.getMessages(chatId)
+                // Get thread info from repo to populate product details
+                val threads = repo.getThreads()
+                val thread = threads.find { it.chatId == chatId }
+                msgs to thread
+            }
+                .onSuccess { (msgs, thread) ->
+                    _uiState.value = SellerChatThreadUiState.Data(
+                        chatId = chatId,
+                        buyerName = buyerName,
+                        buyerPhotoUrl = buyerPhotoUrl,
+                        productId = thread?.productId ?: 0,
+                        productTitle = thread?.productTitle ?: "",
+                        productImageUrl = thread?.productImageUrl,
+                        messages = msgs
+                    )
                     startPolling(chatId)
                 }
                 .onFailure {
@@ -85,16 +102,14 @@ class SellerChatThreadViewModel @Inject constructor(
 
     fun send(text: String) {
         val chatId = currentChatId ?: return
-        val currentState = _uiState.value
         viewModelScope.launch {
             runCatching {
                 repo.sendMessage(chatId, text)
                 repo.getMessages(chatId)
             }.onSuccess { msgs ->
-                if (currentState is SellerChatThreadUiState.Data) {
-                    _uiState.value = currentState.copy(messages = msgs)
-                } else {
-                    _uiState.value = SellerChatThreadUiState.Data(chatId, buyerName, buyerPhotoUrl, msgs)
+                val state = _uiState.value
+                if (state is SellerChatThreadUiState.Data) {
+                    _uiState.value = state.copy(messages = msgs)
                 }
             }.onFailure {
                 _events.emit(SellerChatEvent.ActionError(it.message ?: "Ошибка при отправке"))

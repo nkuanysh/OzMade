@@ -148,17 +148,35 @@ private fun SellerThreadItem(thread: SellerChatThreadUi, onClick: () -> Unit) {
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Photo
-            AsyncImage(
-                model = thread.buyerPhotoUrl,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                error = null // Or a placeholder with the first letter
-            )
+            // Photo & Product Badge
+            Box(modifier = Modifier.size(56.dp)) {
+                AsyncImage(
+                    model = thread.buyerPhotoUrl,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                    error = null
+                )
+
+                // Product Image Badge
+                if (!thread.productImageUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = thread.productImageUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(22.dp)
+                            .align(Alignment.BottomEnd)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color.White)
+                            .padding(1.dp)
+                            .clip(RoundedCornerShape(5.dp)),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                    )
+                }
+            }
 
             Spacer(Modifier.width(16.dp))
 
@@ -181,7 +199,17 @@ private fun SellerThreadItem(thread: SellerChatThreadUi, onClick: () -> Unit) {
                     )
                 }
                 
-                Spacer(Modifier.height(4.dp))
+                if (thread.productTitle.isNotBlank()) {
+                    Text(
+                        text = thread.productTitle,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.Gray,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                Spacer(Modifier.height(2.dp))
                 
                 Text(
                     text = thread.lastMessage,

@@ -50,11 +50,13 @@ class RealSellerChatRepository @Inject constructor(
             SellerChatThreadUi(
                 chatId = chat.id,
                 buyerId = chat.buyerId,
-                // Используем имя из покупателя, если оно там есть
                 buyerName = chat.buyerName ?: "Покупатель #${chat.buyerId}",
                 buyerPhotoUrl = ImageUtils.formatProfilePhotoUrl(chat.buyerPhoto),
+                productId = chat.productId ?: 0,
+                productTitle = chat.productName ?: "Без названия",
+                productImageUrl = ImageUtils.formatImageUrl(chat.productImage),
                 lastMessage = last?.content ?: "Нет новых сообщений",
-                lastTimeText = formatTime(last?.createdAt ?: chat.updatedAt)
+                lastTimeText = formatTime(last?.createdAt ?: chat.updatedAt ?: chat.createdAt)
             )
         }
     }
