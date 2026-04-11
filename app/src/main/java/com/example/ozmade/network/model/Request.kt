@@ -15,8 +15,8 @@ data class ReportRequest(
 )
 
 data class UpdateProfileRequest(
-    val name: String,
-    val address: String,
+    @SerializedName("name") val name: String,
+    @SerializedName("address") val address: String,
     @SerializedName("address_lat") val addressLat: Double?,
     @SerializedName("address_lng") val addressLng: Double?,
     @SerializedName("photo_url") val avatarUrl: String?
@@ -53,14 +53,15 @@ data class ProductRequest(
 )
 
 data class UpdateSellerProfileRequest(
-    @SerializedName(value = "AvatarURL", alternate = ["profile_picture", "avatar_url", "logo_url", "logoUrl"]) val profile_picture: String? = null,
-    @SerializedName(value = "DisplayName", alternate = ["display_name", "displayName"]) val displayName: String? = null,
-    @SerializedName(value = "About", alternate = ["about"]) val about: String? = null,
-    @SerializedName(value = "City", alternate = ["city"]) val city: String? = null,
-    @SerializedName(value = "Address", alternate = ["address"]) val address: String? = null,
-    @SerializedName(value = "FirstName", alternate = ["first_name", "firstName"]) val firstName: String? = null,
-    @SerializedName(value = "LastName", alternate = ["last_name", "lastName"]) val lastName: String? = null,
-    @SerializedName(value = "Categories", alternate = ["categories"]) val categories: List<String>? = null
+    @SerializedName("AvatarURL") val avatarUrl: String? = null,
+    @SerializedName("Name") val name: String? = null,
+    @SerializedName("DisplayName") val displayName: String? = null,
+    @SerializedName("About") val about: String? = null,
+    @SerializedName("City") val city: String? = null,
+    @SerializedName("Address") val address: String? = null,
+    @SerializedName("FirstName") val firstName: String? = null,
+    @SerializedName("LastName") val lastName: String? = null,
+    @SerializedName("Categories") val categories: List<String>? = null
 )
 
 data class CreateOrderRequest(
@@ -82,15 +83,15 @@ data class ReadyOrShippedRequest(
 )
 
 data class SellerRegistrationRequestDto(
-    @SerializedName(value = "FirstName", alternate = ["first_name", "firstName"]) val firstName: String,
-    @SerializedName(value = "LastName", alternate = ["last_name", "lastName"]) val lastName: String,
-    @SerializedName(value = "DisplayName", alternate = ["display_name", "displayName"]) val displayName: String,
-    @SerializedName(value = "City", alternate = ["city"]) val city: String,
-    @SerializedName(value = "Address", alternate = ["address"]) val address: String,
-    @SerializedName(value = "Categories", alternate = ["categories"]) val categories: List<String>,
-    @SerializedName(value = "About", alternate = ["about"]) val about: String? = null,
-    @SerializedName(value = "IdCardUrl", alternate = ["id_card_url", "idCardUrl"]) val idCardUrl: String? = null,
-    @SerializedName(value = "AvatarURL", alternate = ["logo_url", "avatar_url", "logoUrl", "profile_picture"]) val logoUrl: String? = null
+    @SerializedName("FirstName") val firstName: String,
+    @SerializedName("LastName") val lastName: String,
+    @SerializedName("DisplayName") val displayName: String,
+    @SerializedName("City") val city: String,
+    @SerializedName("Address") val address: String,
+    @SerializedName("Categories") val categories: List<String>,
+    @SerializedName("About") val about: String? = null,
+    @SerializedName("IdCardUrl") val idCardUrl: String? = null,
+    @SerializedName("AvatarURL") val logoUrl: String? = null
 )
 data class ChatSendMessageRequest(
     @SerializedName("content") val content: String

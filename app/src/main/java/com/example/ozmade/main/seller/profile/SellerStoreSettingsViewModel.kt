@@ -63,15 +63,24 @@ class SellerStoreSettingsViewModel @Inject constructor(
         }
     }
 
-    fun onFirstNameChange(name: String) = Unit
-    fun onLastNameChange(name: String) = Unit
+    fun onFirstNameChange(name: String) = _uiState.update { it.copy(firstName = name) }
+    fun onLastNameChange(name: String) = _uiState.update { it.copy(lastName = name) }
     fun onStoreNameChange(name: String) = _uiState.update { it.copy(storeName = name) }
     fun onAboutChange(about: String) = _uiState.update { it.copy(about = about) }
     fun onCityChange(city: String) = _uiState.update { it.copy(city = city) }
     fun onAddressChange(address: String) = _uiState.update { it.copy(address = address) }
     fun onLogoSelected(uri: Uri) = _uiState.update { it.copy(localLogoUri = uri) }
     
-    fun onCategoryToggle(category: String) = Unit
+    fun onCategoryToggle(category: String) {
+        _uiState.update { state ->
+            val newList = if (state.selectedCategories.contains(category)) {
+                state.selectedCategories - category
+            } else {
+                state.selectedCategories + category
+            }
+            state.copy(selectedCategories = newList)
+        }
+    }
 
     fun save() {
         val currentState = _uiState.value
@@ -86,7 +95,8 @@ class SellerStoreSettingsViewModel @Inject constructor(
                 }
 
                 val request = UpdateSellerProfileRequest(
-                    profile_picture = finalLogoUrl,
+                    avatarUrl = finalLogoUrl,
+                    name = currentState.storeName,
                     displayName = currentState.storeName,
                     about = currentState.about,
                     city = currentState.city,
@@ -96,8 +106,10 @@ class SellerStoreSettingsViewModel @Inject constructor(
                     categories = currentState.selectedCategories
                 )
                 
-                repository.updateSellerProfile(request)
+                repository.updateSellerProfile(request).getOrThrow()
             }.onSuccess {
+                // После успешного сохранения перезагружаем профиль, чтобы данные в UI обновились точно
+                loadProfile()
                 _uiState.update { it.copy(isLoading = false, isSuccess = true) }
             }.onFailure { e ->
                 _uiState.update { it.copy(isLoading = false, error = e.message ?: "Ошибка сохранения") }

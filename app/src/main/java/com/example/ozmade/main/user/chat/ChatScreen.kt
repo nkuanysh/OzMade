@@ -8,7 +8,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,26 +38,77 @@ fun ChatScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val orangeColor = MaterialTheme.colorScheme.primary
+    var menuExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { viewModel.load() }
 
     Scaffold(
         topBar = {
-            Box(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface)
                     .statusBarsPadding()
-                    .padding(16.dp)
             ) {
-                Text(
-                    text = "Чаты",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Чаты",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 24.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Box {
+                        IconButton(onClick = { menuExpanded = true }) {
+                            Icon(Icons.Default.MoreVert, contentDescription = "Меню")
+                        }
+                        DropdownMenu(
+                            expanded = menuExpanded,
+                            onDismissRequest = { menuExpanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Очистить все") },
+                                onClick = {
+                                    menuExpanded = false
+                                    viewModel.clearAll()
+                                }
+                            )
+                        }
+                    }
+                }
+
+                if (uiState is ChatListUiState.Data) {
+                    val data = uiState as ChatListUiState.Data
+                    OutlinedTextField(
+                        value = data.searchQuery,
+                        onValueChange = { viewModel.onSearchQueryChange(it) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
+                        placeholder = { Text("Поиск чатов...") },
+                        leadingIcon = { Icon(Icons.Default.Search, null) },
+                        trailingIcon = {
+                            if (data.searchQuery.isNotEmpty()) {
+                                IconButton(onClick = { viewModel.onSearchQueryChange("") }) {
+                                    Icon(Icons.Default.Clear, null)
+                                }
+                            }
+                        },
+                        shape = RoundedCornerShape(12.dp),
+                        singleLine = true,
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = orangeColor,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
+                        )
+                    )
+                }
             }
         },
         containerColor = MaterialTheme.colorScheme.background
@@ -93,20 +147,26 @@ fun ChatScreen(
                 }
 
                 is ChatListUiState.Data -> {
-                    if (state.threads.isEmpty()) {
+                    if (state.threads.isEmpty() && state.searchQuery.isEmpty()) {
                         EmptyChatsPlaceholder(onNavigateToHome, orangeColor)
+                    } else if (state.threads.isEmpty() && state.searchQuery.isNotEmpty()) {
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            Text("Ничего не найдено", color = Color.Gray)
+                        }
                     } else {
                         LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(bottom = 16.dp)
                         ) {
-                            // Техподдержка всегда сверху
-                            item {
-                                ChatSupportCard(onClick = onOpenSupportChat, accentColor = orangeColor)
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    color = MaterialTheme.colorScheme.outlineVariant
-                                )
+                            // Техподдержка всегда сверху, только если поиск пуст
+                            if (state.searchQuery.isEmpty()) {
+                                item {
+                                    ChatSupportCard(onClick = onOpenSupportChat, accentColor = orangeColor)
+                                    HorizontalDivider(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        color = MaterialTheme.colorScheme.outlineVariant
+                                    )
+                                }
                             }
 
                             items(state.threads) { t ->
@@ -230,53 +290,25 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit, accentColor: C
             )
         },
         leadingContent = {
-            Box {
-                if (!thread.productImageUrl.isNullOrEmpty()) {
-                    AsyncImage(
-                        model = thread.productImageUrl,
-                        contentDescription = null,
-                        modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Surface(
-                        modifier = Modifier.size(48.dp),
-                        shape = CircleShape,
-                        color = accentColor.copy(alpha = 0.1f)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = thread.sellerName.take(1).uppercase(),
-                                fontWeight = FontWeight.Bold,
-                                color = accentColor
-                            )
-                        }
-                    }
-                }
-
-                if (thread.isOnline) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .size(14.dp)
-                            .background(MaterialTheme.colorScheme.surface, CircleShape)
-                            .padding(2.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color(0xFF4CAF50), CircleShape)
-                        )
-                    }
-                }
-            }
+            AsyncImage(
+                model = thread.productImageUrl,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                contentScale = ContentScale.Crop,
+                error = null
+            )
         },
         trailingContent = {
-            Text(
-                text = thread.lastTimeText,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = thread.lastTimeText,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     )
 }

@@ -28,19 +28,29 @@ class RealChatRepository @Inject constructor(
 
             val last = visibleMessages.maxByOrNull { it.createdAt }
 
+            // Пытаемся найти имя продавца/магазина в разных полях.
+            // Приоритет: 
+            // 1. Прямое поле sellerName в объекте чата
+            // 2. Поле name во вложенном объекте seller
+            // 3. productName (если это "Чат по товару", но обычно нам нужно имя продавца)
+            // 4. Заглушка
+            val displayName = c.sellerName 
+                ?: c.seller?.name 
+                ?: "Продавец #${c.sellerId}"
+
             ChatThreadUi(
                 chatId = c.id,
                 sellerId = c.sellerId,
-                sellerName = if (!c.productName.isNullOrBlank()) "Чат по товару" else "Продавец #${c.sellerId}",
+                sellerName = displayName,
                 productId = c.productId ?: 0,
                 productTitle = c.productName ?: "Без названия",
-                productPrice = 0, // В API пока нет цены в объекте чата
+                productPrice = 0, 
                 productImageUrl = c.productImage,
                 lastMessage = last?.content ?: "Нет сообщений",
                 lastTimeText = formatTime(last?.createdAt ?: c.createdAt),
                 isOnline = false
             )
-        }.sortedByDescending { it.chatId } // Показываем новые чаты сверху
+        }.sortedByDescending { it.chatId }
     }
 
     override suspend fun getMessages(chatId: Int): List<ChatMessageUi> = withContext(Dispatchers.IO) {

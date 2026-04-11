@@ -156,6 +156,8 @@ data class ChatDto(
     @SerializedName(value="CreatedAt", alternate=["created_at"]) val createdAt: String,
     @SerializedName(value="UpdatedAt", alternate=["updated_at"]) val updatedAt: String,
     @SerializedName(value="SellerID", alternate=["seller_id","sellerId"]) val sellerId: Int,
+    @SerializedName(value="SellerName", alternate=["seller_name","sellerName", "store_name", "storeName", "StoreName", "shop_name", "shopName", "ShopName", "display_name", "DisplayName"]) val sellerName: String? = null,
+    @SerializedName(value="seller", alternate=["Seller"]) val seller: SellerInfoDto? = null,
     @SerializedName(value="BuyerID", alternate=["buyer_id","buyerId"]) val buyerId: Int,
     @SerializedName(value="ProductID", alternate=["product_id","productId"]) val productId: Int? = null,
     @SerializedName(value="ProductName", alternate=["product_name","productName"]) val productName: String? = null,
@@ -309,7 +311,7 @@ data class DeliveryInfoDto(
 
 data class SellerInfoDto(
     @SerializedName(value = "ID", alternate = ["id"]) val id: Int,
-    @SerializedName(value = "Name", alternate = ["name"]) val name: String?,
+    @SerializedName(value = "Name", alternate = ["name", "seller_name", "SellerName", "store_name", "storeName", "StoreName", "display_name", "DisplayName"]) val name: String?,
     @SerializedName(value = "AvatarURL", alternate = ["avatar_url", "avatarUrl", "ImageName"]) val avatarUrl: String? = null,
     @SerializedName(value = "Address", alternate = ["address"]) val address: String?,
     @SerializedName("Rating") val rating: Double? = null,
