@@ -55,7 +55,7 @@ class RealChatRepository @Inject constructor(
                 productTitle = c.productName ?: "Без названия",
                 productPrice = 0, 
                 productImageUrl = ImageUtils.formatImageUrl(c.productImage),
-                sellerAvatarUrl = ImageUtils.formatProfilePhotoUrl(c.seller?.avatarUrl),
+                sellerAvatarUrl = ImageUtils.formatProfilePhotoUrl(c.seller?.photoUrl),
                 lastMessage = last?.content ?: "Напишите сообщение...",
                 lastTimeText = formatTime(last?.createdAt ?: c.updatedAt ?: c.createdAt),
                 isOnline = false

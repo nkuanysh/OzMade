@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.seller.data.SellerRepository
 import com.example.ozmade.network.model.UpdateSellerProfileRequest
+import com.example.ozmade.utils.ImageUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -54,7 +55,7 @@ class SellerStoreSettingsViewModel @Inject constructor(
                         city = profile.city ?: "",
                         address = profile.address ?: "",
                         selectedCategories = profile.categories ?: emptyList(),
-                        logoUrl = profile.photoUrl
+                        logoUrl = ImageUtils.formatProfilePhotoUrl(profile.photoUrl)
                     )
                 }
             } else {
@@ -88,14 +89,16 @@ class SellerStoreSettingsViewModel @Inject constructor(
             _uiState.update { it.copy(isLoading = true, error = null) }
             
             runCatching {
-                var finalLogoUrl = currentState.logoUrl
+                var finalPhotoUrl = currentState.logoUrl
                 
                 currentState.localLogoUri?.let { uri ->
-                    finalLogoUrl = repository.uploadPhoto(uri).getOrThrow()
+                    finalPhotoUrl = repository.uploadPhoto(uri).getOrThrow()
                 }
 
+                val photoFilename = ImageUtils.extractFilename(finalPhotoUrl)
+
                 val request = UpdateSellerProfileRequest(
-                    avatarUrl = finalLogoUrl,
+                    photoUrl = photoFilename,
                     name = currentState.storeName,
                     displayName = currentState.storeName,
                     about = currentState.about,

@@ -24,7 +24,7 @@ class RealSellerRepository @Inject constructor(
             rating = sDto?.rating ?: dto.rating ?: 0.0,
             reviewsCount = sDto?.reviewsCount ?: dto.reviewsCount ?: 0,
             daysWithOzMade = sDto?.daysWithOzMade ?: dto.daysWithOzMade ?: 0,
-            avatarUrl = ImageUtils.formatProfilePhotoUrl(sDto?.avatarUrl ?: dto.avatarUrl),
+            avatarUrl = ImageUtils.formatProfilePhotoUrl(sDto?.photoUrl ?: dto.photoUrl),
             city = sDto?.city ?: dto.city,
             description = sDto?.description ?: dto.description,
             categories = sDto?.categories ?: dto.categories,
