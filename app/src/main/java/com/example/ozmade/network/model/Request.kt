@@ -45,7 +45,8 @@ data class UpdateSellerProfileRequest(
     @SerializedName("Address") val address: String? = null,
     @SerializedName("FirstName") val firstName: String? = null,
     @SerializedName("LastName") val lastName: String? = null,
-    @SerializedName("Categories") val categories: List<String>? = null
+    @SerializedName("Categories") val categories: List<String>? = null,
+    @SerializedName("LevelTitle") val levelTitle: String? = null
 )
 
 data class CreateOrderRequest(

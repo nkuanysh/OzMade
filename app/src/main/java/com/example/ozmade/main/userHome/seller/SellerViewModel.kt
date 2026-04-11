@@ -18,7 +18,7 @@ class SellerViewModel @Inject constructor(
     fun load(sellerId: Int) {
         _uiState.value = SellerUiState.Loading
         viewModelScope.launch {
-            runCatching { repo.getSellerPage(sellerId) }
+            runCatching { repo.getSellerReviews(sellerId) }
                 .onSuccess { resp ->
                     // Сразу подтянем лайки
                     val likedIds = resp.products

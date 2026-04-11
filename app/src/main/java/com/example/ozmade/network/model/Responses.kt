@@ -147,7 +147,10 @@ data class SellerProfileDto(
     @SerializedName(value = "first_name", alternate = ["firstName"]) val firstName: String? = null,
     @SerializedName(value = "last_name", alternate = ["lastName"]) val lastName: String? = null,
     @SerializedName("categories") val categories: List<String>? = null,
-    @SerializedName(value = "days_with_ozmade", alternate = ["daysWithOzMade"]) val daysWithOzMade: Int? = null
+    @SerializedName(value = "days_with_ozmade", alternate = ["daysWithOzMade"]) val daysWithOzMade: Int? = null,
+    @SerializedName(value = "level_title", alternate = ["levelTitle", "LevelTitle"]) val levelTitle: String? = null,
+    @SerializedName(value = "level_progress", alternate = ["levelProgress", "LevelProgress"]) val levelProgress: Float? = null,
+    @SerializedName(value = "level_hint", alternate = ["levelHint", "LevelHint"]) val levelHint: String? = null,
 )
 
 data class ChatDto(
@@ -202,7 +205,11 @@ data class SellerPageDto(
     @SerializedName(value = "description", alternate = ["Description", "about", "About"]) val description: String? = null,
     @SerializedName(value = "level_title", alternate = ["levelTitle", "LevelTitle"]) val levelTitle: String? = null,
     @SerializedName(value = "level_progress", alternate = ["levelProgress", "LevelProgress"]) val levelProgress: Float? = null,
-    @SerializedName(value = "level_hint", alternate = ["levelHint", "LevelHint"]) val levelHint: String? = null
+    @SerializedName(value = "level_hint", alternate = ["levelHint", "LevelHint"]) val levelHint: String? = null,
+    @SerializedName(value = "Header", alternate = ["header"]) val header: SellerReviewsHeaderDto?,
+    @SerializedName(value = "Reviews", alternate = ["reviews"]) val reviews: List<SellerReviewItemDto>?,
+
+
 )
 
 data class SellerHeaderDto(
@@ -320,10 +327,10 @@ data class SellerInfoDto(
     @SerializedName(value = "CompletedOrders", alternate = ["completed_orders", "completedOrders", "ordersCount"]) val completedOrders: Int? = null
 )
 
-data class SellerReviewsDto(
-    @SerializedName(value = "Header", alternate = ["header"]) val header: SellerReviewsHeaderDto?,
-    @SerializedName(value = "Reviews", alternate = ["reviews"]) val reviews: List<SellerReviewItemDto>?
-)
+//data class SellerReviewsDto(
+//    @SerializedName(value = "Header", alternate = ["header"]) val header: SellerReviewsHeaderDto?,
+//    @SerializedName(value = "Reviews", alternate = ["reviews"]) val reviews: List<SellerReviewItemDto>?
+//)
 
 data class SellerReviewsHeaderDto(
     @SerializedName(value = "SellerID", alternate = ["seller_id", "sellerId"]) val sellerId: Int,
