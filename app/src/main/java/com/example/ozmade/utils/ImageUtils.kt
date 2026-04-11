@@ -18,25 +18,14 @@ object ImageUtils {
         
         val input = url.trim()
         
-        // 1. Extract the CLEAN filename (strip query params and path prefixes)
-        val filename = try {
-            val uri = Uri.parse(input)
-            val path = uri.path ?: ""
-            // Extract the last segment (the filename)
-            val name = path.substringAfterLast("/")
-            if (name.isBlank() || name == "oz-made" || name == "products") {
-                // If the path was empty or just the bucket name, check if the input itself is the filename
-                if (!input.contains("/") && !input.contains("?")) input else ""
-            } else {
-                name
-            }
-        } catch (e: Exception) {
-            input.substringAfterLast("/").substringBefore("?")
-        }
+        // If it's already a full URL but NOT from our storage, we might want to return it as is?
+        // But the current implementation forces it into our storage pattern.
+        
+        val filename = extractFilename(input) ?: ""
 
         if (filename.isBlank() || filename == "oz-made" || filename == "products") {
             Log.w(TAG, "formatImageUrl: Could not extract valid filename from: $input")
-            return ""
+            return if (input.startsWith("http")) input else ""
         }
 
         // 2. Reconstruct the direct Public GCS URL.
@@ -45,5 +34,27 @@ object ImageUtils {
         
         Log.d(TAG, "formatImageUrl: Using Public GCS URL -> $formattedUrl")
         return formattedUrl
+    }
+
+    /**
+     * Extracts the filename from a URL or returns the input if it's already a filename.
+     */
+    fun extractFilename(input: String?): String? {
+        if (input.isNullOrBlank()) return null
+        if (!input.contains("/")) return input
+
+        return try {
+            val uri = Uri.parse(input)
+            val path = uri.path ?: return input.substringAfterLast("/")
+            val name = path.substringAfterLast("/")
+            if (name.isBlank() || name == "oz-made" || name == "products") {
+                val lastPart = input.substringAfterLast("/")
+                if (lastPart.contains("?")) lastPart.substringBefore("?") else lastPart
+            } else {
+                name
+            }
+        } catch (e: Exception) {
+            input.substringAfterLast("/").substringBefore("?")
+        }
     }
 }

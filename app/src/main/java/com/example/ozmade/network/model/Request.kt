@@ -19,7 +19,7 @@ data class UpdateProfileRequest(
     @SerializedName("address") val address: String,
     @SerializedName("address_lat") val addressLat: Double?,
     @SerializedName("address_lng") val addressLng: Double?,
-    @SerializedName("photo_url") val avatarUrl: String?
+    @SerializedName(value = "AvatarURL", alternate = ["photo_url", "avatar_url", "avatarUrl"]) val avatarUrl: String?
 )
 data class ProductRequest(
     @SerializedName("Name")

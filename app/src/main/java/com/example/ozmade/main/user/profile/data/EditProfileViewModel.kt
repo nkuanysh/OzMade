@@ -43,7 +43,7 @@ class EditProfileViewModel @Inject constructor(
                         address = user.address,
                         addressLat = user.addressLat,
                         addressLng = user.addressLng,
-                        avatarUrl = user.avatarUrl.orEmpty()
+                        avatarUrl = com.example.ozmade.utils.ImageUtils.formatImageUrl(user.avatarUrl)
                     )
                 }
                 .onFailure {
@@ -102,7 +102,11 @@ class EditProfileViewModel @Inject constructor(
                     repo.uploadAvatar(uri)
                 }
 
-                val finalAvatarUrl = uploadedUrl ?: s.avatarUrl.trim().ifBlank { null }
+                val finalAvatarUrl = uploadedUrl ?: if (s.avatarUrl.isNotBlank()) {
+                    com.example.ozmade.utils.ImageUtils.extractFilename(s.avatarUrl)
+                } else {
+                    null
+                }
 
                 repo.updateMyProfile(
                     name = s.name.trim(),
