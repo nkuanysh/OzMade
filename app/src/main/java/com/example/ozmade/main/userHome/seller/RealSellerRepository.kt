@@ -41,7 +41,7 @@ class RealSellerRepository @Inject constructor(
                 city = it.city ?: "",
                 address = it.address ?: "",
                 rating = it.rating ?: 0.0,
-                imageUrl = ImageUtils.formatImageUrl(it.imageUrl)
+                imageUrl = ImageUtils.formatImageUrl(it.images?.firstOrNull() ?: it.imageUrl)
             )
         } ?: emptyList()
 

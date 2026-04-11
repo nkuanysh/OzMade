@@ -231,7 +231,8 @@ data class SellerProductDto(
     @SerializedName(value = "city", alternate = ["City"]) val city: String? = null,
     @SerializedName(value = "address", alternate = ["Address"]) val address: String? = null,
     @SerializedName(value = "rating", alternate = ["Rating", "average_rating", "AverageRating"]) val rating: Double? = null,
-    @SerializedName(value = "imageUrl", alternate = ["image_url", "ImageName", "ImageURL", "photo_url", "PhotoURL"]) val imageUrl: String? = null
+    @SerializedName(value = "imageUrl", alternate = ["image_url", "ImageName", "ImageURL", "photo_url", "PhotoURL"]) val imageUrl: String? = null,
+    @SerializedName(value = "Images", alternate = ["images"]) val images: List<String>? = null
 )
 
 data class AdDto(
