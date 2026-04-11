@@ -160,9 +160,6 @@ fun ProfileScreen(
 
 @Composable
 private fun ProfileHeader(name: String, phone: String, photoUrl: String?, onEdit: () -> Unit) {
-    val formattedPhotoUrl = remember(photoUrl) {
-        com.example.ozmade.utils.ImageUtils.formatProfilePhotoUrl(photoUrl)
-    }
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -173,9 +170,9 @@ private fun ProfileHeader(name: String, phone: String, photoUrl: String?, onEdit
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
-                if (!formattedPhotoUrl.isBlank()) {
+                if (!photoUrl.isNullOrBlank()) {
                     AsyncImage(
-                        model = formattedPhotoUrl,
+                        model = photoUrl,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize().clip(CircleShape),
                         contentScale = ContentScale.Crop

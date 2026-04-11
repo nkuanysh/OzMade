@@ -76,7 +76,7 @@ fun EditProfileScreen(
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { uri ->
-            uri?.let { viewModel.onAvatarPicked(it) }
+            uri?.let { viewModel.onPhotoPicked(it) }
         }
     )
 

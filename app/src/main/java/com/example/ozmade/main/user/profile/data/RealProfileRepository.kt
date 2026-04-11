@@ -74,14 +74,14 @@ class RealProfileRepository @Inject constructor(
         return if (resp.isSuccessful) resp.body().orEmpty() else emptyList()
     }
 
-    override suspend fun uploadAvatar(uri: android.net.Uri): String = runCatching {
+    override suspend fun uploadPhoto(uri: android.net.Uri): String = runCatching {
         val mimeType = context.contentResolver.getType(uri) ?: "image/jpeg"
         val extension = android.webkit.MimeTypeMap.getSingleton()
             .getExtensionFromMimeType(mimeType)
             ?.let { ".$it" }
             ?: ".jpg"
 
-        val tempFile = java.io.File.createTempFile("avatar_upload_", extension, context.cacheDir)
+        val tempFile = java.io.File.createTempFile("photo_upload_", extension, context.cacheDir)
 
         try {
             context.contentResolver.openInputStream(uri)?.use { input ->
@@ -137,6 +137,6 @@ private fun com.example.ozmade.network.model.ProfileDto.toDomain(): UserProfile 
         phone = phoneNumber ?: "",
         addressLat = addressLat,
         addressLng = addressLng,
-        photoUrl = photoUrl
+        photoUrl = com.example.ozmade.utils.ImageUtils.formatProfilePhotoUrl(photoUrl)
     )
 }

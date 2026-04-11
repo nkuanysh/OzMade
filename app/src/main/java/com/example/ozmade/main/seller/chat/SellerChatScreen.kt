@@ -148,9 +148,9 @@ private fun SellerThreadItem(thread: SellerChatThreadUi, onClick: () -> Unit) {
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar
+            // Photo
             AsyncImage(
-                model = thread.buyerAvatarUrl,
+                model = thread.buyerPhotoUrl,
                 contentDescription = null,
                 modifier = Modifier
                     .size(56.dp)

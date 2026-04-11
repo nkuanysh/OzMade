@@ -44,7 +44,6 @@ class RealChatRepository @Inject constructor(
             val last = visibleMessages.maxByOrNull { it.id } ?: c.messages?.maxByOrNull { it.id }
 
             val displayName = c.sellerName 
-                ?: c.seller?.name 
                 ?: "Продавец #${c.sellerId}"
 
             ChatThreadUi(
@@ -55,9 +54,10 @@ class RealChatRepository @Inject constructor(
                 productTitle = c.productName ?: "Без названия",
                 productPrice = 0, 
                 productImageUrl = ImageUtils.formatImageUrl(c.productImage),
-                sellerAvatarUrl = ImageUtils.formatProfilePhotoUrl(c.seller?.photoUrl),
+                sellerPhotoUrl = ImageUtils.formatProfilePhotoUrl(c.sellerPhoto),
                 lastMessage = last?.content ?: "Напишите сообщение...",
                 lastTimeText = formatTime(last?.createdAt ?: c.updatedAt ?: c.createdAt),
+                sellerNumber = c.phoneNumber as String?,
                 isOnline = false
             )
         }.sortedByDescending { it.chatId }

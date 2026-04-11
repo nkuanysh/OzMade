@@ -182,13 +182,13 @@ private fun SellerHeaderBlock(
                     .background(Color(0xFFF0E6FF)),
                 contentAlignment = Alignment.Center
             ) {
-                if (!seller.avatarUrl.isNullOrEmpty()) {
+                if (!seller.photoUrl.isNullOrEmpty()) {
                     AsyncImage(
-                        model = seller.avatarUrl,
+                        model = seller.photoUrl,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop,
-                        onError = { Log.e("SellerUI", "Avatar fail: ${seller.avatarUrl}") }
+                        onError = { Log.e("SellerUI", "Avatar fail: ${seller.photoUrl}") }
                     )
                 } else {
                     Text(

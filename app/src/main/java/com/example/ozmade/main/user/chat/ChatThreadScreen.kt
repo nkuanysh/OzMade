@@ -33,6 +33,7 @@ fun ChatThreadRoute(
     sellerId: Int,
     productId: Int,
     sellerName: String,
+    sellerPhotoUrl: String? = null,
     productTitle: String,
     productPrice: Int,
     onBack: () -> Unit,
@@ -54,6 +55,7 @@ fun ChatThreadRoute(
             chatId = chatId,
             sellerId = sellerId,
             sellerName = sellerName,
+            sellerPhotoUrl = sellerPhotoUrl,
             productId = productId,
             productTitle = productTitle,
             productPrice = productPrice
@@ -99,20 +101,16 @@ private fun ChatThreadScreen(
                     val data = uiState as? ChatThreadUiState.Data
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box {
-                            Surface(
-                                modifier = Modifier.size(36.dp),
-                                shape = CircleShape,
-                                color = orangeColor.copy(alpha = 0.1f)
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    val name = data?.sellerName ?: "Ч"
-                                    Text(
-                                        text = name.take(1).uppercase(),
-                                        style = MaterialTheme.typography.titleSmall,
-                                        color = orangeColor
-                                    )
-                                }
-                            }
+                            AsyncImage(
+                                model = data?.sellerPhotoUrl,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(orangeColor.copy(alpha = 0.1f)),
+                                contentScale = ContentScale.Crop,
+                                error = null // Placeholder logic handled by background if needed
+                            )
 
                             if (data?.isOnline == true) {
                                 Box(

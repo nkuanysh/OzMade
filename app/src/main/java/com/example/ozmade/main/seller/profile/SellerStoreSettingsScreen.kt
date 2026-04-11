@@ -51,7 +51,7 @@ fun SellerStoreSettingsScreen(
     val pickImage = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia()
     ) { uri ->
-        if (uri != null) viewModel.onLogoSelected(uri)
+        if (uri != null) viewModel.onPhotoSelected(uri)
     }
 
     LaunchedEffect(uiState.isSuccess) {
@@ -109,7 +109,7 @@ fun SellerStoreSettingsScreen(
                 }
             }
 
-            // Logo Section
+            // Photo Section
             Box(
                 modifier = Modifier
                     .size(120.dp)
@@ -118,11 +118,11 @@ fun SellerStoreSettingsScreen(
                     .clickable { pickImage.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                 contentAlignment = Alignment.Center
             ) {
-                val imageSource = uiState.localLogoUri ?: uiState.logoUrl
+                val imageSource = uiState.localPhotoUri ?: uiState.photoUrl
                 if (imageSource != null) {
                     AsyncImage(
                         model = imageSource,
-                        contentDescription = "Logo",
+                        contentDescription = "Photo",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
@@ -150,7 +150,7 @@ fun SellerStoreSettingsScreen(
             }
             
             Text(
-                "Логотип магазина",
+                "Фото магазина",
                 modifier = Modifier.padding(top = 12.dp),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray

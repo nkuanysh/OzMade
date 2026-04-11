@@ -50,9 +50,9 @@ class RealSellerChatRepository @Inject constructor(
             SellerChatThreadUi(
                 chatId = chat.id,
                 buyerId = chat.buyerId,
-                // Используем имя из чата, если оно там есть
-                buyerName = chat.buyerName ?: chat.sellerName ?: "Покупатель #${chat.buyerId}",
-                buyerAvatarUrl = ImageUtils.formatProfilePhotoUrl(chat.buyerPhoto),
+                // Используем имя из покупателя, если оно там есть
+                buyerName = chat.buyerName ?: "Покупатель #${chat.buyerId}",
+                buyerPhotoUrl = ImageUtils.formatProfilePhotoUrl(chat.buyerPhoto),
                 lastMessage = last?.content ?: "Нет новых сообщений",
                 lastTimeText = formatTime(last?.createdAt ?: chat.updatedAt)
             )

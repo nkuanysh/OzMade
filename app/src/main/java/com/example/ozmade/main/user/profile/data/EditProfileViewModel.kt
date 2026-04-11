@@ -43,7 +43,7 @@ class EditProfileViewModel @Inject constructor(
                         address = user.address,
                         addressLat = user.addressLat,
                         addressLng = user.addressLng,
-                        photoUrl = com.example.ozmade.utils.ImageUtils.formatProfilePhotoUrl(user.photoUrl)
+                        photoUrl = user.photoUrl ?: ""
                     )
                 }
                 .onFailure {
@@ -84,7 +84,7 @@ class EditProfileViewModel @Inject constructor(
         _state.value = _state.value.copy(photoUrl = v)
     }
 
-    fun onAvatarPicked(uri: android.net.Uri) {
+    fun onPhotoPicked(uri: android.net.Uri) {
         _state.value = _state.value.copy(selectedUri = uri)
     }
 
@@ -99,7 +99,7 @@ class EditProfileViewModel @Inject constructor(
             _state.value = _state.value.copy(saving = true, error = null)
             runCatching {
                 val uploadedUrl = s.selectedUri?.let { uri ->
-                    repo.uploadAvatar(uri)
+                    repo.uploadPhoto(uri)
                 }
 
                 val finalPhotoUrl = uploadedUrl ?: if (s.photoUrl.isNotBlank()) {

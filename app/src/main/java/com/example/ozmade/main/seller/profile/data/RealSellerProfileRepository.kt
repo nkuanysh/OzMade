@@ -1,6 +1,7 @@
 package com.example.ozmade.main.seller.profile.data
 
 import com.example.ozmade.network.api.OzMadeApi
+import com.example.ozmade.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -33,7 +34,7 @@ class RealSellerProfileRepository @Inject constructor(
             address = pDto.address,
             categories = pDto.categories,
             status = pDto.status,
-            photoUrl = pDto.photoUrl,
+            photoUrl = ImageUtils.formatProfilePhotoUrl(pDto.photoUrl),
             totalProducts = pDto.totalProducts,
             rating = qDto?.averageRating ?: pDto.rating ?: 0.0,
             ratingsCount = qDto?.ratingsCount ?: 0,

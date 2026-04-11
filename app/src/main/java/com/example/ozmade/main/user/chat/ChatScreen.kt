@@ -274,7 +274,7 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit, accentColor: C
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         headlineContent = {
             Text(
-                text = thread.sellerName,
+                text = thread.sellerName.ifBlank { "Продавец #${thread.sellerNumber}" },
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -300,9 +300,9 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit, accentColor: C
         },
         leadingContent = {
             Box(modifier = Modifier.size(52.dp)) {
-                // Seller Avatar
+                // Seller Photo
                 AsyncImage(
-                    model = thread.sellerAvatarUrl,
+                    model = thread.sellerPhotoUrl,
                     contentDescription = null,
                     modifier = Modifier
                         .size(48.dp)

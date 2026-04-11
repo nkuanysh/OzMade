@@ -27,7 +27,8 @@ class RealReviewsRepository @Inject constructor(
                 userName = r.userName,
                 rating = r.rating,
                 dateText = r.createdAt,
-                text = r.text
+                text = r.text,
+                photoUrl = com.example.ozmade.utils.ImageUtils.formatProfilePhotoUrl(r.photoUrl)
             )
         } ?: emptyList()
 
