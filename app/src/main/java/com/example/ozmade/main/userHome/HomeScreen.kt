@@ -43,6 +43,7 @@ fun HomeScreen(
     onFavoriteClick: (Int) -> Unit = {},
     onSeeAllCategoriesClick: () -> Unit = {},
     onSeeAllProductsClick: () -> Unit = {},
+    onTabSelected: (HomeTab) -> Unit = {},
     onRetry: () -> Unit = {}
 ) {
     val backgroundColor = MaterialTheme.colorScheme.background
@@ -62,14 +63,12 @@ fun HomeScreen(
                 ErrorContent(message = uiState.message, onRetry = onRetry, accentColor = orangeAccent)
             }
             is HomeUiState.Data -> {
-                val filteredProducts = remember(uiState.searchQuery, uiState.products) {
-                    if (uiState.searchQuery.isBlank()) {
-                        uiState.products
-                    } else {
-                        uiState.products.filter {
-                            it.title.contains(uiState.searchQuery, ignoreCase = true)
-                        }
+                val displayProducts = when (uiState.selectedTab) {
+                    HomeTab.ALL_PRODUCTS -> {
+                        if (uiState.searchQuery.isBlank()) uiState.products
+                        else uiState.products.filter { it.title.contains(uiState.searchQuery, ignoreCase = true) }
                     }
+                    HomeTab.RECOMMENDATIONS -> uiState.recommendations
                 }
 
                 LazyVerticalGrid(
@@ -109,37 +108,9 @@ fun HomeScreen(
                         }
 
                         item(span = { GridItemSpan(2) }) {
-                            SectionHeader(
-                                title = "Рекомендации для вас",
-                                actionText = null,
-                                onActionClick = {},
-                                accentColor = orangeAccent
-                            )
-                        }
-
-                        item(span = { GridItemSpan(2) }) {
-                            LazyRow(
-                                horizontalArrangement = Arrangement.spacedBy(14.dp),
-                                contentPadding = PaddingValues(bottom = 8.dp)
-                            ) {
-                                items(uiState.recommendations) { product ->
-                                    Box(modifier = Modifier.width(180.dp)) {
-                                        MarketProductCard(
-                                            product = product,
-                                            onClick = { onOpenProduct(product.id) },
-                                            onFavoriteClick = { onFavoriteClick(product.id) },
-                                            accentColor = orangeAccent
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
-                        item(span = { GridItemSpan(2) }) {
-                            SectionHeader(
-                                title = "Товары для вас",
-                                actionText = null,
-                                onActionClick = onSeeAllProductsClick,
+                            HomeTabSelector(
+                                selectedTab = uiState.selectedTab,
+                                onTabSelected = onTabSelected,
                                 accentColor = orangeAccent
                             )
                         }
@@ -154,7 +125,7 @@ fun HomeScreen(
                         }
                     }
 
-                    items(filteredProducts) { product ->
+                    items(displayProducts) { product ->
                         MarketProductCard(
                             product = product,
                             onClick = { onOpenProduct(product.id) },
@@ -163,15 +134,76 @@ fun HomeScreen(
                         )
                     }
 
-                    if (filteredProducts.isEmpty() && uiState.searchQuery.isNotBlank()) {
+                    if (displayProducts.isEmpty()) {
                         item(span = { GridItemSpan(2) }) {
                             Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                                Text("Ничего не найдено", color = Color.Gray)
+                                Text(
+                                    if (uiState.searchQuery.isNotBlank()) "Ничего не найдено" 
+                                    else if (uiState.selectedTab == HomeTab.RECOMMENDATIONS) "Пока нет персональных рекомендаций"
+                                    else "Нет товаров",
+                                    color = Color.Gray
+                                )
                             }
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun HomeTabSelector(
+    selectedTab: HomeTab,
+    onTabSelected: (HomeTab) -> Unit,
+    accentColor: Color
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .clickable { onTabSelected(HomeTab.ALL_PRODUCTS) },
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Все товары",
+                fontSize = 16.sp,
+                fontWeight = if (selectedTab == HomeTab.ALL_PRODUCTS) FontWeight.Bold else FontWeight.Normal,
+                color = if (selectedTab == HomeTab.ALL_PRODUCTS) accentColor else Color.Gray
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .background(if (selectedTab == HomeTab.ALL_PRODUCTS) accentColor else Color.Transparent)
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .clickable { onTabSelected(HomeTab.RECOMMENDATIONS) },
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Рекомендации",
+                fontSize = 16.sp,
+                fontWeight = if (selectedTab == HomeTab.RECOMMENDATIONS) FontWeight.Bold else FontWeight.Normal,
+                color = if (selectedTab == HomeTab.RECOMMENDATIONS) accentColor else Color.Gray
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(2.dp)
+                    .background(if (selectedTab == HomeTab.RECOMMENDATIONS) accentColor else Color.Transparent)
+            )
         }
     }
 }

@@ -40,6 +40,9 @@ fun HomeRoute(
         onSearchQueryChange = { query ->
             viewModel.onSearchQueryChange(query)
         },
+        onTabSelected = { tab ->
+            viewModel.onTabSelected(tab)
+        },
         onRetry = { viewModel.load() }
     )
 }
