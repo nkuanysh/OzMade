@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.compose.ui.res.stringResource
 import com.example.ozmade.utils.formatRating
 import com.example.ozmade.R
 
@@ -102,7 +103,7 @@ fun HomeScreen(
 
                         item(span = { GridItemSpan(2) }) {
                             SectionHeader(
-                                title = "Все категории",
+                                title = stringResource(R.string.all_categories),
                                 actionText = null,
                                 onActionClick = onSeeAllCategoriesClick,
                                 accentColor = orangeAccent
@@ -123,7 +124,7 @@ fun HomeScreen(
                     } else {
                         item(span = { GridItemSpan(2) }) {
                             Text(
-                                text = "Результаты поиска: \"${uiState.searchQuery}\"",
+                                text = stringResource(R.string.search_results, uiState.searchQuery),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.padding(vertical = 8.dp)
@@ -144,9 +145,9 @@ fun HomeScreen(
                         item(span = { GridItemSpan(2) }) {
                             Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                                 Text(
-                                    if (uiState.searchQuery.isNotBlank()) "Ничего не найдено" 
-                                    else if (uiState.selectedTab == HomeTab.RECOMMENDATIONS) "Пока нет персональных рекомендаций"
-                                    else "Нет товаров",
+                                    if (uiState.searchQuery.isNotBlank()) stringResource(R.string.nothing_found) 
+                                    else if (uiState.selectedTab == HomeTab.RECOMMENDATIONS) stringResource(R.string.no_recommendations)
+                                    else stringResource(R.string.no_products),
                                     color = Color.Gray
                                 )
                             }
@@ -177,7 +178,7 @@ fun HomeTabSelector(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Все товары",
+                text = stringResource(R.string.all_products_tab),
                 fontSize = 16.sp,
                 fontWeight = if (selectedTab == HomeTab.ALL_PRODUCTS) FontWeight.Bold else FontWeight.Normal,
                 color = if (selectedTab == HomeTab.ALL_PRODUCTS) accentColor else Color.Gray
@@ -198,7 +199,7 @@ fun HomeTabSelector(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Рекомендации",
+                text = stringResource(R.string.recommendations_tab),
                 fontSize = 16.sp,
                 fontWeight = if (selectedTab == HomeTab.RECOMMENDATIONS) FontWeight.Bold else FontWeight.Normal,
                 color = if (selectedTab == HomeTab.RECOMMENDATIONS) accentColor else Color.Gray
@@ -232,7 +233,7 @@ fun HomeSearchBar(
             value = query,
             onValueChange = onQueryChange,
             modifier = Modifier.fillMaxSize(),
-            placeholder = { Text("Поиск товаров и услуг", color = Color.Gray, fontSize = 15.sp) },
+            placeholder = { Text(stringResource(R.string.search_placeholder), color = Color.Gray, fontSize = 15.sp) },
             leadingIcon = { Icon(Icons.Rounded.Search, contentDescription = null, tint = Color.LightGray) },
             trailingIcon = {
                 if (query.isNotEmpty()) {
@@ -444,7 +445,7 @@ fun MarketProductCard(product: Product, onClick: () -> Unit, onFavoriteClick: ()
                     if (product.ordersCount > 0) {
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "• ${product.ordersCount} заказов",
+                            text = "• ${stringResource(R.string.orders_count_simple, product.ordersCount)}",
                             fontSize = 12.sp,
                             color = Color.Gray
                         )
@@ -485,7 +486,7 @@ fun ErrorContent(message: String, onRetry: () -> Unit, accentColor: Color) {
         Text(text = message, color = Color.Red)
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onRetry, colors = ButtonDefaults.buttonColors(containerColor = accentColor)) {
-            Text("Попробовать снова")
+            Text(stringResource(R.string.try_again_btn))
         }
     }
 }

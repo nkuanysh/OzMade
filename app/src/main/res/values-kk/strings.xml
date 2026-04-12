@@ -1,0 +1,131 @@
+<resources>
+    <string name="app_name">OzMade</string>
+    <string name="choose_language_title">Тілді таңдаңыз / Выберите язык</string>
+
+    <string name="lang_kk">Қазақша</string>
+    <string name="lang_ru">Русский</string>
+
+    <string name="auth_title">Кіру</string>
+    <string name="enter_phone">Телефон нөмірін енгізіңіз</string>
+    <string name="sms_info">Растау коды бар СМС жібереміз</string>
+    <string name="send_code">Кодты жіберу</string>
+
+    <string name="enter_code">Кодты енгізіңіз</string>
+    <string name="sent_to">Оны %1$s нөміріне жібердік</string>
+
+    <string name="continue_agree">Жалғастыра отырып, сіз келісесіз: " "</string>
+    <string name="privacy_policy">Құпиялылық саясатымен</string>
+    <string name="and_word">" " және " " </string>
+    <string name="terms">Пайдаланушы келісімімен</string>
+
+    <string name="resend_in">Қайта жіберу: %1$d</string>
+    <string name="resend">Қайта жіберу</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_personal_title">Жеке</string>
+    <string name="profile_notifications">Хабарландырулар</string>
+    <string name="profile_order_history">Тапсырыстар тарихы</string>
+    <string name="profile_support_title">Қолдау және ақпарат</string>
+    <string name="profile_support_service">Қолдау қызметі</string>
+    <string name="profile_about_app">Қосымша туралы</string>
+    <string name="become_seller">Сатушы болу</string>
+    <string name="open_your_shop">Өз дүкеніңізді ашыңыз</string>
+    <string name="logout">Аккаунттан шығу</string>
+    <string name="your_name_placeholder">Сіздің есіміңіз</string>
+    <string name="phone_not_specified">Нөмір көрсетілмеген</string>
+
+    <!-- Edit Profile -->
+    <string name="edit_profile_title">Менің мәліметтерім</string>
+    <string name="edit_profile_name_label">Есіміңіз кім?</string>
+    <string name="edit_profile_name_placeholder">Есіміңізді енгізіңіз</string>
+    <string name="edit_profile_address_label">Сіздің мекенжайыңыз</string>
+    <string name="edit_profile_address_placeholder">Мекенжайды картадан таңдаңыз</string>
+    <string name="edit_profile_map_instruction">Мекенжайды картадан таңдаңыз</string>
+    <string name="edit_profile_map_tap">Картаны басыңыз</string>
+    <string name="edit_profile_full_screen_map">Картаны толық экранда ашу</string>
+    <string name="edit_profile_clear_address">Мекенжайды тазалау</string>
+    <string name="edit_profile_save">Өзгерістерді сақтау</string>
+    <string name="edit_profile_map_ready">Дайын</string>
+    <string name="edit_profile_map_select_hint">Мекенжайды таңдау үшін картаны басыңыз</string>
+
+    <string name="welcome_title">Қош келдіңіз!</string>
+    <string name="login_subtitle">OzMade-ке кіру үшін телефон нөмірін енгізіңіз</string>
+    <string name="phone_label">ТЕЛЕФОН НӨМІРІ</string>
+    <string name="phone_placeholder">777 123 45 67</string>
+    <string name="send_code_btn">КОДТЫ ЖІБЕРУ</string>
+    <string name="login_footer_agree">Жалғастыра отырып, сіз біздің</string>
+    <string name="login_footer_terms">Шарттарымызбен</string>
+    <string name="login_footer_and">" және "</string>
+    <string name="login_footer_privacy">Құпиялылық саясатымен келісесіз</string>
+
+    <string name="otp_title">Тексеру</string>
+    <string name="otp_subtitle">Біз растау кодын мына нөмірге жібердік: </string>
+    <string name="otp_label">КОД</string>
+    <string name="resend_code_wait">Кодты %1$d сек кейін қайта жіберу</string>
+    <string name="resend_code_btn">Қайта жіберу</string>
+    <string name="verify_code_btn">ТЕКСЕРУ</string>
+
+    <string name="all_categories">Барлық санаттар</string>
+    <string name="search_results">Іздеу нәтижелері: \"%1$s\"</string>
+    <string name="nothing_found">Ештеңе табылмады</string>
+    <string name="no_recommendations">Әзірге жеке ұсыныстар жоқ</string>
+    <string name="no_products">Тауарлар жоқ</string>
+    <string name="all_products_tab">Барлық тауарлар</string>
+    <string name="recommendations_tab">Ұсыныстар</string>
+    <string name="search_placeholder">Тауарлар мен қызметтерді іздеу</string>
+
+    <string name="favorites_title">Таңдаулылар</string>
+    <string name="try_again_btn">Қайта байқап көріңіз</string>
+    <string name="empty_favorites_title">Тізім әзірге бос</string>
+    <string name="empty_favorites_desc">Өзіңізге ұнаған тауарларды жоғалтып алмау үшін жүрекшені басыңыз.</string>
+    <string name="to_shopping_btn">Сауда жасауға</string>
+    <string name="orders_count_label">Тапсырыстар: %1$d</string>
+
+    <string name="retry_btn">Қайталау</string>
+    <string name="search_in_category_placeholder">Осы санатта іздеу</string>
+    <string name="no_products_in_category">Бұл санатта әзірге тауарлар жоқ</string>
+    <string name="back_desc">Артқа</string>
+
+    <string name="delete_chat">Чатты жою</string>
+    <string name="online_status">Желіде</string>
+    <string name="offline_status">Жақында болған</string>
+    <string name="message_placeholder">Хабарлама…</string>
+
+    <string name="notifications_title">Хабарландырулар</string>
+    <string name="clear_all">Бәрін тазалау</string>
+    <string name="no_notifications">Әзірге хабарландырулар жоқ</string>
+    <string name="no_notifications_desc">Мұнда жаңалықтар мен маңызды оқиғалар пайда болады</string>
+
+    <string name="chats_title">Чаттар</string>
+    <string name="search_chats_placeholder">Чаттарды іздеу...</string>
+    <string name="no_active_chats">Сізде әзірге белсенді диалогтар жоқ</string>
+    <string name="no_active_chats_desc">Кез келген тауар бетінде сатушыға сұрақ қойыңыз.</string>
+    <string name="go_to_shopping">Сауда жасауға өту</string>
+
+    <string name="reviews_title">Пікірлер</string>
+    <string name="reviews_count_title">Пікірлер (%1$d)</string>
+    <string name="ratings_count_label">%1$d бағалау</string>
+    <string name="orders_count_simple">%1$d тапсырыс</string>
+    <string name="reviews_count_simple">%1$d пікір</string>
+
+    <string name="product_description">Сипаттама</string>
+    <string name="product_specs">Сипаттамалары</string>
+    <string name="share">Бөлісу</string>
+    <string name="buy_btn">Сатып алу</string>
+    <string name="chat_with_seller">Сатушымен чат</string>
+    <string name="chat_label">Чат</string>
+    <string name="buy_now_btn">Қазір сатып алу</string>
+    <string name="delivery_title">Жеткізу</string>
+    <string name="seller_title">Сатушы</string>
+    <string name="all_label">Барлығы</string>
+
+    <string name="inside_delivery_zone">Сіз жеткізу аймағындасыз</string>
+    <string name="outside_delivery_zone">Сіз жеткізу аймағынан тыс жердесіз</string>
+    <string name="not_specified">Көрсетілмеген</string>
+    <string name="courier_delivery">Курьер арқылы жеткізу</string>
+    <string name="pickup_label">Өзі алып кету: %1$s</string>
+    <string name="free_label">Тегін</string>
+    <string name="intercity_label">Қалааралық</string>
+    <string name="available_label">Қолжетімді</string>
+    <string name="menu_desc">Мәзір</string>
+</resources>

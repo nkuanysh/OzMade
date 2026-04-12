@@ -3,6 +3,7 @@ package com.example.ozmade.main.user.profile.data
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ozmade.main.seller.data.SellerLocalStore
+import com.example.ozmade.main.user.profile.locale.AppLang
 import com.example.ozmade.main.user.profile.locale.LanguageStore
 import com.example.ozmade.network.auth.SessionStore
 import com.google.firebase.auth.FirebaseAuth
@@ -21,6 +22,9 @@ class ProfileViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _error = MutableStateFlow<String?>(null)
+
+    val currentLang: StateFlow<AppLang> = languageStore.langFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppLang.RU)
 
     val uiState: StateFlow<ProfileUiState> = combine(repo.profileFlow, _error) { user, error ->
         when {
@@ -53,6 +57,12 @@ class ProfileViewModel @Inject constructor(
             sellerLocalStore.clear()
             languageStore.clear()
             firebaseAuth.signOut()
+        }
+    }
+
+    fun setLanguage(lang: AppLang) {
+        viewModelScope.launch {
+            languageStore.setLang(lang)
         }
     }
 }

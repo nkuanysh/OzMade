@@ -41,6 +41,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import androidx.compose.ui.res.stringResource
+import com.example.ozmade.R
 import com.example.ozmade.main.user.profile.data.EditProfileViewModel
 import com.example.ozmade.main.user.profile.data.EditProfileState
 import com.google.android.gms.location.LocationServices
@@ -84,7 +86,7 @@ fun EditProfileScreen(
         containerColor = Color(0xFFF8F9FA),
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Мои данные", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.edit_profile_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = null)
@@ -156,8 +158,8 @@ fun EditProfileScreen(
                 CustomEditTextField(
                     value = state.name,
                     onValueChange = viewModel::onNameChange,
-                    label = "Как вас зовут?",
-                    placeholder = "Введите имя"
+                    label = stringResource(R.string.edit_profile_name_label),
+                    placeholder = stringResource(R.string.edit_profile_name_placeholder)
                 )
 
                 HorizontalDivider(
@@ -169,8 +171,8 @@ fun EditProfileScreen(
                 CustomEditTextField(
                     value = state.address,
                     onValueChange = viewModel::onAddressChange,
-                    label = "Ваш адрес",
-                    placeholder = "Выберите адрес на карте"
+                    label = stringResource(R.string.edit_profile_address_label),
+                    placeholder = stringResource(R.string.edit_profile_address_placeholder)
                 )
 
                 Spacer(Modifier.height(12.dp))
@@ -229,7 +231,7 @@ fun EditProfileScreen(
                         color = Color.White
                     )
                 } else {
-                    Text("Сохранить изменения", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(stringResource(R.string.edit_profile_save), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             }
         }
@@ -264,7 +266,7 @@ private fun ProfileAddressMapSection(
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = "Выберите адрес на карте",
+            text = stringResource(R.string.edit_profile_map_instruction),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold
@@ -330,7 +332,7 @@ private fun ProfileAddressMapSection(
                 ) {
                     Icon(Icons.Default.TouchApp, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Тап по карте")
+                    Text(stringResource(R.string.edit_profile_map_tap))
                 }
             }
         }
@@ -342,7 +344,7 @@ private fun ProfileAddressMapSection(
         ) {
             Icon(Icons.Default.OpenInFull, contentDescription = null)
             Spacer(Modifier.width(8.dp))
-            Text("Открыть карту на весь экран")
+            Text(stringResource(R.string.edit_profile_full_screen_map))
         }
 
         if (state.addressLat != null && state.addressLng != null) {
@@ -353,7 +355,7 @@ private fun ProfileAddressMapSection(
             ) {
                 Icon(Icons.Default.DeleteOutline, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Очистить адрес")
+                Text(stringResource(R.string.edit_profile_clear_address))
             }
         }
     }
@@ -499,7 +501,7 @@ private fun FullScreenProfileAddressMapDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = selectedAddress.ifBlank { "Нажмите на карту, чтобы выбрать адрес" },
+                        text = selectedAddress.ifBlank { stringResource(R.string.edit_profile_map_select_hint) },
                         modifier = Modifier.weight(1f),
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -507,7 +509,7 @@ private fun FullScreenProfileAddressMapDialog(
                     Button(onClick = onDismiss) {
                         Icon(Icons.Default.Check, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Готово")
+                        Text(stringResource(R.string.edit_profile_map_ready))
                     }
                 }
             }

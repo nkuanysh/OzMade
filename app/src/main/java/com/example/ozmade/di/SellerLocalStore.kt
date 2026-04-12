@@ -19,10 +19,4 @@ object SellerLocalModule {
     fun provideSellerLocalStore(@ApplicationContext context: Context): SellerLocalStore {
         return SellerLocalStore(context)
     }
-
-    @Provides
-    @Singleton
-    fun provideLanguageStore(@ApplicationContext context: Context): LanguageStore {
-        return LanguageStore(context)
-    }
 }

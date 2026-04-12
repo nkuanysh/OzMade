@@ -23,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.ozmade.R
 import coil.compose.AsyncImage
 import com.example.ozmade.utils.formatRating
 import kotlin.math.cos
@@ -42,8 +44,8 @@ fun ReviewsScreen(
             TopAppBar(
                 title = {
                     val title = when (uiState) {
-                        is ReviewsUiState.Data -> "Отзывы (${uiState.titleCount})"
-                        else -> "Отзывы"
+                        is ReviewsUiState.Data -> stringResource(R.string.reviews_count_title, uiState.titleCount)
+                        else -> stringResource(R.string.reviews_title)
                     }
                     Text(
                         text = title,
@@ -96,7 +98,7 @@ fun ReviewsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Повторить")
+                        Text(stringResource(R.string.retry_btn))
                     }
                 }
             }
@@ -160,7 +162,7 @@ private fun RatingHeader(avg: Double, ratingsCount: Int) {
                 StarsRow(rating = avg, size = 18.dp)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "$ratingsCount оценок",
+                    text = stringResource(R.string.ratings_count_label, ratingsCount),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

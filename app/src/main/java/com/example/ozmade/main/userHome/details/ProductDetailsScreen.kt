@@ -35,6 +35,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.ozmade.R
 import com.example.ozmade.utils.formatRating
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
@@ -242,7 +244,7 @@ fun ProductDetailsScreen(
                         VerticalDivider(modifier = Modifier.height(16.dp).padding(horizontal = 8.dp))
                         
                         Text(
-                            text = "${product.reviewsCount} отзывов",
+                            text = stringResource(R.string.reviews_count_simple, product.reviewsCount),
                             color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Medium
                         )
@@ -250,7 +252,7 @@ fun ProductDetailsScreen(
                         VerticalDivider(modifier = Modifier.height(16.dp).padding(horizontal = 8.dp))
                         
                         Text(
-                            "${product.ordersCount} заказов",
+                            stringResource(R.string.orders_count_simple, product.ordersCount),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -268,13 +270,13 @@ fun ProductDetailsScreen(
                             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
                     ) {
                         TabButton(
-                            text = "Описание",
+                            text = stringResource(R.string.product_description),
                             selected = tab == DetailsTab.DESCRIPTION,
                             onClick = { tab = DetailsTab.DESCRIPTION },
                             modifier = Modifier.weight(1f)
                         )
                         TabButton(
-                            text = "Характеристики",
+                            text = stringResource(R.string.product_specs),
                             selected = tab == DetailsTab.SPECS,
                             onClick = { tab = DetailsTab.SPECS },
                             modifier = Modifier.weight(1f)
@@ -301,11 +303,11 @@ fun ProductDetailsScreen(
 
                     HorizontalDivider(Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
 
-                    InfoSection(title = "Доставка", icon = Icons.Outlined.LocalShipping) {
+                    InfoSection(title = stringResource(R.string.delivery_title), icon = Icons.Outlined.LocalShipping) {
                         DeliveryBlock(product.delivery)
                     }
 
-                    InfoSection(title = "Продавец", icon = Icons.Default.Store, iconColor = Color(0xFFFF9800)) {
+                    InfoSection(title = stringResource(R.string.seller_title), icon = Icons.Default.Store, iconColor = Color(0xFFFF9800)) {
                         SellerBlock(product.seller, onClick = { onOpenSeller(product.seller.id) })
                     }
 
@@ -321,13 +323,13 @@ fun ProductDetailsScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = "Отзывы (${product.reviewsCount})",
+                                    text = stringResource(R.string.reviews_count_title, product.reviewsCount),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
-                                        text = "Все",
+                                        text = stringResource(R.string.all_label),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Bold
@@ -493,7 +495,7 @@ private fun BottomActionsBar(onChat: () -> Unit, onOrder: () -> Unit) {
             ) {
                 Icon(Icons.Outlined.ChatBubbleOutline, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Чат", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.chat_label), fontWeight = FontWeight.Bold)
             }
 
             Button(
@@ -502,7 +504,7 @@ private fun BottomActionsBar(onChat: () -> Unit, onOrder: () -> Unit) {
                 shape = RoundedCornerShape(16.dp),
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
             ) {
-                Text("Купить сейчас", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(stringResource(R.string.buy_now_btn), fontWeight = FontWeight.Bold, fontSize = 16.sp)
             }
         }
     }
@@ -563,33 +565,35 @@ private fun DeliveryBlock(delivery: DeliveryInfoUi) {
         ) {
             if (delivery.freeDeliveryEnabled) {
                 val zoneText = when (delivery.isBuyerInsideDeliveryZone) {
-                    true -> "Вы в зоне доставки"
-                    false -> "Вы вне зоны доставки"
-                    null -> delivery.radiusKm?.let { "${it.toInt()} км" } ?: "Не указано"
+                    true -> stringResource(R.string.inside_delivery_zone)
+                    false -> stringResource(R.string.outside_delivery_zone)
+                    null -> delivery.radiusKm?.let { "${it.toInt()} км" } ?: stringResource(R.string.not_specified)
                 }
 
                 DeliveryRow(
                     icon = if (delivery.isBuyerInsideDeliveryZone == false) Icons.Default.Public else Icons.Default.CheckCircle,
-                    label = "Доставка курьером",
+                    label = stringResource(R.string.courier_delivery),
                     value = zoneText,
                     isFree = delivery.isBuyerInsideDeliveryZone != false
                 )
             }
 
             if (delivery.pickupEnabled) {
-                DeliveryRow(
-                    icon = Icons.Default.LocationOn,
-                    label = "Самовывоз: ${delivery.pickupAddress}",
-                    value = "Бесплатно",
-                    isFree = true
-                )
+                delivery.pickupAddress?.let {
+                    DeliveryRow(
+                        icon = Icons.Default.LocationOn,
+                        label = stringResource(R.string.pickup_label, it),
+                        value = stringResource(R.string.free_label),
+                        isFree = true
+                    )
+                }
             }
 
             if (delivery.intercityEnabled) {
                 DeliveryRow(
                     icon = Icons.Default.Public,
-                    label = "Межгород",
-                    value = "Доступно",
+                    label = stringResource(R.string.intercity_label),
+                    value = stringResource(R.string.available_label),
                     isFree = false
                 )
             }
@@ -673,7 +677,7 @@ private fun SellerBlock(seller: SellerUi, onClick: () -> Unit) {
                     )
                     
                     Text(
-                        text = "• ${seller.completedOrders} заказов",
+                        text = stringResource(R.string.orders_count_simple, seller.completedOrders),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

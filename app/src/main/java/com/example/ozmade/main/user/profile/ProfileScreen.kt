@@ -27,9 +27,10 @@ import com.example.ozmade.main.user.profile.data.ProfileUiState
 import com.example.ozmade.main.user.profile.data.ProfileViewModel
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import com.example.ozmade.main.user.profile.locale.AppLang
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import coil.compose.AsyncImage
-
-private enum class AppLang { KAZ, RUS }
 
 @Composable
 fun ProfileScreen(
@@ -42,7 +43,7 @@ fun ProfileScreen(
     onBecomeSeller: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    var lang by rememberSaveable { mutableStateOf(AppLang.RUS) }
+    val lang by viewModel.currentLang.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -66,7 +67,7 @@ fun ProfileScreen(
                     .padding(vertical = 12.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                LanguageSelector(selectedLang = lang, onLangSelected = { lang = it })
+                LanguageSelector(selectedLang = lang, onLangSelected = { viewModel.setLanguage(it) })
             }
 
             when (val state = uiState) {
@@ -87,7 +88,7 @@ fun ProfileScreen(
             Spacer(Modifier.height(32.dp))
 
             Text(
-                text = "Личное",
+                text = stringResource(R.string.profile_personal_title),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
@@ -96,14 +97,14 @@ fun ProfileScreen(
             ProfileSectionCard {
                 ProfileMenuItem(
                     icon = Icons.Outlined.Notifications,
-                    title = "Уведомления",
+                    title = stringResource(R.string.profile_notifications),
                     iconColor = Color(0xFF5C6BC0),
                     onClick = onNotifications
                 )
                 MenuDivider()
                 ProfileMenuItem(
                     icon = Icons.Outlined.History,
-                    title = "История заказов",
+                    title = stringResource(R.string.profile_order_history),
                     iconColor = Color(0xFF66BB6A),
                     onClick = onOrderHistory
                 )
@@ -112,7 +113,7 @@ fun ProfileScreen(
             Spacer(Modifier.height(24.dp))
 
             Text(
-                text = "Поддержка и инфо",
+                text = stringResource(R.string.profile_support_title),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
@@ -121,14 +122,14 @@ fun ProfileScreen(
             ProfileSectionCard {
                 ProfileMenuItem(
                     icon = Icons.Outlined.SupportAgent,
-                    title = "Служба поддержки",
+                    title = stringResource(R.string.profile_support_service),
                     iconColor = Color(0xFF26A69A),
                     onClick = onSupport
                 )
                 MenuDivider()
                 ProfileMenuItem(
                     icon = Icons.Outlined.Info,
-                    title = "О приложении",
+                    title = stringResource(R.string.profile_about_app),
                     iconColor = Color(0xFF78909C),
                     onClick = onAbout
                 )
@@ -150,7 +151,7 @@ fun ProfileScreen(
             ) {
                 Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(8.dp))
-                Text("Выйти из аккаунта", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.logout), fontWeight = FontWeight.Bold)
             }
 
             Spacer(Modifier.height(16.dp))
@@ -202,13 +203,13 @@ private fun ProfileHeader(name: String, phone: String, photoUrl: String?, onEdit
         Spacer(Modifier.height(16.dp))
 
         Text(
-            text = name.ifBlank { "Ваше имя" },
+            text = name.ifBlank { stringResource(R.string.your_name_placeholder) },
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = phone.ifBlank { "Номер не указан" },
+            text = phone.ifBlank { stringResource(R.string.phone_not_specified) },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -285,13 +286,13 @@ private fun BecomeSellerCard(onClick: () -> Unit) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Стать продавцом",
+                    stringResource(R.string.become_seller),
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
                 Text(
-                    "Откройте свой магазин",
+                    stringResource(R.string.open_your_shop),
                     color = Color.White.copy(0.8f),
                     fontSize = 13.sp
                 )
@@ -328,7 +329,7 @@ private fun LanguageSelector(selectedLang: AppLang, onLangSelected: (AppLang) ->
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = if (lang == AppLang.KAZ) "ҚАЗ" else "РУС",
+                        text = if (lang == AppLang.KK) "ҚАЗ" else "РУС",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = contentColor

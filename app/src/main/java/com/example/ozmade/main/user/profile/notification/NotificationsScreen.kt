@@ -22,6 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import com.example.ozmade.R
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -38,19 +40,19 @@ fun NotificationsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Уведомления",
+                        stringResource(R.string.notifications_title),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back_desc))
                     }
                 },
                 actions = {
                     if (uiState is NotificationsUiState.Data && (uiState as NotificationsUiState.Data).items.isNotEmpty()) {
                         IconButton(onClick = { viewModel.clearAll() }) {
-                            Icon(Icons.Outlined.DeleteOutline, contentDescription = "Очистить всё")
+                            Icon(Icons.Outlined.DeleteOutline, contentDescription = stringResource(R.string.clear_all))
                         }
                     }
                 },
@@ -191,7 +193,7 @@ fun EmptyNotifications(padding: PaddingValues) {
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Уведомлений пока нет",
+                text = stringResource(R.string.no_notifications),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = Color.Gray,
                     fontWeight = FontWeight.Medium
@@ -199,7 +201,7 @@ fun EmptyNotifications(padding: PaddingValues) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Здесь будут появляться новости и важные события",
+                text = stringResource(R.string.no_notifications_desc),
                 style = MaterialTheme.typography.bodySmall.copy(color = Color.LightGray),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 32.dp)

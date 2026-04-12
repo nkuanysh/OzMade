@@ -2,6 +2,8 @@ package com.example.ozmade.auth
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -20,8 +22,15 @@ fun AuthNavHost(
     onBack: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val activity = LocalContext.current as Activity
     val context = LocalContext.current
+    val activity = remember(context) {
+        var currentContext = context
+        while (currentContext is ContextWrapper) {
+            if (currentContext is Activity) break
+            currentContext = currentContext.baseContext
+        }
+        currentContext as? Activity
+    }
 
     // Launcher for notification permission
     val launcher = rememberLauncherForActivityResult(
@@ -52,14 +61,14 @@ fun AuthNavHost(
             isLoading = false,
             errorText = null,
             onVerify = { otp -> viewModel.verifyOtp(state.verificationId, otp, state.phone) },
-            onResend = { viewModel.requestOtp(activity, state.phone) },
+            onResend = { activity?.let { viewModel.requestOtp(it, state.phone) } },
             onBackClick = { viewModel.reset() }
         )
 
         is AuthUiState.Loading -> PhoneLoginScreen(
             isLoading = true,
             errorText = null,
-            onSendCode = { phone -> viewModel.requestOtp(activity, phone) },
+            onSendCode = { phone -> activity?.let { viewModel.requestOtp(it, phone) } },
             onBackClick = onBack,
             onOpenPrivacy = onOpenPrivacy,
             onOpenTerms = onOpenTerms
@@ -72,14 +81,14 @@ fun AuthNavHost(
                     isLoading = false,
                     errorText = state.message,
                     onVerify = { otp -> viewModel.verifyOtp(state.verificationId, otp, state.phone) },
-                    onResend = { viewModel.requestOtp(activity, state.phone) },
+                    onResend = { activity?.let { viewModel.requestOtp(it, state.phone) } },
                     onBackClick = { viewModel.reset() }
                 )
             } else {
                 PhoneLoginScreen(
                     isLoading = false,
                     errorText = state.message,
-                    onSendCode = { phone -> viewModel.requestOtp(activity, phone) },
+                    onSendCode = { phone -> activity?.let { viewModel.requestOtp(it, phone) } },
                     onBackClick = onBack,
                     onOpenPrivacy = onOpenPrivacy,
                     onOpenTerms = onOpenTerms
@@ -90,7 +99,7 @@ fun AuthNavHost(
         else -> PhoneLoginScreen(
             isLoading = false,
             errorText = null,
-            onSendCode = { phone -> viewModel.requestOtp(activity, phone) },
+            onSendCode = { phone -> activity?.let { viewModel.requestOtp(it, phone) } },
             onBackClick = onBack,
             onOpenPrivacy = onOpenPrivacy,
             onOpenTerms = onOpenTerms

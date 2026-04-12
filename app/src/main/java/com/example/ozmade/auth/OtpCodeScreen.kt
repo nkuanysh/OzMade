@@ -23,7 +23,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.ozmade.R
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 
@@ -98,7 +100,7 @@ fun OtpCodeScreen(
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Text(
-                    text = "Проверка",
+                    text = stringResource(R.string.otp_title),
                     color = Color.White,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
@@ -107,7 +109,7 @@ fun OtpCodeScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "Мы отправили код подтверждения на ",
+                    text = stringResource(R.string.otp_subtitle),
                     color = secondaryText,
                     fontSize = 14.sp
                 )
@@ -129,7 +131,7 @@ fun OtpCodeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "КОД",
+                text = stringResource(R.string.otp_label),
                 modifier = Modifier.align(Alignment.Start),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
@@ -213,13 +215,13 @@ fun OtpCodeScreen(
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 if (!canResend) {
                     Text(
-                        text = "Повторно отправить код через ${secondsLeft} сек",
+                        text = stringResource(R.string.resend_code_wait, secondsLeft),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp
                     )
                 } else {
                     Text(
-                        text = "Отправить повторно",
+                        text = stringResource(R.string.resend_code_btn),
                         color = orangePrimary,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
@@ -257,7 +259,7 @@ fun OtpCodeScreen(
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                 } else {
                     Text(
-                        text = "ПРОВЕРИТЬ",
+                        text = stringResource(R.string.verify_code_btn),
                         color = Color.White,
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,

@@ -1,6 +1,7 @@
 package com.example.ozmade.di
 
 import android.content.Context
+import com.example.ozmade.main.user.profile.locale.LanguageStore
 import com.example.ozmade.ui.theme.ThemeSettings
 import dagger.Module
 import dagger.Provides
@@ -17,5 +18,11 @@ object SettingsModule {
     @Singleton
     fun provideThemeSettings(@ApplicationContext context: Context): ThemeSettings {
         return ThemeSettings(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideLanguageStore(@ApplicationContext context: Context): LanguageStore {
+        return LanguageStore(context)
     }
 }

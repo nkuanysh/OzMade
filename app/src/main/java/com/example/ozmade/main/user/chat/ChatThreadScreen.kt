@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import androidx.compose.ui.res.stringResource
+import com.example.ozmade.R
 import com.example.ozmade.main.user.chat.data.ChatMessageUi
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -144,13 +146,13 @@ private fun ChatThreadScreen(
 
                         Column {
                             Text(
-                                text = data?.sellerName ?: "Чат",
-                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                                text = data?.sellerName ?: stringResource(R.string.chats_title),
+                                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = if (data?.isOnline == true) "В сети" else "Был(а) недавно",
+                                text = if (data?.isOnline == true) stringResource(R.string.online_status) else stringResource(R.string.offline_status),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = if (data?.isOnline == true) Color(0xFF4CAF50) else Color.Gray
                             )
@@ -164,7 +166,7 @@ private fun ChatThreadScreen(
                     IconButton(onClick = { menuExpanded = true }) { Icon(Icons.Default.MoreVert, null) }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                         DropdownMenuItem(
-                            text = { Text("Удалить чат") },
+                            text = { Text(stringResource(R.string.delete_chat)) },
                             onClick = {
                                 menuExpanded = false
                                 onDelete()
@@ -196,7 +198,7 @@ private fun ChatThreadScreen(
                         modifier = Modifier
                             .weight(1f)
                             .padding(horizontal = 4.dp),
-                        placeholder = { Text("Сообщение…") },
+                        placeholder = { Text(stringResource(R.string.message_placeholder)) },
                         maxLines = 4,
                         shape = RoundedCornerShape(24.dp),
                         colors = TextFieldDefaults.colors(

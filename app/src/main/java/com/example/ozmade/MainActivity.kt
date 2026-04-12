@@ -1,5 +1,7 @@
 package com.example.ozmade
 
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -14,8 +16,21 @@ import com.example.ozmade.navigation.AppNavHost
 import com.example.ozmade.ui.theme.OzMadeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.getValue
+import com.example.ozmade.main.user.profile.locale.AppLang
+import com.example.ozmade.main.user.profile.locale.LanguageStore
+import javax.inject.Inject
+import androidx.compose.runtime.collectAsState
+import java.util.Locale
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var languageStore: LanguageStore
 
     private val openChat = mutableStateOf(false)
     private val chatId = mutableStateOf(0)
@@ -35,25 +50,37 @@ class MainActivity : ComponentActivity() {
         handleIntent(intent)
         
         setContent {
-            OzMadeTheme {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    val navController = rememberNavController()
+            val lang by languageStore.langFlow.collectAsState(initial = AppLang.RU)
+            
+            CompositionLocalProvider(
+                LocalContext provides remember(lang) {
+                    val config = resources.configuration
+                    val locale = Locale(lang.code)
+                    Locale.setDefault(locale)
+                    config.setLocale(locale)
+                    val localizedContext = createConfigurationContext(config)
+                    object : ContextWrapper(localizedContext) {
+                        override fun getBaseContext(): Context = this@MainActivity
+                    }
+                }
+            ) {
+                OzMadeTheme {
+                    Surface(color = MaterialTheme.colorScheme.background) {
+                        val navController = rememberNavController()
 
-                    AppNavHost(
-                        navController = navController,
-                        openChatFromPush = openChat.value || (deepLinkChatId.value != 0),
-                        pushChatId = if (deepLinkChatId.value != 0) deepLinkChatId.value else chatId.value,
-                        pushSellerId = sellerId.value,
-                        pushProductId = productId.value,
-                        pushSellerName = sellerName.value,
-                        pushProductTitle = productTitle.value,
-                        pushPrice = price.value,
-                        deepLinkProductId = deepLinkProductId.value,
-                        openOrderHistory = openOrderHistory.value
-                    )
-                    
-                    // Reset flag after passing to NavHost if needed, 
-                    // but usually AppNavHost handles it via LaunchedEffect
+                        AppNavHost(
+                            navController = navController,
+                            openChatFromPush = openChat.value || (deepLinkChatId.value != 0),
+                            pushChatId = if (deepLinkChatId.value != 0) deepLinkChatId.value else chatId.value,
+                            pushSellerId = sellerId.value,
+                            pushProductId = productId.value,
+                            pushSellerName = sellerName.value,
+                            pushProductTitle = productTitle.value,
+                            pushPrice = price.value,
+                            deepLinkProductId = deepLinkProductId.value,
+                            openOrderHistory = openOrderHistory.value
+                        )
+                    }
                 }
             }
         }

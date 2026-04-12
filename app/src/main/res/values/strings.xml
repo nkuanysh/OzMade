@@ -21,5 +21,113 @@
     <string name="resend_in">Отправить повторно через: %1$d</string>
     <string name="resend">Отправить ещё раз</string>
 
+    <string name="welcome_title">Добро пожаловать!</string>
+    <string name="login_subtitle">Введите номер телефона для входа в OzMade</string>
+    <string name="phone_label">НОМЕР ТЕЛЕФОНА</string>
+    <string name="phone_placeholder">777 123 45 67</string>
+    <string name="send_code_btn">ОТПРАВИТЬ КОД</string>
+    <string name="login_footer_agree">Продолжая, вы соглашаетесь с нашими</string>
+    <string name="login_footer_terms">Условиями</string>
+    <string name="login_footer_and">" и "</string>
+    <string name="login_footer_privacy">Политикой конфиденциальности</string>
+
+    <string name="otp_title">Проверка</string>
+    <string name="otp_subtitle">Мы отправили код подтверждения на </string>
+    <string name="otp_label">КОД</string>
+    <string name="resend_code_wait">Повторно отправить код через %1$d сек</string>
+    <string name="resend_code_btn">Отправить повторно</string>
+    <string name="verify_code_btn">ПРОВЕРИТЬ</string>
+
+    <string name="all_categories">Все категории</string>
+    <string name="search_results">Результаты поиска: \"%1$s\"</string>
+    <string name="nothing_found">Ничего не найдено</string>
+    <string name="no_recommendations">Пока нет персональных рекомендаций</string>
+    <string name="no_products">Нет товаров</string>
+    <string name="all_products_tab">Все товары</string>
+    <string name="recommendations_tab">Рекомендации</string>
+    <string name="search_placeholder">Поиск товаров и услуг</string>
+
+    <string name="favorites_title">Избранное</string>
+    <string name="try_again_btn">Попробуйте снова</string>
+    <string name="empty_favorites_title">В списке пока пусто</string>
+    <string name="empty_favorites_desc">Нажимайте на сердечко у товаров, которые вам понравились, чтобы не потерять их.</string>
+    <string name="to_shopping_btn">К покупкам</string>
+    <string name="orders_count_label">Заказов: %1$d</string>
+
+    <string name="retry_btn">Повторить</string>
+    <string name="search_in_category_placeholder">Поиск в этой категории</string>
+    <string name="no_products_in_category">В этой категории пока нет товаров</string>
+    <string name="back_desc">Назад</string>
+
+    <string name="delete_chat">Удалить чат</string>
+    <string name="online_status">В сети</string>
+    <string name="offline_status">Был(а) недавно</string>
+    <string name="message_placeholder">Сообщение…</string>
+
+    <string name="notifications_title">Уведомления</string>
+    <string name="clear_all">Очистить всё</string>
+    <string name="no_notifications">Уведомлений пока нет</string>
+    <string name="no_notifications_desc">Здесь будут появляться новости и важные события</string>
+
+    <string name="chats_title">Чаты</string>
+    <string name="search_chats_placeholder">Поиск чатов...</string>
+    <string name="no_active_chats">У вас пока нет активных диалогов</string>
+    <string name="no_active_chats_desc">Задайте вопрос продавцу на странице любого товара.</string>
+    <string name="go_to_shopping">Перейти к покупкам</string>
+
+    <string name="reviews_title">Отзывы</string>
+    <string name="reviews_count_title">Отзывы (%1$d)</string>
+    <string name="ratings_count_label">%1$d оценок</string>
+    <string name="orders_count_simple">%1$d заказов</string>
+    <string name="reviews_count_simple">%1$d отзывов</string>
+
+    <string name="product_description">Описание</string>
+    <string name="product_specs">Характеристики</string>
+    <string name="share">Поделиться</string>
+    <string name="buy_btn">Купить</string>
+    <string name="chat_with_seller">Чат с продавцом</string>
+    <string name="chat_label">Чат</string>
+    <string name="buy_now_btn">Купить сейчас</string>
+    <string name="delivery_title">Доставка</string>
+    <string name="seller_title">Продавец</string>
+    <string name="all_label">Все</string>
+
+    <string name="inside_delivery_zone">Вы в зоне доставки</string>
+    <string name="outside_delivery_zone">Вы вне зоны доставки</string>
+    <string name="not_specified">Не указано</string>
+    <string name="courier_delivery">Доставка курьером</string>
+    <string name="pickup_label">Самовывоз: %1$s</string>
+    <string name="free_label">Бесплатно</string>
+    <string name="intercity_label">Межгород</string>
+    <string name="available_label">Доступно</string>
+
     <string name="google_maps_key">AIzaSyCguBxmFvx7yS2p_ghv4q97mADnpmFjKl8</string>
+
+    <!-- Profile Screen -->
+    <string name="profile_personal_title">Личное</string>
+    <string name="profile_notifications">Уведомления</string>
+    <string name="profile_order_history">История заказов</string>
+    <string name="profile_support_title">Поддержка и инфо</string>
+    <string name="profile_support_service">Служба поддержки</string>
+    <string name="profile_about_app">О приложении</string>
+    <string name="become_seller">Стать продавцом</string>
+    <string name="open_your_shop">Откройте свой магазин</string>
+    <string name="logout">Выйти из аккаунта</string>
+    <string name="your_name_placeholder">Ваше имя</string>
+    <string name="phone_not_specified">Номер не указан</string>
+
+    <!-- Edit Profile -->
+    <string name="edit_profile_title">Мои данные</string>
+    <string name="edit_profile_name_label">Как вас зовут?</string>
+    <string name="edit_profile_name_placeholder">Введите имя</string>
+    <string name="edit_profile_address_label">Ваш адрес</string>
+    <string name="edit_profile_address_placeholder">Выберите адрес на карте</string>
+    <string name="edit_profile_map_instruction">Выберите адрес на карте</string>
+    <string name="edit_profile_map_tap">Тап по карте</string>
+    <string name="edit_profile_full_screen_map">Открыть карту на весь экран</string>
+    <string name="edit_profile_clear_address">Очистить адрес</string>
+    <string name="edit_profile_save">Сохранить изменения</string>
+    <string name="edit_profile_map_ready">Готово</string>
+    <string name="edit_profile_map_select_hint">Нажмите на карту, чтобы выбрать адрес</string>
+    <string name="menu_desc">Меню</string>
 </resources>

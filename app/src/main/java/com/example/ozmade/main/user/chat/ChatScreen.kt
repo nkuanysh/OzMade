@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import androidx.compose.ui.res.stringResource
+import com.example.ozmade.R
 import com.example.ozmade.main.user.chat.data.ChatThreadUi
 
 @Composable
@@ -57,7 +59,7 @@ fun ChatScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        text = "Чаты",
+                        text = stringResource(R.string.chats_title),
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Bold,
                             fontSize = 24.sp
@@ -67,14 +69,14 @@ fun ChatScreen(
 
                     Box {
                         IconButton(onClick = { menuExpanded = true }) {
-                            Icon(Icons.Default.MoreVert, contentDescription = "Меню")
+                            Icon(Icons.Default.MoreVert, contentDescription = stringResource(R.string.menu_desc))
                         }
                         DropdownMenu(
                             expanded = menuExpanded,
                             onDismissRequest = { menuExpanded = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Очистить все") },
+                                text = { Text(stringResource(R.string.clear_all)) },
                                 onClick = {
                                     menuExpanded = false
                                     viewModel.clearAll()
@@ -92,7 +94,7 @@ fun ChatScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
-                        placeholder = { Text("Поиск чатов...") },
+                        placeholder = { Text(stringResource(R.string.search_chats_placeholder)) },
                         leadingIcon = { Icon(Icons.Default.Search, null) },
                         trailingIcon = {
                             if (data.searchQuery.isNotEmpty()) {
@@ -141,7 +143,7 @@ fun ChatScreen(
                             onClick = { viewModel.load() },
                             colors = ButtonDefaults.buttonColors(containerColor = orangeColor)
                         ) {
-                            Text("Повторить")
+                            Text(stringResource(R.string.retry_btn))
                         }
                     }
                 }
@@ -151,7 +153,7 @@ fun ChatScreen(
                         EmptyChatsPlaceholder(onNavigateToHome, orangeColor)
                     } else if (state.threads.isEmpty() && state.searchQuery.isNotEmpty()) {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text("Ничего не найдено", color = Color.Gray)
+                            Text(stringResource(R.string.nothing_found), color = Color.Gray)
                         }
                     } else {
                         LazyColumn(
@@ -204,7 +206,7 @@ private fun EmptyChatsPlaceholder(onNavigateToHome: () -> Unit, accentColor: Col
             }
             Spacer(Modifier.height(24.dp))
             Text(
-                "У вас пока нет активных диалогов",
+                stringResource(R.string.no_active_chats),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
@@ -212,7 +214,7 @@ private fun EmptyChatsPlaceholder(onNavigateToHome: () -> Unit, accentColor: Col
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "Задайте вопрос продавцу на странице любого товара.",
+                stringResource(R.string.no_active_chats_desc),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
@@ -223,7 +225,7 @@ private fun EmptyChatsPlaceholder(onNavigateToHome: () -> Unit, accentColor: Col
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = accentColor)
             ) {
-                Text("Перейти к покупкам")
+                Text(stringResource(R.string.go_to_shopping))
             }
         }
     }

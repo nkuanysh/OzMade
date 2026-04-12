@@ -24,6 +24,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.ozmade.R
 import com.example.ozmade.utils.formatRating
 import coil.compose.AsyncImage
 import com.example.ozmade.main.userHome.Product
@@ -76,7 +78,7 @@ fun CategoryScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Повторить")
+                        Text(stringResource(R.string.retry_btn))
                     }
                 }
             }
@@ -112,7 +114,7 @@ fun CategoryScreen(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(vertical = 8.dp),
-                                placeholder = { Text("Поиск в этой категории") },
+                                placeholder = { Text(stringResource(R.string.search_in_category_placeholder)) },
                                 leadingIcon = { Icon(Icons.Default.Search, null) },
                                 shape = RoundedCornerShape(12.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
@@ -148,8 +150,8 @@ fun CategoryScreen(
                                     Spacer(Modifier.height(16.dp))
                                     Text(
                                         text = if (uiState.searchQuery.isEmpty()) 
-                                            "В этой категории пока нет товаров" 
-                                            else "Ничего не найдено",
+                                            stringResource(R.string.no_products_in_category) 
+                                            else stringResource(R.string.nothing_found),
                                         style = MaterialTheme.typography.bodyLarge,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
@@ -174,7 +176,7 @@ fun CategoryScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Назад",
+                            contentDescription = stringResource(R.string.back_desc),
                             tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -375,7 +377,7 @@ private fun CategoryProductCard(
                     if (product.ordersCount > 0) {
                         Spacer(Modifier.weight(1f))
                         Text(
-                            text = "${product.ordersCount} зак.",
+                            text = stringResource(R.string.orders_count_simple, product.ordersCount),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1

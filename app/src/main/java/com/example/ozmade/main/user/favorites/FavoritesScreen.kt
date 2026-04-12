@@ -23,6 +23,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.ozmade.R
 import com.example.ozmade.utils.formatRating
 import coil.compose.AsyncImage
 
@@ -50,7 +52,7 @@ fun FavoritesScreen(
                         .padding(16.dp)
                 ) {
                     Text(
-                        text = "Избранное",
+                        text = stringResource(R.string.favorites_title),
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -83,7 +85,7 @@ fun FavoritesScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = orangeAccent),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Попробуйте снова")
+                            Text(stringResource(R.string.try_again_btn))
                         }
                     }
                 }
@@ -138,14 +140,14 @@ private fun EmptyFavoritesView(onAction: () -> Unit, accentColor: Color) {
         }
         Spacer(Modifier.height(24.dp))
         Text(
-            "В списке пока пусто",
+            stringResource(R.string.empty_favorites_title),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(12.dp))
         Text(
-            "Нажимайте на сердечко у товаров, которые вам понравились, чтобы не потерять их.",
+            stringResource(R.string.empty_favorites_desc),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -160,7 +162,7 @@ private fun EmptyFavoritesView(onAction: () -> Unit, accentColor: Color) {
         ) {
             Icon(Icons.Rounded.ShoppingBag, null)
             Spacer(Modifier.width(8.dp))
-            Text("К покупкам", fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.to_shopping_btn), fontWeight = FontWeight.Bold)
         }
     }
 }
@@ -252,7 +254,7 @@ private fun FavoriteProductCard(
 
                 if (product.ordersCount > 0) {
                     Text(
-                        text = "Заказов: ${product.ordersCount}",
+                        text = stringResource(R.string.orders_count_label, product.ordersCount),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 4.dp)

@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import com.example.ozmade.R
 
 @Composable
@@ -98,7 +99,7 @@ fun PhoneLoginScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "Добро пожаловать!",
+                    text = stringResource(R.string.welcome_title),
                     color = Color.White,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold
@@ -107,7 +108,7 @@ fun PhoneLoginScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Введите номер телефона для входа в OzMade",
+                    text = stringResource(R.string.login_subtitle),
                     color = secondaryText,
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
@@ -127,7 +128,7 @@ fun PhoneLoginScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "НОМЕР ТЕЛЕФОНА",
+                text = stringResource(R.string.phone_label),
                 modifier = Modifier.align(Alignment.Start),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp,
@@ -150,7 +151,7 @@ fun PhoneLoginScreen(
                 leadingIcon = {
                     Icon(Icons.Default.Phone, contentDescription = null, tint = orangePrimary)
                 },
-                placeholder = { Text("777 123 45 67", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)) },
+                placeholder = { Text(stringResource(R.string.phone_placeholder), color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
@@ -188,7 +189,7 @@ fun PhoneLoginScreen(
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
                 } else {
                     Text(
-                        text = "ОТПРАВИТЬ КОД", 
+                        text = stringResource(R.string.send_code_btn), 
                         color = Color.White, 
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp,
@@ -206,7 +207,7 @@ fun PhoneLoginScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = "Продолжая, вы соглашаетесь с нашими",
+                    text = stringResource(R.string.login_footer_agree),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center
@@ -217,7 +218,7 @@ fun PhoneLoginScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Условиями",
+                        text = stringResource(R.string.login_footer_terms),
                         modifier = Modifier.clickable { onOpenTerms() },
                         color = orangePrimary,
                         fontSize = 12.sp,
@@ -225,12 +226,12 @@ fun PhoneLoginScreen(
                         textDecoration = TextDecoration.Underline
                     )
                     Text(
-                        text = " и ",
+                        text = stringResource(R.string.login_footer_and),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp
                     )
                     Text(
-                        text = "Политикой конфиденциальности",
+                        text = stringResource(R.string.login_footer_privacy),
                         modifier = Modifier.clickable { onOpenPrivacy() },
                         color = orangePrimary,
                         fontSize = 12.sp,
