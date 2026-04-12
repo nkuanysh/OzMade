@@ -67,7 +67,7 @@ class RealSellerChatRepository @Inject constructor(
                 chatId = chat.id,
                 buyerId = chat.buyerId,
                 buyerName = chat.buyerName ?: "Покупатель #${chat.buyerId}",
-                buyerPhotoUrl = ImageUtils.formatProfilePhotoUrl(chat.buyerPhoto),
+                buyerPhotoUrl = ImageUtils.formatImageUrl(chat.buyerPhoto),
                 productId = chat.productId ?: 0,
                 productTitle = chat.productName ?: "Без названия",
                 productImageUrl = ImageUtils.formatImageUrl(chat.productImage),

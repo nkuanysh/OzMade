@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -85,16 +86,31 @@ private fun SellerChatThreadScreen(
                 title = {
                     val data = uiState as? SellerChatThreadUiState.Data
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        AsyncImage(
-                            model = data?.buyerPhotoUrl,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primaryContainer),
-                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                            error = null
-                        )
+                        if (data != null && !data.buyerPhotoUrl.isNullOrBlank()) {
+                            AsyncImage(
+                                model = data.buyerPhotoUrl,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Surface(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape),
+                                color = MaterialTheme.colorScheme.primaryContainer
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Person,
+                                    contentDescription = null,
+                                    modifier = Modifier.padding(10.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
 
                         Spacer(Modifier.width(12.dp))
 

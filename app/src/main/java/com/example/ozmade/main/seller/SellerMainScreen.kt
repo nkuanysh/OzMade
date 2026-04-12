@@ -138,17 +138,21 @@ fun SellerMainScreen(
             composable(SellerBottomItem.Chat.route) {
                 com.example.ozmade.main.seller.chat.SellerChatScreen(
                     onOpenChat = { thread ->
-                        navController.navigate("seller_chat_thread/${thread.chatId}/${thread.buyerName}")
+                        val encName = android.net.Uri.encode(thread.buyerName)
+                        val encPhoto = android.net.Uri.encode(thread.buyerPhotoUrl ?: "")
+                        navController.navigate("${SellerRoutes.CHAT_THREAD}/${thread.chatId}/$encName?buyerPhotoUrl=$encPhoto")
                     }
                 )
             }
-            composable("${SellerRoutes.CHAT_THREAD}/{chatId}/{buyerName}") { backStack ->
+            composable("${SellerRoutes.CHAT_THREAD}/{chatId}/{buyerName}?buyerPhotoUrl={buyerPhotoUrl}") { backStack ->
                 val chatId = backStack.arguments?.getString("chatId")?.toIntOrNull() ?: return@composable
                 val buyerName = backStack.arguments?.getString("buyerName") ?: "Покупатель"
+                val buyerPhotoUrl = backStack.arguments?.getString("buyerPhotoUrl")
 
                 com.example.ozmade.main.seller.chat.SellerChatThreadRoute(
                     chatId = chatId,
                     buyerName = buyerName,
+                    buyerPhotoUrl = buyerPhotoUrl,
                     onBack = { navController.popBackStack() }
                 )
             }

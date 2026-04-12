@@ -101,16 +101,31 @@ private fun ChatThreadScreen(
                     val data = uiState as? ChatThreadUiState.Data
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box {
-                            AsyncImage(
-                                model = data?.sellerPhotoUrl,
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .clip(CircleShape)
-                                    .background(orangeColor.copy(alpha = 0.1f)),
-                                contentScale = ContentScale.Crop,
-                                error = null // Placeholder logic handled by background if needed
-                            )
+                            if (data != null && !data.sellerPhotoUrl.isNullOrBlank()) {
+                                AsyncImage(
+                                    model = data.sellerPhotoUrl,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape)
+                                        .background(orangeColor.copy(alpha = 0.1f)),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Surface(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .clip(CircleShape),
+                                    color = orangeColor.copy(alpha = 0.1f)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = null,
+                                        modifier = Modifier.padding(8.dp),
+                                        tint = orangeColor
+                                    )
+                                }
+                            }
 
                             if (data?.isOnline == true) {
                                 Box(

@@ -126,12 +126,21 @@ private fun SellerProfileContent(
                 shape = CircleShape,
                 color = Color(0xFFEEEEEE)
             ) {
-                AsyncImage(
-                    model = profile.photoUrl,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
+                if (!profile.photoUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = profile.photoUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.padding(16.dp),
+                        tint = Color.LightGray
+                    )
+                }
             }
 
             Spacer(Modifier.width(16.dp))

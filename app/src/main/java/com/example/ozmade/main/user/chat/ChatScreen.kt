@@ -263,17 +263,33 @@ private fun ThreadCard(thread: ChatThreadUi, onClick: () -> Unit, accentColor: C
             }
         },
         leadingContent = {
-            Box(modifier = Modifier.size(52.dp)) {
+            Box(modifier = Modifier.size(52.dp), contentAlignment = Alignment.Center) {
                 // Seller Photo
-                AsyncImage(
-                    model = thread.sellerPhotoUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surfaceVariant),
-                    contentScale = ContentScale.Crop
-                )
+                if (!thread.sellerPhotoUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = thread.sellerPhotoUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceVariant),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Surface(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape),
+                        color = MaterialTheme.colorScheme.surfaceVariant
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.padding(10.dp),
+                            tint = Color.Gray
+                        )
+                    }
+                }
                 
                 // Small Product Image Badge
                 AsyncImage(

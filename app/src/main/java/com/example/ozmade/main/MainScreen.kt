@@ -240,7 +240,8 @@ fun MainScreen(
                         onOpenThread = { t ->
                             val encName = Uri.encode(t.sellerName)
                             val encTitle = Uri.encode(t.productTitle)
-                            navController.navigate("chat/${t.chatId}/${t.sellerId}/${t.productId}?sellerName=$encName&productTitle=$encTitle&price=${t.productPrice}")
+                            val encPhoto = Uri.encode(t.sellerPhotoUrl ?: "")
+                            navController.navigate("chat/${t.chatId}/${t.sellerId}/${t.productId}?sellerName=$encName&productTitle=$encTitle&price=${t.productPrice}&sellerPhotoUrl=$encPhoto")
                         },
                         onNavigateToHome = {
                             navController.navigate(BottomItem.Home.route) {

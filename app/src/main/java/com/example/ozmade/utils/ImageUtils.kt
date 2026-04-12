@@ -21,6 +21,7 @@ object ImageUtils {
         // If it's already a full URL, we trust the backend and return it as is.
         // This handles signed URLs and different storage paths.
         if (input.startsWith("http")) {
+            Log.d(TAG, "formatImageUrl: Already a full URL, returning as-is: $input")
             return input
         }
         
@@ -48,6 +49,7 @@ object ImageUtils {
         
         // If it's already a full URL, use it directly.
         if (input.startsWith("http")) {
+            Log.d(TAG, "formatProfilePhotoUrl: Already a full URL, returning as-is: $input")
             return input
         }
 

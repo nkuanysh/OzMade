@@ -75,7 +75,7 @@ class RealChatRepository @Inject constructor(
                 productTitle = c.productName ?: "Без названия",
                 productPrice = c.productPrice ?: 0,
                 productImageUrl = ImageUtils.formatImageUrl(c.productImage),
-                sellerPhotoUrl = ImageUtils.formatProfilePhotoUrl(c.sellerPhoto),
+                sellerPhotoUrl = ImageUtils.formatImageUrl(c.sellerPhoto),
                 lastMessage = finalLastMessage,
                 lastTimeText = if (lastMsgFromVisible != null || isLastMessageVisible) formatTime(timeSource) else "",
                 sellerNumber = c.phoneNumber as String?,

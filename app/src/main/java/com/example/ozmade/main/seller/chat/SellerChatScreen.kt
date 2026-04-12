@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChatBubbleOutline
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -149,17 +150,33 @@ private fun SellerThreadItem(thread: SellerChatThreadUi, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Photo & Product Badge
-            Box(modifier = Modifier.size(56.dp)) {
-                AsyncImage(
-                    model = thread.buyerPhotoUrl,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                    error = null
-                )
+            Box(modifier = Modifier.size(56.dp), contentAlignment = Alignment.Center) {
+                if (!thread.buyerPhotoUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = thread.buyerPhotoUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                        contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                        error = null
+                    )
+                } else {
+                    Surface(
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(CircleShape),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.padding(12.dp),
+                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                        )
+                    }
+                }
 
                 // Product Image Badge
                 if (!thread.productImageUrl.isNullOrBlank()) {
