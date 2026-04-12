@@ -48,24 +48,32 @@ class SellerAnalyticsViewModel @Inject constructor(
                 // 1. Get orders to calculate revenue and popular products
                 val orders = ordersRepo.getOrders()
                 
-                // Only completed orders contribute to revenue
-                val completedOrders = orders.filter { it.status == OrderStatus.COMPLETED }
-                
-                val totalRevenue = completedOrders.sumOf { it.totalCost }
-                // Count only active or completed orders for analytics (excluding cancelled/expired)
-                val relevantOrdersCount = orders.count { 
-                    it.status != OrderStatus.CANCELLED_BY_BUYER && 
-                    it.status != OrderStatus.CANCELLED_BY_SELLER && 
-                    it.status != OrderStatus.EXPIRED 
+                // Logic Fix: Successful orders are those not cancelled or expired.
+                // We count them all in "Orders" to be consistent with what the seller sees in "My Orders".
+                val successfulOrders = orders.filter { 
+                    it.status != OrderStatus.CANCELLED_BY_BUYER &&
+                    it.status != OrderStatus.CANCELLED_BY_SELLER &&
+                    it.status != OrderStatus.EXPIRED
                 }
 
-                // Calculate popular products based on completed orders
-                val popularProducts = completedOrders.groupBy { it.productId }
+                // Logic Fix: Total Revenue should include ALL successful orders (In-progress + Completed)
+                // to match the "Popular Products" revenue and show the total volume (GMV).
+                // If we only show Completed, the card might show $0 while the products list shows thousands.
+                val totalRevenue = successfulOrders.sumOf { 
+                    if (it.totalCost > 0) it.totalCost else it.price * it.quantity 
+                }
+                
+                val relevantOrdersCount = successfulOrders.size
+
+                // Calculate popular products based on ALL successful orders
+                val popularProducts = successfulOrders.groupBy { it.productId }
                     .map { (id, productOrders) ->
                         PopularProductUi(
                             name = productOrders.first().productTitle,
                             salesCount = productOrders.sumOf { it.quantity },
-                            revenue = productOrders.sumOf { it.totalCost },
+                            revenue = productOrders.sumOf { 
+                                if (it.totalCost > 0) it.totalCost else it.price * it.quantity 
+                            },
                             imageUrl = productOrders.first().productImageUrl
                         )
                     }
@@ -79,7 +87,7 @@ class SellerAnalyticsViewModel @Inject constructor(
                 _uiState.value = AnalyticsUiState(
                     isLoading = false,
                     totalRevenue = totalRevenue,
-                    revenueGrowth = 0.0, // Should be calculated comparing with previous period
+                    revenueGrowth = 0.0,
                     ordersCount = relevantOrdersCount,
                     viewsCount = viewsCount,
                     popularProducts = popularProducts
