@@ -96,7 +96,7 @@ class SellerAddProductViewModel @Inject constructor(
         val backendType = st.selectedCategories.firstOrNull()?.backendValue ?: "crafts"
 
         return ProductCreateRequest(
-            name = st.title.trim(),
+            title = st.title.trim(),
             description = st.description.trim(),
             price = price,
 

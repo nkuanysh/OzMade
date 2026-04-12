@@ -68,7 +68,7 @@ class SellerRepositoryImpl @Inject constructor(
             ?: throw Exception("Товар не найден")
             
         val request = ProductRequest(
-            name = product.title ?: "",
+            title = product.title ?: "",
             description = product.description ?: "",
             price = newPrice.toDouble(),
             type = product.type ?: "crafts",
@@ -98,7 +98,7 @@ class SellerRepositoryImpl @Inject constructor(
         val newHidden = !currentlyHidden
         
         val request = ProductRequest(
-            name = product.title ?: "",
+            title = product.title ?: "",
             description = product.description ?: "",
             price = product.price ?: 0.0,
             type = product.type ?: "crafts",

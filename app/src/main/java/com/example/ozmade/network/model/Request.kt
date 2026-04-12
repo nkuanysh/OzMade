@@ -25,20 +25,20 @@ data class UpdateProfileRequest(
 )
 
 data class ProductRequest(
-    @SerializedName("Title") val name: String,
-    @SerializedName("Description") val description: String,
-    @SerializedName("Cost") val price: Double,
-    @SerializedName("Type") val type: String,
-    @SerializedName("Categories") val categories: List<String>,
-    @SerializedName("ImageUrl") val imageUrl: String?,
-    @SerializedName("Images") val images: List<String>?,
-    @SerializedName("Weight") val weight: String?,
-    @SerializedName("HeightCm") val heightCm: String?,
-    @SerializedName("WidthCm") val widthCm: String?,
-    @SerializedName("DepthCm") val depthCm: String?,
-    @SerializedName("Composition") val composition: String?,
-    @SerializedName("YouTubeUrl") val youtubeUrl: String?,
-    @SerializedName("IsHidden") val isHidden: Boolean? = null,
+    @SerializedName("title") val title: String,
+    @SerializedName("description") val description: String,
+    @SerializedName("price") val price: Double,
+    @SerializedName("type") val type: String,
+    @SerializedName("categories") val categories: List<String>,
+    @SerializedName("image_url") val imageUrl: String?,
+    @SerializedName("images") val images: List<String>?,
+    @SerializedName("weight") val weight: String?,
+    @SerializedName("height_cm") val heightCm: String?,
+    @SerializedName("width_cm") val widthCm: String?,
+    @SerializedName("depth_cm") val depthCm: String?,
+    @SerializedName("composition") val composition: String?,
+    @SerializedName("youtube_url") val youtubeUrl: String?,
+    @SerializedName("is_hidden") val isHidden: Boolean? = null,
     @SerializedName("address") val address: String? = null
 )
 
@@ -100,20 +100,20 @@ data class FCMTokenRequest(
 )
 
 data class ProductCreateRequest(
-    @SerializedName("Title") val name: String,
-    @SerializedName("Description") val description: String,
-    @SerializedName("Cost") val price: Double,
-    @SerializedName("Type") val type: String,
-    @SerializedName("Categories") val categories: List<String>,
-    @SerializedName("ImageUrl") val imageUrl: String?,
-    @SerializedName("Images") val images: List<String>?,
-    @SerializedName("Weight") val weight: String?,
-    @SerializedName("HeightCm") val heightCm: String?,
-    @SerializedName("WidthCm") val widthCm: String?,
-    @SerializedName("DepthCm") val depthCm: String?,
-    @SerializedName("Composition") val composition: String?,
-    @SerializedName("YouTubeUrl") val youtubeUrl: String?,
-    @SerializedName("IsHidden") val isHidden: Boolean? = null,
+    @SerializedName("title") val title: String,
+    @SerializedName("description") val description: String,
+    @SerializedName("price") val price: Double,
+    @SerializedName("type") val type: String,
+    @SerializedName("categories") val categories: List<String>,
+    @SerializedName("image_url") val imageUrl: String?,
+    @SerializedName("images") val images: List<String>?,
+    @SerializedName("weight") val weight: String?,
+    @SerializedName("height_cm") val heightCm: String?,
+    @SerializedName("width_cm") val widthCm: String?,
+    @SerializedName("depth_cm") val depthCm: String?,
+    @SerializedName("composition") val composition: String?,
+    @SerializedName("youtube_url") val youtubeUrl: String?,
+    @SerializedName("is_hidden") val isHidden: Boolean? = null,
     @SerializedName("address") val address: String? = null
 )
 

@@ -6,7 +6,7 @@ data class ProductDto(
     @SerializedName(value = "ID", alternate = ["id"]) val id: Int = 0,
     @SerializedName(value = "SellerID", alternate = ["seller_id", "sellerId"])
     val sellerId: Int? = null,
-    @SerializedName(value = "Title", alternate = ["title", "Name", "name"]) val title: String? = null,
+    @SerializedName(value = "title", alternate = ["Title", "Name", "name"]) val title: String? = null,
     @SerializedName(value = "Description", alternate = ["description"]) val description: String? = null,
     @SerializedName(value = "Type", alternate = ["type"]) val type: String? = null,
     @SerializedName(value = "Categories", alternate = ["categories"])
