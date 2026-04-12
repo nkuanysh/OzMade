@@ -183,7 +183,9 @@ data class ChatDto(
     @SerializedName("deleted_by_seller") val deletedBySeller: Boolean = false,
     @SerializedName("buyer_cleared_at") val buyerClearedAt: String? = null,
     @SerializedName("seller_cleared_at") val sellerClearedAt: String? = null,
-    @SerializedName(value="Messages", alternate=["messages"]) val messages: List<MessageDto>? = null
+    @SerializedName(value="Messages", alternate=["messages"]) val messages: List<MessageDto>? = null,
+    @SerializedName(value="last_message", alternate=["lastMessage"]) val lastMessage: MessageDto? = null,
+    @SerializedName(value="last_message_content", alternate=["lastMessageContent"]) val lastMessageContent: String? = null
 )
 
 data class MessageDto(
@@ -220,9 +222,7 @@ data class SellerPageDto(
     @SerializedName(value = "level_progress", alternate = ["levelProgress", "LevelProgress"]) val levelProgress: Float? = null,
     @SerializedName(value = "level_hint", alternate = ["levelHint", "LevelHint"]) val levelHint: String? = null,
     @SerializedName(value = "Header", alternate = ["header", "Summary", "summary"]) val header: SellerReviewsHeaderDto? = null,
-    @SerializedName(value = "Reviews", alternate = ["reviews", "comments", "Comments", "ReviewsList"]) val reviews: List<SellerReviewItemDto>? = null,
-
-
+    @SerializedName(value = "Reviews", alternate = ["reviews", "comments", "Comments", "ReviewsList"]) val reviews: List<SellerReviewItemDto>? = null
 )
 
 data class SellerHeaderDto(

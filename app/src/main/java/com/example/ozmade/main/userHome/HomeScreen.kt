@@ -45,6 +45,7 @@ fun HomeScreen(
     onSeeAllCategoriesClick: () -> Unit = {},
     onSeeAllProductsClick: () -> Unit = {},
     onTabSelected: (HomeTab) -> Unit = {},
+    onAdClick: (AdBanner) -> Unit = {},
     onRetry: () -> Unit = {}
 ) {
     val backgroundColor = MaterialTheme.colorScheme.background
@@ -91,7 +92,11 @@ fun HomeScreen(
                     if (uiState.searchQuery.isBlank()) {
                         if (uiState.ads.isNotEmpty()) {
                             item(span = { GridItemSpan(2) }) {
-                                ModernPromoSlider(ads = uiState.ads, accentColor = orangeAccent)
+                                ModernPromoSlider(
+                                    ads = uiState.ads,
+                                    accentColor = orangeAccent,
+                                    onAdClick = onAdClick
+                                )
                             }
                         }
 
@@ -250,7 +255,7 @@ fun HomeSearchBar(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ModernPromoSlider(ads: List<AdBanner>, accentColor: Color) {
+fun ModernPromoSlider(ads: List<AdBanner>, accentColor: Color, onAdClick: (AdBanner) -> Unit) {
     val pagerState = rememberPagerState(pageCount = { ads.size })
         LaunchedEffect(Unit) {
             while (true) {
@@ -270,7 +275,7 @@ fun ModernPromoSlider(ads: List<AdBanner>, accentColor: Color) {
                 .clip(RoundedCornerShape(16.dp))
         ) { page ->
             val ad = ads[page]
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize().clickable { onAdClick(ad) }) {
                 if (ad.imageUrl != null) {
                     AsyncImage(
                         model = ad.imageUrl,

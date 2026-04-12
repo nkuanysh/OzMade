@@ -31,27 +31,38 @@ class RealSellerChatRepository @Inject constructor(
 
         Log.d(TAG, "getThreads: myId=$myId, received ${chats.size} chats")
 
-        // Filter: for seller view, we only show chats where we are the seller
-        // and ignore chats where we are the buyer
-        val filtered = if (myId != null && myId > 0) {
-            chats.filter { it.sellerId == myId && it.buyerId != myId }
-        } else {
-            chats
+        // Filter: for seller view, we show chats where we are the seller.
+        // We include self-chats (buyerId == sellerId) here.
+        val filtered = chats.filter { chat ->
+            val isMySellerChat = if (myId != null && myId > 0) chat.sellerId == myId else true
+            isMySellerChat && !chat.deletedBySeller
         }
 
-        filtered.mapNotNull { chat ->
-            // Если чат удален продавцом полностью, не показываем его
-            if (chat.deletedBySeller) return@mapNotNull null
-
-            // Фильтруем сообщения по времени очистки
-            val messages = chat.messages.orEmpty()
-            val visibleMessages = messages.filter { msg ->
+        filtered.map { chat ->
+            val visibleMessages = chat.messages.orEmpty().filter { msg ->
                 chat.sellerClearedAt.isNullOrEmpty() || chat.sellerClearedAt.startsWith("0001") || msg.createdAt > chat.sellerClearedAt
             }
 
-            // Fallback to any message if visible list is empty but chat exists
-            val last = visibleMessages.maxByOrNull { it.id } ?: messages.maxByOrNull { it.id }
+            val lastMsgFromVisible = visibleMessages.maxByOrNull { it.id }
             
+            // Check if the chat-level last message is also "visible" (newer than clearedAt)
+            val isLastMessageVisible = chat.lastMessage != null && 
+                (chat.sellerClearedAt.isNullOrEmpty() || 
+                 chat.sellerClearedAt.startsWith("0001") || 
+                 chat.lastMessage.createdAt > chat.sellerClearedAt)
+
+            val finalLastMessage = when {
+                lastMsgFromVisible != null -> lastMsgFromVisible.content
+                isLastMessageVisible -> chat.lastMessage?.content ?: chat.lastMessageContent ?: "Напишите сообщение..."
+                else -> "Напишите сообщение..."
+            }
+
+            val timeSource = when {
+                lastMsgFromVisible != null -> lastMsgFromVisible.createdAt
+                isLastMessageVisible -> chat.lastMessage?.createdAt ?: chat.updatedAt ?: chat.createdAt
+                else -> chat.updatedAt ?: chat.createdAt
+            }
+
             SellerChatThreadUi(
                 chatId = chat.id,
                 buyerId = chat.buyerId,
@@ -60,10 +71,10 @@ class RealSellerChatRepository @Inject constructor(
                 productId = chat.productId ?: 0,
                 productTitle = chat.productName ?: "Без названия",
                 productImageUrl = ImageUtils.formatImageUrl(chat.productImage),
-                lastMessage = last?.content ?: "Нет новых сообщений",
-                lastTimeText = formatTime(last?.createdAt ?: chat.updatedAt ?: chat.createdAt)
+                lastMessage = finalLastMessage,
+                lastTimeText = if (lastMsgFromVisible != null || isLastMessageVisible) formatTime(timeSource) else ""
             )
-        }
+        }.sortedByDescending { it.chatId }
     }
 
     override suspend fun getMessages(chatId: Int): List<SellerChatMessageUi> = withContext(Dispatchers.IO) {
@@ -77,12 +88,11 @@ class RealSellerChatRepository @Inject constructor(
 
         val myId = sessionStore.myUserId()
 
-        Log.d(TAG, "getMessages: chatId=$chatId, myId=$myId, total=${dtos.size}, clearedAt=$clearedAt")
-
         dtos
             .filter { clearedAt.isNullOrEmpty() || clearedAt.startsWith("0001") || it.createdAt > clearedAt }
             .map { dto ->
                 val role = dto.senderRole?.uppercase()
+                // Seller's own messages are those where senderId == myId or role is not BUYER/USER
                 val isMine = if (myId != null && myId > 0) {
                     dto.senderId == myId
                 } else {
@@ -111,13 +121,11 @@ class RealSellerChatRepository @Inject constructor(
     private fun formatTime(isoString: String?): String {
         if (isoString.isNullOrBlank()) return ""
         return try {
-            // Backend provides ISO 8601 like "2023-10-27T10:00:00Z" (UTC)
             val odt = OffsetDateTime.parse(isoString)
             val local = odt.atZoneSameInstant(ZoneId.systemDefault())
             local.format(DateTimeFormatter.ofPattern("HH:mm"))
         } catch (e: Exception) {
             try {
-                // Fallback for simple parts if parsing fails
                 val parts = isoString.split("T")
                 if (parts.size < 2) return isoString
                 parts[1].take(5)

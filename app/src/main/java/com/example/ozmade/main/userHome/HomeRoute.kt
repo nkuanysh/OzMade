@@ -11,6 +11,8 @@ fun HomeRoute(
     viewModel: HomeViewModel = hiltViewModel(),
     onOpenProduct: (Int) -> Unit,
     onOpenCategory: (String) -> Unit,
+    onBecomeSeller: () -> Unit,
+    onSupportClick: () -> Unit,
     onSearchClick: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -42,6 +44,13 @@ fun HomeRoute(
         },
         onTabSelected = { tab ->
             viewModel.onTabSelected(tab)
+        },
+        onAdClick = { ad ->
+            when (ad.id) {
+                "1" -> onBecomeSeller()
+                "2" -> onOpenCategory("craft")
+                "3" -> onSupportClick()
+            }
         },
         onRetry = { viewModel.load() }
     )

@@ -209,6 +209,16 @@ fun MainScreen(
                         onOpenProduct = { pid -> navController.navigate("product/$pid") },
                         onOpenCategory = { catId ->
                             navController.navigate("category/0?title=$catId")
+                        },
+                        onBecomeSeller = {
+                            if (isRegistered) {
+                                scope.launch { sellerStore.setSellerMode(true) }
+                            } else {
+                                navController.navigate("seller_registration")
+                            }
+                        },
+                        onSupportClick = {
+                            navController.navigate("support")
                         }
                     )
                 }

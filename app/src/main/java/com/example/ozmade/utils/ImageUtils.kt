@@ -8,7 +8,7 @@ object ImageUtils {
 
     /**
      * Formats a raw image URL or filename from the backend into a valid link.
-     * 
+     *
      * Since public access has been added to the 'oz-made' bucket, we use the
      * direct Google Cloud Storage public URL. This avoids signature issues
      * and Firebase API overhead.
@@ -31,7 +31,7 @@ object ImageUtils {
         // 2. Reconstruct the direct Public GCS URL.
         // Files are confirmed to be stored in the 'products/' subfolder.
         val formattedUrl = "https://storage.googleapis.com/oz-made/products/$filename"
-        
+
         Log.d(TAG, "formatImageUrl: Using Public GCS URL -> $formattedUrl")
         return formattedUrl
     }
