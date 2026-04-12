@@ -58,7 +58,8 @@ class SellerRepositoryImpl @Inject constructor(
                 title = dto.title ?: "No Title",
                 price = (dto.price ?: 0.0).toInt(),
                 imageUrl = ImageUtils.formatImageUrl(rawImg),
-                status = if (dto.isHidden == true) SellerProductStatus.OFF_SALE else SellerProductStatus.ON_SALE
+                status = if (dto.isHidden == true) SellerProductStatus.OFF_SALE else SellerProductStatus.ON_SALE,
+                viewCount = dto.viewCount ?: 0
             )
         } ?: emptyList()
     }
