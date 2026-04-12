@@ -18,8 +18,11 @@ object ImageUtils {
         
         val input = url.trim()
         
-        // If it's already a full URL but NOT from our storage, we might want to return it as is?
-        // But the current implementation forces it into our storage pattern.
+        // If it's already a full URL, we trust the backend and return it as is.
+        // This handles signed URLs and different storage paths.
+        if (input.startsWith("http")) {
+            return input
+        }
         
         val filename = extractFilename(input) ?: ""
 
@@ -41,10 +44,18 @@ object ImageUtils {
      */
     fun formatProfilePhotoUrl(url: String?): String {
         if (url.isNullOrBlank()) return ""
-        val filename = extractFilename(url.trim()) ?: ""
-        if (filename.isBlank()) return url
+        val input = url.trim()
         
-        return "https://storage.googleapis.com/oz-made/products/$filename"
+        // If it's already a full URL, use it directly.
+        if (input.startsWith("http")) {
+            return input
+        }
+
+        val filename = extractFilename(input) ?: ""
+        if (filename.isBlank()) return input
+        
+        // Fallback for raw filenames
+        return "https://storage.googleapis.com/oz-made/$filename"
     }
 
     /**
