@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller.profile.data
 
+import com.example.ozmade.main.orders.data.OrderUi
+
 data class SellerProfileUi(
     val name: String,
     val firstName: String?,
@@ -15,5 +17,6 @@ data class SellerProfileUi(
     val totalProducts: Int,
     val rating: Double,
     val ratingsCount: Int,
-    val ordersCount: Int
+    val ordersCount: Int,
+    val activeOrders: List<OrderUi> = emptyList()
 )
