@@ -10,7 +10,8 @@ data class SellerProductUi(
     val title: String,
     val price: Int,
     val imageUrl: String?,
-    val status: SellerProductStatus
+    val status: SellerProductStatus,
+    val viewCount: Int = 0
 )
 
 enum class SellerProductsFilter(val title: String) {

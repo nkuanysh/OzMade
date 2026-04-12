@@ -2,6 +2,7 @@ package com.example.ozmade.main.seller.analytics
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ozmade.main.orders.data.OrderStatus
 import com.example.ozmade.main.seller.data.SellerRepository
 import com.example.ozmade.main.seller.orders.data.SellerOrdersRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,17 +49,22 @@ class SellerAnalyticsViewModel @Inject constructor(
                 val orders = ordersRepo.getOrders()
                 
                 // Only completed orders contribute to revenue
-                val completedOrders = orders.filter { it.status.lowercase() == "completed" || it.status.lowercase() == "delivered" }
+                val completedOrders = orders.filter { it.status == OrderStatus.COMPLETED }
                 
                 val totalRevenue = completedOrders.sumOf { it.totalCost }
-                val ordersCount = orders.size
+                // Count only active or completed orders for analytics (excluding cancelled/expired)
+                val relevantOrdersCount = orders.count { 
+                    it.status != OrderStatus.CANCELLED_BY_BUYER && 
+                    it.status != OrderStatus.CANCELLED_BY_SELLER && 
+                    it.status != OrderStatus.EXPIRED 
+                }
 
-                // Calculate popular products
-                val popularProducts = orders.groupBy { it.productId }
+                // Calculate popular products based on completed orders
+                val popularProducts = completedOrders.groupBy { it.productId }
                     .map { (id, productOrders) ->
                         PopularProductUi(
                             name = productOrders.first().productTitle,
-                            salesCount = productOrders.size,
+                            salesCount = productOrders.sumOf { it.quantity },
                             revenue = productOrders.sumOf { it.totalCost },
                             imageUrl = productOrders.first().productImageUrl
                         )
@@ -66,15 +72,15 @@ class SellerAnalyticsViewModel @Inject constructor(
                     .sortedByDescending { it.salesCount }
                     .take(5)
 
-                // 2. Get views from profile or products
-                val profile = sellerRepo.getSellerProfile()
-                val viewsCount = profile?.totalProducts?.let { it * 10 } ?: 0 // Placeholder logic for views
+                // 2. Get views from real product data
+                val products = sellerRepo.getMyProducts()
+                val viewsCount = products.sumOf { it.viewCount }
 
                 _uiState.value = AnalyticsUiState(
                     isLoading = false,
                     totalRevenue = totalRevenue,
-                    revenueGrowth = 15.0, // Static for now
-                    ordersCount = ordersCount,
+                    revenueGrowth = 0.0, // Should be calculated comparing with previous period
+                    ordersCount = relevantOrdersCount,
                     viewsCount = viewsCount,
                     popularProducts = popularProducts
                 )

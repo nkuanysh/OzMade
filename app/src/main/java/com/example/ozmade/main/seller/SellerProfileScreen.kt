@@ -24,16 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import com.example.ozmade.main.orders.data.OrderUi
-import com.example.ozmade.main.orders.data.deliveryTitle
 import com.example.ozmade.main.seller.profile.SellerProfileViewModel
 import com.example.ozmade.main.seller.profile.data.SellerProfileUi
 import com.example.ozmade.main.seller.profile.data.SellerProfileUiState
 import com.example.ozmade.utils.formatRating
-import com.example.ozmade.utils.ImageUtils
-import java.util.Locale
 
 @Composable
 fun SellerProfileScreen(
@@ -171,39 +165,6 @@ private fun SellerProfileContent(
             onOpenQuality = onOpenQuality
         )
 
-        if (profile.activeOrders.isNotEmpty()) {
-            Spacer(Modifier.height(32.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "АКТИВНЫЕ ЗАКАЗЫ",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = Color.Gray
-                )
-                Text(
-                    text = "Все",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = Color(0xFFFF9800),
-                    modifier = Modifier.clickable { onOpenOrders() }
-                )
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = 4.dp)
-            ) {
-                items(profile.activeOrders) { order ->
-                    ActiveOrderCard(order = order, onClick = { onOpenOrders() })
-                }
-            }
-        }
-
         Spacer(Modifier.height(32.dp))
 
         Text(
@@ -214,22 +175,6 @@ private fun SellerProfileContent(
         )
 
         ProfileSectionCard {
-            SellerMenuItem(
-                icon = Icons.Outlined.Inventory2,
-                title = "Мои товары",
-                subtitle = "Управление ассортиментом",
-                iconColor = Color(0xFFFF9800),
-                onClick = onOpenProducts
-            )
-            MenuDivider()
-            SellerMenuItem(
-                icon = Icons.Outlined.ShoppingBag,
-                title = "Заказы",
-                subtitle = "Активные и завершенные",
-                iconColor = Color(0xFFFB8C00),
-                onClick = onOpenOrders
-            )
-            MenuDivider()
             SellerMenuItem(
                 icon = Icons.Outlined.Settings,
                 title = "Настройки магазина",
@@ -354,62 +299,6 @@ private fun SellerStatsRow(
                     fontWeight = FontWeight.Medium
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun ActiveOrderCard(order: OrderUi, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .width(200.dp)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
-    ) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Surface(
-                    modifier = Modifier.size(40.dp),
-                    shape = RoundedCornerShape(8.dp),
-                    color = Color(0xFFF0F0F0)
-                ) {
-                    AsyncImage(
-                        model = ImageUtils.formatImageUrl(order.productImageUrl),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Spacer(Modifier.width(8.dp))
-                Column {
-                    Text(
-                        text = "№${order.id}",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = "${order.totalCost} ₸",
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2E7D32)
-                    )
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = order.productTitle,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-            )
-            Text(
-                text = deliveryTitle(order.deliveryType),
-                style = MaterialTheme.typography.labelSmall,
-                color = Color(0xFF5C6BC0)
-            )
         }
     }
 }
