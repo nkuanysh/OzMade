@@ -15,14 +15,22 @@ class RealSellerQualityRepository @Inject constructor(
 ) : SellerQualityRepository {
 
     override suspend fun load(): SellerQualityUi = withContext(Dispatchers.IO) {
-        // Try to load dedicated quality stats first
         val qualityResp = runCatching { api.getSellerQuality() }.getOrNull()
+        
         if (qualityResp != null && qualityResp.isSuccessful) {
             val dto = qualityResp.body()!!
+            
+            val reviewsCount = dto.reviews_count ?: 0
+            val ratingsCount = dto.ratingsCount ?: 0
+            
+            // LOGIC FIX: If there are no ratings, the average MUST be 0.0
+            // Even if the server returns 4.0 or 5.0 as default
+            val averageRating = if (ratingsCount > 0) dto.averageRating ?: 0.0 else 0.0
+
             val level = computeLevel(
                 orders = dto.ordersCount ?: 0,
-                rating = dto.averageRating ?: 0.0,
-                reviews = dto.reviews_count ?: 0,
+                rating = averageRating,
+                reviews = max(reviewsCount, ratingsCount),
                 days = dto.daysWithOzMade ?: 0
             )
             return@withContext SellerQualityUi(
@@ -30,34 +38,36 @@ class RealSellerQualityRepository @Inject constructor(
                 levelTitle = level.title,
                 levelProgress = level.progress,
                 levelHint = level.hint,
-                averageRating = dto.averageRating ?: 0.0,
-                ratingsCount = dto.ratingsCount ?: 0,
-                reviewsCount = dto.reviews_count ?: 0,
+                averageRating = averageRating,
+                ratingsCount = ratingsCount,
+                reviewsCount = reviewsCount,
                 reviews = dto.reviews?.map { r -> mapToUi(r) } ?: emptyList()
             )
         }
 
-        // Fallback: 1. Get profile to find the seller ID
+        // Fallback to profile and reviews
         val profileResp = api.getSellerProfile()
         if (!profileResp.isSuccessful) error("Не удалось загрузить профиль (${profileResp.code()})")
         val profile = profileResp.body() ?: error("Пустой ответ профиля")
 
-        // 2. Load reviews using the ID (using the suggested endpoint seller/:id/review)
         val reviewsResp = api.getSellerReviewLegacy(profile.id)
         val reviewsDto = if (reviewsResp.isSuccessful) reviewsResp.body() else null
         val header = reviewsDto?.header
 
-        // 3. Compute stats
         val ordersCount = profile.ordersCount ?: 0
-        val averageRating = header?.averageRating ?: profile.rating ?: 0.0
-        val reviewsCount = header?.reviewsCount ?: dtoReviewsCount(reviewsDto?.reviews) ?: 0
+        val reviewsCountFromList = reviewsDto?.reviews?.size ?: 0
+        val reviewsCount = header?.reviewsCount ?: reviewsCountFromList
         val ratingsCount = header?.ratingsCount ?: reviewsCount
+        
+        // LOGIC FIX: Average rating should be 0 if no ratings exist
+        val averageRating = if (ratingsCount > 0) (header?.averageRating ?: profile.rating ?: 0.0) else 0.0
+        
         val daysWithOzMade = profile.daysWithOzMade ?: 0
 
         val level = computeLevel(
             orders = ordersCount,
             rating = averageRating,
-            reviews = reviewsCount,
+            reviews = max(reviewsCount, ratingsCount),
             days = daysWithOzMade
         )
 
@@ -66,10 +76,8 @@ class RealSellerQualityRepository @Inject constructor(
             levelTitle = level.title,
             levelProgress = level.progress,
             levelHint = level.hint,
-
             averageRating = averageRating,
             ratingsCount = ratingsCount,
-
             reviewsCount = reviewsCount,
             reviews = reviewsDto?.reviews?.map { r -> mapToUi(r) } ?: emptyList()
         )
@@ -85,27 +93,36 @@ class RealSellerQualityRepository @Inject constructor(
         text = r.text ?: ""
     )
 
-    private fun dtoReviewsCount(list: List<SellerReviewItemDto>?): Int? {
-        return list?.size?.takeIf { it > 0 }
-    }
-
     private data class Level(val title: String, val progress: Float, val hint: String)
 
     private fun computeLevel(orders: Int, rating: Double, reviews: Int, days: Int): Level {
-        val ordersPts = min(40, orders * 2)
-        val reviewsPts = min(30, reviews * 3)
-        val ratingRaw = max(0.0, rating - 3.0) * 10.0
-        val ratingPts = min(20, ratingRaw.toInt())
-        val daysPts = min(10, days / 7)
+        // Points system (Total 100)
+        
+        // 1. Orders: 2 points per order, max 40 (Need 20 orders for full points)
+        val ordersPts = min(40.0, orders * 2.0).toInt()
+        
+        // 2. Reviews/Ratings: 5 points per review, max 30 (Need 6 reviews for full points)
+        val reviewsPts = min(30.0, reviews * 5.0).toInt()
+        
+        // 3. Rating Score: Up to 20 points. Only counts if there is activity.
+        // Formula: (Rating - 3.0) * 10 -> 3.0 = 0pts, 4.0 = 10pts, 5.0 = 20pts
+        val ratingPts = if (reviews > 0 && rating >= 3.0) {
+            min(20.0, (rating - 3.0) * 10.0).toInt()
+        } else 0
+        
+        // 4. Tenure: 1 point per 2 weeks, max 10 points
+        val daysPts = min(10.0, (days / 14.0)).toInt()
 
-        val score = ordersPts + reviewsPts + ratingPts + daysPts
-        val s = score.coerceIn(0, 100)
+        val totalScore = ordersPts + reviewsPts + ratingPts + daysPts
+        val s = totalScore.coerceIn(0, 100)
+        
+        // Progress is total progress towards "Top Master"
         val progress = s / 100f
 
         return when {
-            s < 20 -> Level("Новый мастер", progress, "Начни собирать отзывы и выполненные заказы")
-            s < 45 -> Level("Надёжный мастер", progress, "Держи рейтинг и увеличивай число заказов")
-            s < 70 -> Level("Проверенный мастер", progress, "Ещё немного — и ты в топе")
+            s < 30 -> Level("Новый мастер", progress, "Начни собирать отзывы и выполненные заказы")
+            s < 55 -> Level("Надёжный мастер", progress, "Держи рейтинг и увеличивай число заказов")
+            s < 75 -> Level("Проверенный мастер", progress, "Ещё немного — и ты в топе")
             s < 90 -> Level("Отличный мастер", progress, "Стабильная работа, высокий рейтинг")
             else -> Level("Топ мастер", progress, "Максимальный уровень доверия покупателей")
         }
