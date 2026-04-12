@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.impl.FirebaseAuthRepository
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.model.FCMTokenRequest
+import com.example.ozmade.network.model.SyncRequest
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -91,14 +92,14 @@ class AuthViewModel @Inject constructor(
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                    val response = api.updateFCMToken(FCMTokenRequest(token))
+                    val response = api.syncUser(SyncRequest(fcmToken = token))
                     if (response.isSuccessful) {
-                        Log.d("FCM", "Token sent successfully")
+                        Log.d("FCM", "Token sent successfully via syncUser")
                     } else {
-                        Log.e("FCM", "Token send failed: ${response.code()}")
+                        Log.e("FCM", "Token sync failed: ${response.code()}")
                     }
                 } catch (e: Exception) {
-                    Log.e("FCM", "Send error", e)
+                    Log.e("FCM", "Sync error", e)
                 }
             }
         }

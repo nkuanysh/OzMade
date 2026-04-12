@@ -61,7 +61,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             return
         }
 
-        // Сохраняем в локальную историю
+        // Сохраняем в локальную историю (теперь и для CHAT)
         NotificationStorage.add(
             NotificationItem(
                 id = data["notification_id"]?.toIntOrNull() ?: 0,

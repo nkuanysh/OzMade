@@ -99,6 +99,10 @@ data class FCMTokenRequest(
     @SerializedName("token") val token: String
 )
 
+data class SyncRequest(
+    @SerializedName("fcm_token") val fcmToken: String? = null
+)
+
 data class ProductCreateRequest(
     @SerializedName("title") val title: String,
     @SerializedName("description") val description: String,

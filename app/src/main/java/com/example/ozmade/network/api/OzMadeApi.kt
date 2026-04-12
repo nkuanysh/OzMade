@@ -40,7 +40,9 @@ interface OzMadeApi {
     suspend fun getTrendingProducts(): Response<List<ProductDto>>
 
     @POST("auth/sync")
-    suspend fun syncUser(): Response<AuthSyncResponse>
+    suspend fun syncUser(
+        @Body request: SyncRequest = SyncRequest()
+    ): Response<AuthSyncResponse>
 
     @POST("products/{id}/comments")
     suspend fun postComment(
