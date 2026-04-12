@@ -25,9 +25,9 @@ data class UpdateProfileRequest(
 )
 
 data class ProductRequest(
-    @SerializedName("Name") val name: String,
+    @SerializedName("Title") val name: String,
     @SerializedName("Description") val description: String,
-    @SerializedName("Price") val price: Double,
+    @SerializedName("Cost") val price: Double,
     @SerializedName("Type") val type: String,
     @SerializedName("Categories") val categories: List<String>,
     @SerializedName("ImageUrl") val imageUrl: String?,
@@ -99,9 +99,9 @@ data class FCMTokenRequest(
 )
 
 data class ProductCreateRequest(
-    @SerializedName("Name") val name: String,
+    @SerializedName("Title") val name: String,
     @SerializedName("Description") val description: String,
-    @SerializedName("Price") val price: Double,
+    @SerializedName("Cost") val price: Double,
     @SerializedName("Type") val type: String,
     @SerializedName("Categories") val categories: List<String>,
     @SerializedName("ImageUrl") val imageUrl: String?,

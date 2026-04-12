@@ -1,5 +1,6 @@
 package com.example.ozmade.main.userHome
 
+import android.R.attr.name
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.network.model.AdDto
 import com.example.ozmade.network.model.CategoryDto
@@ -120,7 +121,7 @@ private fun ProductDto.toDomain(liked: Boolean = false): Product {
 
     return Product(
         id = id,
-        title = title ?: name ?: "Unknown",
+        title = title ?:  "Unknown",
         price = price ?: 0.0,
         city = address?.substringBefore(",") ?: "Unknown",
         address = address ?: "Unknown",

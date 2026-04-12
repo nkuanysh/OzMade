@@ -6,8 +6,7 @@ data class ProductDto(
     @SerializedName(value = "ID", alternate = ["id"]) val id: Int = 0,
     @SerializedName(value = "SellerID", alternate = ["seller_id", "sellerId"])
     val sellerId: Int? = null,
-    @SerializedName(value = "Title", alternate = ["title"]) val title: String? = null,
-    @SerializedName(value = "Name", alternate = ["name"]) val name: String? = null,
+    @SerializedName(value = "Title", alternate = ["title", "Name", "name"]) val title: String? = null,
     @SerializedName(value = "Description", alternate = ["description"]) val description: String? = null,
     @SerializedName(value = "Type", alternate = ["type"]) val type: String? = null,
     @SerializedName(value = "Categories", alternate = ["categories"])
@@ -44,7 +43,7 @@ data class ProductDto(
 
 data class ProductDetailsDto(
     @SerializedName(value = "ID", alternate = ["id"]) val id: Int,
-    @SerializedName(value = "Title", alternate = ["title"]) val title: String,
+    @SerializedName(value = "Title", alternate = ["title", "Name", "name"]) val title: String,
     @SerializedName(value = "Description", alternate = ["description"]) val description: String,
     @SerializedName(value = "SellerID", alternate = ["seller_id", "sellerId"])
     val sellerId: Int? = null,

@@ -135,7 +135,7 @@ class RealProductRepository @Inject constructor(
         response.body().orEmpty().map { dto ->
             FavoriteProductUi(
                 id = dto.id,
-                title = dto.title ?: dto.name ?: "Без названия",
+                title = dto.title ?: "Без названия",
                 price = dto.price ?: 0.0,
                 imageUrl = ImageUtils.formatImageUrl(dto.images?.firstOrNull() ?: dto.imageUrl),
                 address = dto.address ?: "",

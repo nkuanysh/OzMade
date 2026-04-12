@@ -30,7 +30,7 @@ class SellerEditProductViewModel @Inject constructor(
         loadedId = productId
 
         viewModelScope.launch {
-            _state.update { it.copy(loading = true, error = null) }
+            _state.value = AddProductState(loading = true)
 
             runCatching {
                 val dto = repo.getProductDetails(productId)
@@ -45,16 +45,22 @@ class SellerEditProductViewModel @Inject constructor(
 
                     val catTitles = dto.categories ?: listOfNotNull(dto.type)
                     
+                    // Format price to remove .0 if it's an integer
+                    val formattedPrice = if (dto.price != null) {
+                        if (dto.price % 1 == 0.0) dto.price.toInt().toString() 
+                        else dto.price.toString()
+                    } else ""
+
                     st.copy(
                         loading = false,
                         error = null,
                         success = false,
-                        title = dto.title ?: "",
-                        description = dto.description ?: "",
-                        priceText = (dto.price ?: 0.0).toString(),
+                        title = dto.title,
+                        description = dto.description,
+                        priceText = formattedPrice,
                         photos = formattedPhotos,
                         selectedCategories = SellerCategory.entries
-                            .filter { cat -> catTitles.any { it == cat.title || it == cat.backendValue } }
+                            .filter { cat -> catTitles.any { it.equals(cat.title, ignoreCase = true) || it.equals(cat.backendValue, ignoreCase = true) } }
                             .toSet(),
                         weightText = dto.weight ?: "",
                         heightText = dto.heightCm ?: "",

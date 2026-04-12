@@ -55,7 +55,7 @@ class SellerRepositoryImpl @Inject constructor(
             val rawImg = dto.images?.firstOrNull() ?: dto.imageUrl
             SellerProductUi(
                 id = dto.id,
-                title = dto.title ?: dto.name ?: "No Title",
+                title = dto.title ?: "No Title",
                 price = (dto.price ?: 0.0).toInt(),
                 imageUrl = ImageUtils.formatImageUrl(rawImg),
                 status = SellerProductStatus.ON_SALE
