@@ -27,6 +27,7 @@ import coil.compose.AsyncImage
 import com.example.ozmade.main.seller.profile.SellerProfileViewModel
 import com.example.ozmade.main.seller.profile.data.SellerProfileUi
 import com.example.ozmade.main.seller.profile.data.SellerProfileUiState
+import com.example.ozmade.utils.formatRating
 import com.example.ozmade.utils.ImageUtils
 import java.util.Locale
 
@@ -253,7 +254,7 @@ private fun SellerStatsRow(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = if (profile.rating > 0) String.format(Locale.US, "%.1f", profile.rating) else "—",
+                    text = if (profile.rating > 0) formatRating(profile.rating) else "—",
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 20.sp,
                     color = Color(0xFF2D2D2D)

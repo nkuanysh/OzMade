@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.ozmade.utils.formatRating
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.min
@@ -150,7 +151,7 @@ private fun RatingHeader(avg: Double, ratingsCount: Int) {
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = String.format("%.1f", avg),
+                    text = formatRating(avg),
                     style = MaterialTheme.typography.displayMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -201,7 +202,7 @@ private fun RatingBar(stars: Int, progress: Float) {
 }
 
 @Composable
-private fun ReviewCard(r: ReviewUi) {
+fun ReviewCard(r: ReviewUi) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -267,24 +268,25 @@ private fun ReviewCard(r: ReviewUi) {
 }
 
 @Composable
-private fun StarsRow(rating: Double, size: Dp) {
+fun StarsRow(rating: Double, size: Dp, color: Color = Color(0xFFFFC107)) {
     val full = floor(rating).toInt().coerceIn(0, 5)
     val hasHalf = (rating - full) >= 0.5 && full < 5
     val empty = 5 - full - (if (hasHalf) 1 else 0)
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-        repeat(full) { Star(filledFraction = 1f, size = size) }
-        if (hasHalf) Star(filledFraction = 0.5f, size = size)
-        repeat(empty) { Star(filledFraction = 0f, size = size) }
+        repeat(full) { Star(filledFraction = 1f, size = size, color = color) }
+        if (hasHalf) Star(filledFraction = 0.5f, size = size, color = color)
+        repeat(empty) { Star(filledFraction = 0f, size = size, color = color) }
     }
 }
 
 @Composable
-private fun Star(
+fun Star(
     filledFraction: Float,
-    size: Dp
+    size: Dp,
+    color: Color = Color(0xFFFFC107)
 ) {
-    val fill = Color(0xFFFFC107)
+    val fill = color
     val outline = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
 
     val path = remember { Path() }

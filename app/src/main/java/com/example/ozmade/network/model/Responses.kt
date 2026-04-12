@@ -91,7 +91,9 @@ data class CommentDto(
     @SerializedName(value = "ID", alternate = ["id"]) val id: Int,
     @SerializedName(value = "UserID", alternate = ["user_id", "userId"]) val userId: Int,
     @SerializedName(value = "ProductID", alternate = ["product_id", "productId"]) val productId: Int,
-    @SerializedName(value = "Rating", alternate = ["rating"]) val rating: Int,
+    @SerializedName(value = "UserName", alternate = ["user_name", "userName", "name"]) val userName: String? = null,
+    @SerializedName(value = "UserPhoto", alternate = ["user_photo", "photo_url", "avatar_url"]) val userPhoto: String? = null,
+    @SerializedName(value = "Rating", alternate = ["rating"]) val rating: Double,
     @SerializedName(value = "Text", alternate = ["text", "comment", "content", "message"]) val text: String,
     @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String?,
     @SerializedName(value = "User", alternate = ["user"]) val user: ProfileDto? = null
@@ -270,16 +272,15 @@ data class CategoryDto(
 )
 
 data class ProductReviewsDto(
-    @SerializedName(value = "Summary", alternate = ["summary", "header", "Header"]) val summary: ReviewsSummaryDto? = null,
-    @SerializedName(value = "Reviews", alternate = ["reviews", "comments", "Comments", "data"]) val reviews: List<ReviewItemDto>? = null
+    @SerializedName("summary") val summary: ReviewsSummaryDto? = null,
+    @SerializedName("reviews") val reviews: List<ReviewItemDto>? = null
 )
 
 data class ReviewsSummaryDto(
-    @SerializedName(value = "ProductID", alternate = ["product_id", "productId"]) val productId: Int? = null,
-    @SerializedName(value = "AverageRating", alternate = ["average_rating", "averageRating"]) val averageRating: Double? = null,
-    @SerializedName(value = "RatingsCount", alternate = ["ratings_count", "ratingsCount"]) val ratingsCount: Int? = null,
-    @SerializedName(value = "ReviewsCount", alternate = ["reviews_count", "reviewsCount", "count", "Count"]) val reviewsCount: Int? = null,
-    @SerializedName(value = "Count", alternate = ["count"]) val count: Int? = null
+    @SerializedName("product_id") val productId: Int? = null,
+    @SerializedName("average_rating") val averageRating: Double? = null,
+    @SerializedName("ratings_count") val ratingsCount: Int? = null,
+    @SerializedName("reviews_count") val reviewsCount: Int? = null
 )
 
 data class ReviewItemDto(

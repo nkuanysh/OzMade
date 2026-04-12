@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ozmade.main.seller.quality.data.SellerQualityReviewUi
 import com.example.ozmade.main.seller.quality.data.SellerQualityUiState
+import com.example.ozmade.utils.formatRating
 import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.floor
@@ -256,7 +257,7 @@ private fun RatingCard(rating: Double, ratingsCount: Int) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = String.format(Locale.US, "%.1f", rating),
+                text = formatRating(rating),
                 style = MaterialTheme.typography.displayMedium,
                 fontWeight = FontWeight.Black,
                 color = Color(0xFF212121)

@@ -64,6 +64,17 @@ class RealProductRepository @Inject constructor(
             dto.seller?.completedOrders ?: 0
         )
 
+        val reviews = dto.comments?.map { c ->
+            com.example.ozmade.main.userHome.reviews.ReviewUi(
+                id = c.id,
+                userName = c.user?.name ?: "Пользователь",
+                rating = c.rating.toDouble(),
+                dateText = c.createdAt ?: "",
+                text = c.text,
+                photoUrl = ImageUtils.formatProfilePhotoUrl(c.user?.photoUrl)
+            )
+        } ?: emptyList()
+
         return ProductDetailsUi(
             id = dto.id,
             title = dto.title,
@@ -105,6 +116,7 @@ class RealProductRepository @Inject constructor(
                 completedOrders = dto.seller?.completedOrders ?: 0,
                 photoUrl = ImageUtils.formatProfilePhotoUrl(dto.seller?.photoUrl)
             ),
+            reviews = reviews,
             isMine = isMine
         )
     }
@@ -146,7 +158,7 @@ class RealProductRepository @Inject constructor(
         }
     }
 
-    override suspend fun postComment(productId: Int, rating: Int, text: String, orderId: Int?): Result<Unit> = withContext(Dispatchers.IO) {
+    override suspend fun postComment(productId: Int, rating: Double, text: String, orderId: Int?): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             val resp = api.postComment(productId, com.example.ozmade.network.model.CommentRequest(text, rating, orderId))
             if (resp.isSuccessful) Result.success(Unit)

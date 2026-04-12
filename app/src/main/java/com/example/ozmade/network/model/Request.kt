@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName
  */
 data class CommentRequest(
     @SerializedName("Text") val text: String,
-    @SerializedName("Rating") val rating: Int,
+    @SerializedName("Rating") val rating: Double,
     @SerializedName("OrderID") val orderId: Int? = null
 )
 

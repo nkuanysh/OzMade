@@ -15,6 +15,11 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -383,9 +388,9 @@ private fun InfoRow(label: String, value: String) {
 @Composable
 fun ReviewDialog(
     onDismiss: () -> Unit,
-    onSubmit: (Int, String) -> Unit
+    onSubmit: (Double, String) -> Unit
 ) {
-    var rating by remember { mutableIntStateOf(5) }
+    var rating by remember { mutableDoubleStateOf(5.0) }
     var text by remember { mutableStateOf("") }
 
     AlertDialog(
@@ -398,7 +403,7 @@ fun ReviewDialog(
                     horizontalArrangement = Arrangement.Center
                 ) {
                     repeat(5) { index ->
-                        val starIndex = index + 1
+                        val starIndex = (index + 1).toDouble()
                         IconButton(onClick = { rating = starIndex }) {
                             Icon(
                                 imageVector = if (starIndex <= rating) Icons.Default.Star else Icons.Default.StarBorder,

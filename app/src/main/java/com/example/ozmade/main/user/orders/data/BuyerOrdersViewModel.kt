@@ -45,11 +45,11 @@ class BuyerOrdersViewModel @Inject constructor(
         }
     }
 
-    fun postReview(orderId: Int, productId: Int, rating: Int, text: String, onComplete: () -> Unit) {
+    fun postReview(orderId: Int, productId: Int, rating: Double, text: String, onComplete: () -> Unit) {
         viewModelScope.launch {
             Log.d("BuyerOrdersViewModel", "Posting review: orderId=$orderId, prodId=$productId, rating=$rating, text=$text")
             
-            if (rating < 1 || text.isBlank()) {
+            if (rating < 1.0 || text.isBlank()) {
                 Log.e("BuyerOrdersViewModel", "Invalid rating ($rating) or empty text")
                 return@launch
             }

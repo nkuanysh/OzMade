@@ -1,5 +1,7 @@
 package com.example.ozmade.main.userHome.details
 
+import com.example.ozmade.main.userHome.reviews.ReviewUi
+
 data class DeliveryInfoUi(
     val pickupEnabled: Boolean = false,
     val pickupTime: String? = null,
@@ -41,6 +43,7 @@ data class ProductDetailsUi(
     val specs: List<Pair<String, String>>,
     val delivery: DeliveryInfoUi,
     val seller: SellerUi,
+    val reviews: List<ReviewUi> = emptyList(),
     val isMine: Boolean = false
 )
 

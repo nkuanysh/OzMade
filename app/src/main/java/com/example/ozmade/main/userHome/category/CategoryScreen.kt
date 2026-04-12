@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ozmade.utils.formatRating
 import coil.compose.AsyncImage
 import com.example.ozmade.main.userHome.Product
 
@@ -332,7 +333,7 @@ private fun CategoryProductCard(
                         )
                         Spacer(Modifier.width(2.dp))
                         Text(
-                            text = String.format("%.1f", product.rating),
+                            text = formatRating(product.rating),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold
                         )

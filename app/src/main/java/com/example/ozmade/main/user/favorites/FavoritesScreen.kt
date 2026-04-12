@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ozmade.utils.formatRating
 import coil.compose.AsyncImage
 
 @Composable
@@ -223,7 +224,7 @@ private fun FavoriteProductCard(
                         Icon(Icons.Rounded.Star, null, tint = Color(0xFFFFB300), modifier = Modifier.size(12.dp))
                         Spacer(Modifier.width(2.dp))
                         Text(
-                            text = String.format("%.1f", product.rating),
+                            text = formatRating(product.rating),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface

@@ -1,7 +1,6 @@
 package com.example.ozmade.main.userHome.seller.reviews
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,24 +10,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Fill
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.cos
-import kotlin.math.floor
-import kotlin.math.min
-import kotlin.math.sin
+import com.example.ozmade.utils.formatRating
+import com.example.ozmade.main.userHome.reviews.StarsRow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -159,7 +150,7 @@ private fun SellerReviewsHeader(header: SellerReviewsHeaderUi) {
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = String.format("%.1f", header.averageRating),
+                    text = formatRating(header.averageRating),
                     style = MaterialTheme.typography.displayMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -290,60 +281,5 @@ private fun SellerReviewCard(
             lineHeight = 20.sp,
             color = MaterialTheme.colorScheme.onSurface
         )
-    }
-}
-
-@Composable
-private fun StarsRow(rating: Double, size: Dp) {
-    val full = floor(rating).toInt().coerceIn(0, 5)
-    val hasHalf = (rating - full) >= 0.5 && full < 5
-    val empty = 5 - full - (if (hasHalf) 1 else 0)
-
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        repeat(full) { Star(filledFraction = 1f, starSize = size) }
-        if (hasHalf) Star(filledFraction = 0.5f, starSize = size)
-        repeat(empty) { Star(filledFraction = 0f, starSize = size) }
-    }
-}
-
-@Composable
-private fun Star(
-    filledFraction: Float,
-    starSize: Dp
-) {
-    val fill = Color(0xFFFFC107)
-    val outline = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
-
-    val path = remember { Path() }
-
-    androidx.compose.foundation.Canvas(
-        modifier = Modifier
-            .size(starSize)
-            .padding(end = 2.dp)
-    ) {
-        path.reset()
-        val w = size.width
-        val h = size.height
-        val cx = w / 2f
-        val cy = h / 2f
-        val outer = min(w, h) * 0.5f
-        val inner = outer * 0.45f
-        val startAngle = -Math.PI / 2.0
-        for (i in 0 until 10) {
-            val r = if (i % 2 == 0) outer else inner
-            val a = startAngle + i * (Math.PI / 5.0)
-            val x = cx + (r * cos(a)).toFloat()
-            val y = cy + (r * sin(a)).toFloat()
-            if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
-        }
-        path.close()
-
-        drawPath(path = path, color = outline, style = Stroke(width = 1.dp.toPx()))
-
-        if (filledFraction > 0f) {
-            clipRect(left = 0f, top = 0f, right = w * filledFraction, bottom = h) {
-                drawPath(path = path, color = fill, style = Fill)
-            }
-        }
     }
 }

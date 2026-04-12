@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.ozmade.utils.formatRating
 import com.example.ozmade.R
 
 @Composable
@@ -430,7 +431,7 @@ fun MarketProductCard(product: Product, onClick: () -> Unit, onFavoriteClick: ()
                     Icon(Icons.Rounded.Star, null, tint = Color(0xFFFFB300), modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = product.rating.toString(),
+                        text = formatRating(product.rating),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.Gray

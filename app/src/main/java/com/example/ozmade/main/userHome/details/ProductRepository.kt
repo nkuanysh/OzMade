@@ -10,6 +10,6 @@ interface ProductRepository {
 
     suspend fun getFavorites(): List<FavoriteProductUi>
 
-    suspend fun postComment(productId: Int, rating: Int, text: String, orderId: Int? = null): Result<Unit>
+    suspend fun postComment(productId: Int, rating: Double, text: String, orderId: Int? = null): Result<Unit>
     suspend fun reportProduct(productId: Int, reason: String): Result<Unit>
 }

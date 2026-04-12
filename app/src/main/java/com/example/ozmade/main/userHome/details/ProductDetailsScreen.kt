@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ozmade.utils.formatRating
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
 import com.example.ozmade.main.user.orderflow.ui.OrderBottomSheet
@@ -44,6 +45,9 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstan
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.options.IFramePlayerOptions
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+
+import com.example.ozmade.main.userHome.reviews.ReviewCard
+import com.example.ozmade.main.userHome.reviews.StarsRow
 
 private enum class DetailsTab { DESCRIPTION, SPECS }
 
@@ -303,6 +307,44 @@ fun ProductDetailsScreen(
 
                     InfoSection(title = "Продавец", icon = Icons.Default.Store, iconColor = Color(0xFFFF9800)) {
                         SellerBlock(product.seller, onClick = { onOpenSeller(product.seller.id) })
+                    }
+
+                    if (product.reviews.isNotEmpty()) {
+                        HorizontalDivider(Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
+                        Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 20.dp, vertical = 16.dp)
+                                    .clickable { onOpenReviews(product.id) },
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Отзывы (${product.reviewsCount})",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "Все",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Icon(
+                                        Icons.Default.ChevronRight,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+
+                            product.reviews.take(3).forEach { review ->
+                                ReviewCard(review)
+                            }
+                        }
                     }
 
                     Spacer(Modifier.height(if (product.isMine) 40.dp else 120.dp))
@@ -658,4 +700,4 @@ private fun SellerBlock(seller: SellerUi, onClick: () -> Unit) {
     }
 }
 
-private fun formatRating(rating: Double): String = if (rating == 0.0) "0.0" else "%.1f".format(rating)
+

@@ -24,6 +24,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ozmade.utils.formatRating
 import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -251,7 +252,7 @@ private fun SellerHeaderBlock(
                 Box(Modifier.width(1.dp).height(30.dp).background(Color.LightGray.copy(0.5f)))
                 
                 StatItem(
-                    value = String.format("%.1f", seller.rating),
+                    value = formatRating(seller.rating),
                     label = "рейтинг",
                     modifier = Modifier.weight(1f).clickable { onOpenReviews() },
                     isHighlight = true
@@ -339,7 +340,7 @@ private fun SellerProductCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Star, null, modifier = Modifier.size(14.dp), tint = Color(0xFFFFB400))
                     Spacer(Modifier.width(2.dp))
-                    Text(product.rating.toString(), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+                    Text(formatRating(product.rating), style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                     
                     if (product.ordersCount > 0) {
                         Spacer(Modifier.weight(1f))
