@@ -58,17 +58,67 @@ class SellerRepositoryImpl @Inject constructor(
                 title = dto.title ?: "No Title",
                 price = (dto.price ?: 0.0).toInt(),
                 imageUrl = ImageUtils.formatImageUrl(rawImg),
-                status = SellerProductStatus.ON_SALE
+                status = if (dto.isHidden == true) SellerProductStatus.OFF_SALE else SellerProductStatus.ON_SALE
             )
         } ?: emptyList()
     }
 
     override suspend fun updateProductPrice(productId: Int, newPrice: Int) {
-        api.patchProduct(productId, mapOf("Price" to newPrice))
+        val product = api.getSellerProducts().body()?.find { it.id == productId }
+            ?: throw Exception("Товар не найден")
+            
+        val request = ProductRequest(
+            name = product.title ?: "",
+            description = product.description ?: "",
+            price = newPrice.toDouble(),
+            type = product.type ?: "crafts",
+            categories = product.categories ?: emptyList(),
+            imageUrl = product.imageUrl,
+            images = product.images,
+            weight = product.weight,
+            heightCm = product.heightCm,
+            widthCm = product.widthCm,
+            depthCm = product.depthCm,
+            composition = product.composition,
+            youtubeUrl = product.youtubeUrl,
+            isHidden = product.isHidden,
+            address = product.address
+        )
+        val resp = api.updateProduct(productId, request)
+        if (!resp.isSuccessful) {
+            throw Exception("Ошибка изменения цены: ${resp.code()} ${resp.message()}")
+        }
     }
 
     override suspend fun toggleProductSaleState(productId: Int) {
-        TODO("Not yet implemented")
+        val product = api.getSellerProducts().body()?.find { it.id == productId }
+            ?: throw Exception("Товар не найден")
+            
+        val currentlyHidden = product.isHidden ?: false
+        val newHidden = !currentlyHidden
+        
+        val request = ProductRequest(
+            name = product.title ?: "",
+            description = product.description ?: "",
+            price = product.price ?: 0.0,
+            type = product.type ?: "crafts",
+            categories = product.categories ?: emptyList(),
+            imageUrl = product.imageUrl,
+            images = product.images,
+            weight = product.weight,
+            heightCm = product.heightCm,
+            widthCm = product.widthCm,
+            depthCm = product.depthCm,
+            composition = product.composition,
+            youtubeUrl = product.youtubeUrl,
+            isHidden = newHidden,
+            address = product.address
+        )
+        
+        val resp = api.updateProduct(productId, request)
+        if (!resp.isSuccessful) {
+            throw Exception("Ошибка изменения статуса: ${resp.code()} ${resp.message()}")
+        }
     }
 
     override suspend fun deleteProduct(productId: Int) {
