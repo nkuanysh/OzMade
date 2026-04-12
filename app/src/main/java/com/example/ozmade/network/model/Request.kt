@@ -38,6 +38,7 @@ data class ProductRequest(
     @SerializedName("DepthCm") val depthCm: String?,
     @SerializedName("Composition") val composition: String?,
     @SerializedName("YouTubeUrl") val youtubeUrl: String?,
+    @SerializedName("IsHidden") val isHidden: Boolean? = null,
     @SerializedName("address") val address: String? = null
 )
 
@@ -112,6 +113,7 @@ data class ProductCreateRequest(
     @SerializedName("DepthCm") val depthCm: String?,
     @SerializedName("Composition") val composition: String?,
     @SerializedName("YouTubeUrl") val youtubeUrl: String?,
+    @SerializedName("IsHidden") val isHidden: Boolean? = null,
     @SerializedName("address") val address: String? = null
 )
 

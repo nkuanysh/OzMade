@@ -37,7 +37,7 @@ data class ProductDto(
     @SerializedName(value = "ReviewsCount", alternate = ["reviews_count", "reviewsCount", "comments_count", "total_reviews"]) val reviewsCount: Int? = null,
     @SerializedName(value = "CreatedAt", alternate = ["created_at", "createdAt"]) val createdAt: String? = null,
     @SerializedName(value = "Comments", alternate = ["comments"]) val comments: List<CommentDto>? = null,
-    @SerializedName(value = "IsActive", alternate = ["is_active", "isActive", "is_hidden"]) val isActive: Boolean? = null,
+    @SerializedName(value = "IsHidden", alternate = ["is_hidden", "isHidden", "IsActive", "is_active"]) val isHidden: Boolean? = null,
     @SerializedName(value = "ShareLink", alternate = ["share_link", "shareLink"]) val shareLink: String? = null
 )
 
@@ -83,7 +83,7 @@ data class ProductDetailsDto(
     @SerializedName("SellerName") val sellerName: String? = null,
     @SerializedName("delivery") val delivery: DeliveryInfoDto? = null,
     @SerializedName("seller") val seller: SellerInfoDto? = null,
-    @SerializedName(value = "IsActive", alternate = ["is_active", "isActive", "is_hidden"]) val isActive: Boolean? = null,
+    @SerializedName(value = "IsHidden", alternate = ["is_hidden", "isHidden", "IsActive", "is_active"]) val isHidden: Boolean? = null,
     @SerializedName(value = "ShareLink", alternate = ["share_link", "shareLink"]) val shareLink: String? = null
 )
 
