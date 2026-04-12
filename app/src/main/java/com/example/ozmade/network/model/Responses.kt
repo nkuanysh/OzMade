@@ -394,3 +394,14 @@ data class OrderDto(
     @SerializedName(value = "ConfirmCode", alternate = ["confirm_code", "confirmCode"]) val confirmCode: String? = null,
     @SerializedName(value = "IsReviewed", alternate = ["is_reviewed", "isReviewed"]) val isReviewed: Boolean = false
 )
+
+data class NotificationDto(
+    @SerializedName("id") val id: Int,
+    @SerializedName("user_id") val userId: Int,
+    @SerializedName("title") val title: String,
+    @SerializedName("body") val body: String,
+    @SerializedName("type") val type: String,
+    @SerializedName("order_id") val orderId: Int?,
+    @SerializedName("is_read") val isRead: Boolean,
+    @SerializedName("created_at") val createdAt: String
+)

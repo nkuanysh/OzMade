@@ -21,6 +21,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 import javax.inject.Inject
 
@@ -61,11 +64,12 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
         // Сохраняем в локальную историю
         NotificationStorage.add(
             NotificationItem(
-                id = UUID.randomUUID().toString(),
+                id = data["notification_id"]?.toIntOrNull() ?: 0,
                 title = title,
                 body = body,
                 type = type,
-                orderId = data["order_id"]?.toIntOrNull()
+                orderId = data["order_id"]?.toIntOrNull(),
+                createdAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US).format(Date())
             )
         )
 

@@ -3,11 +3,11 @@ package com.example.ozmade.main.user.profile.notification
 import java.util.Date
 
 data class NotificationItem(
-    val id: String,
+    val id: Int,
     val title: String,
     val body: String,
     val type: String, // "CHAT", "ORDER", "SYSTEM"
-    val timestamp: Long = System.currentTimeMillis(),
+    val createdAt: String,
     val orderId: Int? = null,
     val isRead: Boolean = false
 )

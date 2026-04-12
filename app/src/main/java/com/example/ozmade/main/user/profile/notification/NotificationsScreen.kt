@@ -21,25 +21,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NotificationsScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: NotificationsViewModel = hiltViewModel()
 ) {
-    var items by remember { mutableStateOf(NotificationStorage.getAll()) }
-
-    DisposableEffect(Unit) {
-        val listener = {
-            items = NotificationStorage.getAll()
-        }
-        NotificationStorage.subscribe(listener)
-        onDispose {
-            NotificationStorage.unsubscribe(listener)
-        }
-    }
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -56,8 +48,8 @@ fun NotificationsScreen(
                     }
                 },
                 actions = {
-                    if (items.isNotEmpty()) {
-                        IconButton(onClick = { NotificationStorage.clear() }) {
+                    if (uiState is NotificationsUiState.Data && (uiState as NotificationsUiState.Data).items.isNotEmpty()) {
+                        IconButton(onClick = { viewModel.clearAll() }) {
                             Icon(Icons.Outlined.DeleteOutline, contentDescription = "Очистить всё")
                         }
                     }
@@ -69,18 +61,32 @@ fun NotificationsScreen(
         },
         containerColor = Color(0xFFF8F9FA)
     ) { padding ->
-        if (items.isEmpty()) {
-            EmptyNotifications(padding)
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(items) { notification ->
-                    NotificationCard(notification)
+        when (val state = uiState) {
+            is NotificationsUiState.Loading -> {
+                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color(0xFFFF9800))
+                }
+            }
+            is NotificationsUiState.Error -> {
+                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                    Text(state.message, color = MaterialTheme.colorScheme.error)
+                }
+            }
+            is NotificationsUiState.Data -> {
+                if (state.items.isEmpty()) {
+                    EmptyNotifications(padding)
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(padding),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(state.items) { notification ->
+                            NotificationCard(notification)
+                        }
+                    }
                 }
             }
         }
@@ -89,8 +95,16 @@ fun NotificationsScreen(
 
 @Composable
 fun NotificationCard(item: NotificationItem) {
-    val sdf = remember { SimpleDateFormat("HH:mm, dd MMM", Locale("ru")) }
-    val dateStr = remember(item.timestamp) { sdf.format(Date(item.timestamp)) }
+    // Backend returns "2024-05-20T12:00:00Z"
+    val sdf = remember { SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).apply { timeZone = TimeZone.getTimeZone("UTC") } }
+    val outSdf = remember { SimpleDateFormat("HH:mm, dd MMM", Locale("ru")) }
+    
+    val dateStr = try {
+        val date = sdf.parse(item.createdAt)
+        if (date != null) outSdf.format(date) else item.createdAt
+    } catch (e: Exception) {
+        item.createdAt
+    }
 
     val iconColor = when (item.type) {
         "ORDER" -> Color(0xFF4CAF50) // Green for orders

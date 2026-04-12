@@ -236,4 +236,13 @@ interface OzMadeApi {
     suspend fun updateFCMToken(
         @Body request: FCMTokenRequest
     ): Response<MessageResponse>
+
+    @GET("notifications")
+    suspend fun getNotifications(): Response<List<NotificationDto>>
+
+    @POST("notifications/{id}/read")
+    suspend fun markNotificationRead(@Path("id") id: Int): Response<MessageResponse>
+
+    @POST("notifications/read-all")
+    suspend fun markAllNotificationsRead(): Response<MessageResponse>
 }
