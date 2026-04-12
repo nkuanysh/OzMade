@@ -146,7 +146,7 @@ class SellerEditProductViewModel @Inject constructor(
         val price = st.priceValue ?: 0.0
 
         return ProductRequest(
-            name = st.title.trim(),
+            title = st.title.trim(),
             description = st.description.trim(),
             price = price,
             type = st.selectedCategories.firstOrNull()?.backendValue ?: "",
