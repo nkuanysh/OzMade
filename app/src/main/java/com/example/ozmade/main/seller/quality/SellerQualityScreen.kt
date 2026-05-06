@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller.quality
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -66,10 +68,10 @@ private fun SellerQualityScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Качество и рейтинг", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.quality_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_desc))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
@@ -104,7 +106,7 @@ private fun SellerQualityScreen(
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800)),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Повторить")
+                        Text(stringResource(R.string.retry_btn))
                     }
                 }
             }
@@ -121,7 +123,7 @@ private fun SellerQualityScreen(
                 ) {
                     item {
                         Text(
-                            "ВАШ УРОВЕНЬ",
+                            stringResource(R.string.your_level),
                             style = MaterialTheme.typography.labelLarge,
                             color = Color.Gray,
                             modifier = Modifier.padding(start = 8.dp)
@@ -136,7 +138,7 @@ private fun SellerQualityScreen(
 
                     item {
                         Text(
-                            "ОЦЕНКА МАГАЗИНА",
+                            stringResource(R.string.store_score),
                             style = MaterialTheme.typography.labelLarge,
                             color = Color.Gray,
                             modifier = Modifier.padding(start = 8.dp)
@@ -156,7 +158,7 @@ private fun SellerQualityScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "ОТЗЫВЫ ПОКУПАТЕЛЕЙ",
+                                stringResource(R.string.buyer_reviews),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = Color.Gray
                             )
@@ -179,7 +181,7 @@ private fun SellerQualityScreen(
                     if (d.reviews.isEmpty()) {
                         item {
                             Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                                Text("Пока нет отзывов", color = Color.Gray)
+                                Text(stringResource(R.string.no_reviews_yet), color = Color.Gray)
                             }
                         }
                     } else {
@@ -268,7 +270,7 @@ private fun RatingCard(rating: Double, ratingsCount: Int) {
             Spacer(Modifier.height(8.dp))
             
             Text(
-                text = "на основе $ratingsCount оценок",
+                text = stringResource(R.string.based_on_ratings, ratingsCount),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
@@ -328,7 +330,7 @@ private fun ReviewCard(
                 color = Color.Transparent
             ) {
                 Text(
-                    text = "Товар: ${review.productTitle}",
+                    text = stringResource(R.string.product_label_prefix) + review.productTitle,
                     style = MaterialTheme.typography.labelSmall,
                     color = Color(0xFF5C6BC0),
                     maxLines = 1,

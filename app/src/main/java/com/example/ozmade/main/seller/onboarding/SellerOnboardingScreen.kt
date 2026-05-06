@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller.onboarding
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -34,7 +36,7 @@ fun SellerOnboardingScreen(
                 title = { Text("") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_desc))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -70,7 +72,7 @@ fun SellerOnboardingScreen(
             Spacer(Modifier.height(40.dp))
 
             Text(
-                text = "Станьте продавцом\nв OzMade",
+                text = stringResource(R.string.seller_onboarding_title),
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.ExtraBold,
                     lineHeight = 34.sp
@@ -82,7 +84,7 @@ fun SellerOnboardingScreen(
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text = "Начните продавать товары собственного производства, домашнюю еду и уникальное ремесло напрямую вашим покупателям.",
+                text = stringResource(R.string.seller_onboarding_desc),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = Color.Gray,
                     lineHeight = 24.sp
@@ -95,17 +97,17 @@ fun SellerOnboardingScreen(
             // Преимущества
             OnboardingFeatureItem(
                 icon = Icons.Default.Done,
-                text = "Прямая связь с покупателями",
+                text = stringResource(R.string.seller_benefit_direct),
                 accentColor = orangeColor
             )
             OnboardingFeatureItem(
                 icon = Icons.Default.Done,
-                text = "Простое управление товарами",
+                text = stringResource(R.string.seller_benefit_products),
                 accentColor = orangeColor
             )
             OnboardingFeatureItem(
                 icon = Icons.Default.Done,
-                text = "Безопасные сделки",
+                text = stringResource(R.string.seller_benefit_safe),
                 accentColor = orangeColor
             )
 
@@ -120,7 +122,7 @@ fun SellerOnboardingScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = orangeColor)
             ) {
                 Text(
-                    "Начать регистрацию",
+                    stringResource(R.string.start_registration),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )

@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller.analytics
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -40,7 +42,7 @@ fun SellerAnalyticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Аналитика продаж", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold)) },
+                title = { Text(stringResource(R.string.analytics_title), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
@@ -68,7 +70,7 @@ fun SellerAnalyticsScreen(
                 RevenueCard(uiState.totalRevenue, uiState.revenueGrowth)
 
                 Text(
-                    "ОСНОВНЫЕ ПОКАЗАТЕЛИ",
+                    stringResource(R.string.key_metrics),
                     style = MaterialTheme.typography.labelLarge,
                     color = Color.Gray,
                     modifier = Modifier.padding(start = 4.dp)
@@ -76,14 +78,14 @@ fun SellerAnalyticsScreen(
 
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     StatSmallCard(
-                        title = "Заказы",
+                        title = stringResource(R.string.orders_metric),
                         value = uiState.ordersCount.toString(),
                         icon = Icons.Default.ShoppingBag,
                         color = Color(0xFF64B5F6),
                         modifier = Modifier.weight(1f)
                     )
                     StatSmallCard(
-                        title = "Просмотры",
+                        title = stringResource(R.string.views_metric),
                         value = formatViews(uiState.viewsCount),
                         icon = Icons.Default.Visibility,
                         color = Color(0xFFFFB74D),
@@ -100,7 +102,7 @@ fun SellerAnalyticsScreen(
                         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
                     ) {
                         Column(Modifier.padding(20.dp)) {
-                            Text("Популярные товары", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            Text(stringResource(R.string.popular_products), fontWeight = FontWeight.Bold, fontSize = 18.sp)
                             Spacer(Modifier.height(16.dp))
                             uiState.popularProducts.forEachIndexed { index, product ->
                                 Row(
@@ -116,7 +118,7 @@ fun SellerAnalyticsScreen(
                                     Spacer(Modifier.width(12.dp))
                                     Column(Modifier.weight(1f)) {
                                         Text(product.name, fontWeight = FontWeight.Bold, maxLines = 1)
-                                        Text("Продано: ${product.salesCount}", fontSize = 12.sp, color = Color.Gray)
+                                        Text(stringResource(R.string.sold_count, product.salesCount), fontSize = 12.sp, color = Color.Gray)
                                     }
                                     Text(formatPrice(product.revenue), fontWeight = FontWeight.ExtraBold, color = Color(0xFFFF9800))
                                 }
@@ -148,7 +150,7 @@ private fun RevenueCard(revenue: Double, growth: Double) {
             )
         ) {
             Column(Modifier.padding(24.dp)) {
-                Text("Общий доход", color = Color.White.copy(0.8f), fontSize = 14.sp)
+                Text(stringResource(R.string.total_income), color = Color.White.copy(0.8f), fontSize = 14.sp)
                 Spacer(Modifier.height(4.dp))
                 Text(formatPrice(revenue), color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold)
                 Spacer(Modifier.height(20.dp))
@@ -159,7 +161,7 @@ private fun RevenueCard(revenue: Double, growth: Double) {
                     Row(Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.AutoMirrored.Filled.TrendingUp, null, tint = Color.White, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(6.dp))
-                        Text("Статистика по заказам", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.order_stats), color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }

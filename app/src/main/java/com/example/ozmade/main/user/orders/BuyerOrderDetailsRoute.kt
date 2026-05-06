@@ -1,5 +1,7 @@
 package com.example.ozmade.main.user.orders
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -22,6 +24,7 @@ import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -53,6 +56,7 @@ fun BuyerOrderDetailsRoute(
     val ui by viewModel.ui.collectAsState()
     val order = remember(ui, orderId) { viewModel.findById(orderId) }
     val lifecycleOwner = LocalLifecycleOwner.current
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) { viewModel.load() }
 
@@ -71,10 +75,10 @@ fun BuyerOrderDetailsRoute(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Заказ #$orderId", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.order_number, orderId), fontWeight = FontWeight.Bold) },
                 navigationIcon = { 
                     IconButton(onClick = onBack) { 
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад") 
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_desc)) 
                     } 
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
@@ -116,7 +120,7 @@ fun BuyerOrderDetailsRoute(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Дата заказа: ${order.createdAt}",
+                            text = stringResource(R.string.order_date, order.createdAt),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
@@ -153,14 +157,14 @@ fun BuyerOrderDetailsRoute(
                                 maxLines = 2
                             )
                             Text(
-                                "Продавец: ${order.sellerName ?: "Мастер"}",
+                                stringResource(R.string.seller_label_value, order.sellerName ?: stringResource(R.string.master_default)),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = Color.Gray
                             )
                             Spacer(Modifier.height(4.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    "${order.quantity} шт.",
+                                    stringResource(R.string.pieces_count, order.quantity),
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.Medium
                                 )
@@ -187,22 +191,22 @@ fun BuyerOrderDetailsRoute(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Default.LocalShipping, null, modifier = Modifier.size(20.dp), tint = Color.Gray)
                         Spacer(Modifier.width(8.dp))
-                        Text("Информация о доставке", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.Gray)
+                        Text(stringResource(R.string.delivery_info), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = Color.Gray)
                     }
                     Spacer(Modifier.height(12.dp))
                     
-                    InfoRow("Способ", deliveryTitle(order.deliveryType))
+                    InfoRow(stringResource(R.string.delivery_method), deliveryTitle(order.deliveryType))
                     
                     when (order.deliveryType) {
                         DeliveryType.PICKUP -> {
-                            InfoRow("Адрес", order.pickupAddress ?: "—")
-                            InfoRow("Время", order.pickupTime ?: "—")
+                            InfoRow(stringResource(R.string.address), order.pickupAddress ?: stringResource(R.string.dash))
+                            InfoRow(stringResource(R.string.working_hours), order.pickupTime ?: stringResource(R.string.dash))
                         }
                         DeliveryType.MY_DELIVERY -> {
-                            InfoRow("Адрес доставки", order.shippingAddressText ?: "—")
+                            InfoRow(stringResource(R.string.shipping_address), order.shippingAddressText ?: stringResource(R.string.dash))
                         }
                         DeliveryType.INTERCITY -> {
-                            InfoRow("Адрес (межгород)", order.shippingAddressText ?: "—")
+                            InfoRow(stringResource(R.string.intercity_address), order.shippingAddressText ?: stringResource(R.string.dash))
                         }
                     }
                 }
@@ -222,7 +226,7 @@ fun BuyerOrderDetailsRoute(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            "Код подтверждения",
+                            stringResource(R.string.confirmation_code_title),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.primary
@@ -237,7 +241,7 @@ fun BuyerOrderDetailsRoute(
                         )
                         Spacer(Modifier.height(8.dp))
                         Text(
-                            "Покажите этот код продавцу при получении товара",
+                            stringResource(R.string.show_code_to_seller),
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -254,7 +258,7 @@ fun BuyerOrderDetailsRoute(
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color.Red.copy(alpha = 0.8f))
-                    ) { Text("Отменить заказ", fontWeight = FontWeight.Bold) }
+                    ) { Text(stringResource(R.string.cancel_order), fontWeight = FontWeight.Bold) }
                 }
 
                 OrderStatus.CONFIRMED, OrderStatus.READY_OR_SHIPPED -> {
@@ -263,7 +267,7 @@ fun BuyerOrderDetailsRoute(
                             onClick = { viewModel.received(order.id) },
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             shape = RoundedCornerShape(16.dp)
-                        ) { Text("Я получил товар", fontWeight = FontWeight.Bold) }
+                        ) { Text(stringResource(R.string.received_product), fontWeight = FontWeight.Bold) }
                         
                         Spacer(Modifier.height(8.dp))
                         Surface(
@@ -275,7 +279,7 @@ fun BuyerOrderDetailsRoute(
                                 Icon(Icons.Default.Info, null, tint = Color(0xFF1976D2), modifier = Modifier.size(20.dp))
                                 Spacer(Modifier.width(8.dp))
                                 Text(
-                                    "Нажимайте только после фактического получения товара.",
+                                    stringResource(R.string.receive_warning),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = Color(0xFF1976D2)
                                 )
@@ -288,7 +292,7 @@ fun BuyerOrderDetailsRoute(
                         onClick = { 
                             onChat(
                                 order.sellerId ?: 0,
-                                order.sellerName ?: "Продавец",
+                                order.sellerName ?: context.getString(R.string.seller_default),
                                 order.productId,
                                 order.productTitle,
                                 order.price.toInt()
@@ -296,7 +300,7 @@ fun BuyerOrderDetailsRoute(
                         },
                         modifier = Modifier.fillMaxWidth().height(56.dp),
                         shape = RoundedCornerShape(16.dp)
-                    ) { Text("Написать продавцу", fontWeight = FontWeight.Bold) }
+                    ) { Text(stringResource(R.string.write_seller), fontWeight = FontWeight.Bold) }
                 }
 
                 OrderStatus.COMPLETED -> {
@@ -307,7 +311,7 @@ fun BuyerOrderDetailsRoute(
                             modifier = Modifier.fillMaxWidth().height(56.dp),
                             shape = RoundedCornerShape(16.dp)
                         ) {
-                            Text("Оставить отзыв", fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.leave_review), fontWeight = FontWeight.Bold)
                         }
 
                         if (showDialog) {
@@ -328,7 +332,7 @@ fun BuyerOrderDetailsRoute(
                             color = Color(0xFFE8F5E9)
                         ) {
                             Text(
-                                "Вы уже оставили отзыв",
+                                stringResource(R.string.already_reviewed),
                                 modifier = Modifier.padding(16.dp),
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.bodyMedium,
@@ -395,7 +399,7 @@ fun ReviewDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Ваш отзыв") },
+        title = { Text(stringResource(R.string.review_yours_title)) },
         text = {
             Column {
                 Row(
@@ -418,7 +422,7 @@ fun ReviewDialog(
                 OutlinedTextField(
                     value = text,
                     onValueChange = { text = it },
-                    placeholder = { Text("Поделитесь впечатлениями о товаре...") },
+                    placeholder = { Text(stringResource(R.string.review_placeholder)) },
                     modifier = Modifier.fillMaxWidth(),
                     minLines = 3,
                     shape = RoundedCornerShape(12.dp)
@@ -431,12 +435,12 @@ fun ReviewDialog(
                 enabled = text.isNotBlank(),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Отправить")
+                Text(stringResource(R.string.send))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Отмена")
+                Text(stringResource(R.string.cancel))
             }
         }
     )

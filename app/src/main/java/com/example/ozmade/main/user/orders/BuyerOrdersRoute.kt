@@ -1,5 +1,7 @@
 package com.example.ozmade.main.user.orders
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -43,7 +45,7 @@ fun BuyerOrdersRoute(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("История заказов") },
+                title = { Text(stringResource(R.string.profile_order_history)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, null) }
                 }
@@ -62,7 +64,7 @@ fun BuyerOrdersRoute(
                     Text(msg, color = MaterialTheme.colorScheme.error)
                     Spacer(Modifier.height(12.dp))
                     Button(onClick = { viewModel.load() }, modifier = Modifier.fillMaxWidth()) {
-                        Text("Повторить")
+                        Text(stringResource(R.string.retry_btn))
                     }
                 }
             }
@@ -71,7 +73,7 @@ fun BuyerOrdersRoute(
                 val orders = (ui as BuyerOrdersUiState.Data).orders
                 if (orders.isEmpty()) {
                     Box(Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text("У вас пока нет заказов", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(stringResource(R.string.no_orders_yet), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 } else {
                     OrdersList(

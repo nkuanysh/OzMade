@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller.orders
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -44,7 +46,7 @@ fun SellerOrdersRoute(
 ) {
     val ui by viewModel.ui.collectAsState()
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Активные", "Завершенные", "Отмененные")
+    val tabs = listOf(stringResource(R.string.active_tab), stringResource(R.string.completed_tab), stringResource(R.string.cancelled_tab))
     val lifecycleOwner = LocalLifecycleOwner.current
 
     LaunchedEffect(Unit) { viewModel.load() }
@@ -64,7 +66,7 @@ fun SellerOrdersRoute(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Заказы", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.orders_title), fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
             )
         },
@@ -184,7 +186,7 @@ private fun SellerOrderCard(order: OrderUi, onClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Заказ #${order.id}",
+                        text = stringResource(R.string.order_number, order.id),
                         style = MaterialTheme.typography.labelLarge,
                         color = Color.Gray
                     )
@@ -254,11 +256,11 @@ private fun SellerOrderCard(order: OrderUi, onClick: () -> Unit) {
 @Composable
 private fun StatusBadge(status: String) {
     val (color, text) = when (status) {
-        OrderStatus.PENDING_SELLER -> Color(0xFFFFA000) to "Новый"
-        OrderStatus.CONFIRMED -> Color(0xFF1E88E5) to "В работе"
-        OrderStatus.READY_OR_SHIPPED -> Color(0xFF43A047) to "Отправлен"
-        OrderStatus.COMPLETED -> Color(0xFF757575) to "Завершен"
-        else -> Color(0xFFE53935) to "Отменен"
+        OrderStatus.PENDING_SELLER -> Color(0xFFFFA000) to stringResource(R.string.seller_order_status_new)
+        OrderStatus.CONFIRMED -> Color(0xFF1E88E5) to stringResource(R.string.seller_order_status_in_progress)
+        OrderStatus.READY_OR_SHIPPED -> Color(0xFF43A047) to stringResource(R.string.seller_order_status_shipped)
+        OrderStatus.COMPLETED -> Color(0xFF757575) to stringResource(R.string.order_status_completed)
+        else -> Color(0xFFE53935) to stringResource(R.string.seller_order_status_cancelled)
     }
 
     Surface(
@@ -298,12 +300,12 @@ private fun EmptyState(tabName: String) {
         }
         Spacer(Modifier.height(24.dp))
         Text(
-            "Нет заказов",
+            stringResource(R.string.no_orders),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         Text(
-            "В разделе \"$tabName\" пока пусто",
+            stringResource(R.string.empty_tab, tabName),
             style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray,
             textAlign = TextAlign.Center
@@ -326,7 +328,7 @@ private fun ErrorState(message: String, onRetry: () -> Unit) {
             onClick = onRetry,
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
         ) {
-            Text("Повторить")
+            Text(stringResource(R.string.retry_btn))
         }
     }
 }

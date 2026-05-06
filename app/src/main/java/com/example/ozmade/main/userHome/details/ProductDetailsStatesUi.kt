@@ -1,5 +1,7 @@
 package com.example.ozmade.main.userHome.details
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -14,7 +16,7 @@ fun ProductDetailsLoading(onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Товар") },
+                title = { Text(stringResource(R.string.product_default)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = null)
@@ -39,7 +41,7 @@ fun ProductDetailsError(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Товар") },
+                title = { Text(stringResource(R.string.product_default)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = null)
@@ -55,7 +57,7 @@ fun ProductDetailsError(
             Text(message, color = MaterialTheme.colorScheme.error)
             Spacer(Modifier.height(12.dp))
             Button(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
-                Text("Повторить")
+                Text(stringResource(R.string.retry_btn))
             }
         }
     }

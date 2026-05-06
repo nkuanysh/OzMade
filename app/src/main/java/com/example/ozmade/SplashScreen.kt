@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -64,7 +65,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
         ) {
             Image(
                 painter = painterResource(id = R.drawable.image_removebg_preview),
-                contentDescription = "OzMade Logo",
+                contentDescription = stringResource(R.string.logo_desc),
                 modifier = Modifier
                     .size(220.dp)
                     .scale(scale)
@@ -74,7 +75,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
             
             Text(
-                text = "OzMade",
+                text = stringResource(R.string.app_name),
                 fontSize = 32.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color(0xFFFF6F00),
@@ -82,7 +83,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
             )
             
             Text(
-                text = "Сделано с любовью",
+                text = stringResource(R.string.made_with_love),
                 fontSize = 16.sp,
                 color = Color.Gray.copy(alpha = 0.8f),
                 modifier = Modifier.alpha(textAlpha)
@@ -141,7 +142,7 @@ fun RegistrationScreenPlaceholder(onNext: () -> Unit) {
     ) {
         Image(
             painter = painterResource(id = R.drawable.image_removebg_preview),
-            contentDescription = "OzMade Logo",
+            contentDescription = stringResource(R.string.logo_desc),
             modifier = Modifier.size(180.dp)
         )
     }

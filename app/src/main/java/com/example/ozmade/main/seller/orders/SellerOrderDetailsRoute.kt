@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller.orders
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -50,10 +52,10 @@ fun SellerOrderDetailsRoute(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Заказ #$orderId", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.order_number, orderId), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_desc))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
@@ -99,7 +101,7 @@ fun SellerOrderDetailsRoute(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Обновлено: ${order.createdAt}",
+                            text = stringResource(R.string.updated_at, order.createdAt),
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.Gray
                         )
@@ -135,7 +137,7 @@ fun SellerOrderDetailsRoute(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                "Кол-во: ${order.quantity} шт.",
+                                stringResource(R.string.quantity_value, order.quantity),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.Gray
                             )
@@ -152,21 +154,21 @@ fun SellerOrderDetailsRoute(
 
             // ---- Delivery Info ----
             InfoSection(
-                title = "Доставка",
+                title = stringResource(R.string.delivery_title),
                 icon = Icons.Default.LocalShipping
             ) {
-                InfoRow("Способ", deliveryTitle(order.deliveryType))
+                InfoRow(stringResource(R.string.delivery_method), deliveryTitle(order.deliveryType))
                 
                 when (order.deliveryType) {
                     DeliveryType.PICKUP -> {
-                        order.pickupAddress?.let { InfoRow("Адрес самовывоза", it) }
-                        order.pickupTime?.let { InfoRow("Время работы", it) }
+                        order.pickupAddress?.let { InfoRow(stringResource(R.string.pickup_address), it) }
+                        order.pickupTime?.let { InfoRow(stringResource(R.string.working_hours), it) }
                     }
                     DeliveryType.MY_DELIVERY -> {
-                        order.shippingAddressText?.let { InfoRow("Адрес доставки", it) }
+                        order.shippingAddressText?.let { InfoRow(stringResource(R.string.shipping_address), it) }
                     }
                     DeliveryType.INTERCITY -> {
-                        order.shippingAddressText?.let { InfoRow("Адрес (межгород)", it) }
+                        order.shippingAddressText?.let { InfoRow(stringResource(R.string.intercity_address), it) }
                     }
                 }
             }
@@ -279,7 +281,7 @@ private fun ActionSection(
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
                     ) {
-                        Text("Отклонить", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.decline), fontWeight = FontWeight.Bold)
                     }
                     Button(
                         onClick = onConfirm,
@@ -289,7 +291,7 @@ private fun ActionSection(
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = orangeColor)
                     ) {
-                        Text("Подтвердить", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.confirm), fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -302,12 +304,12 @@ private fun ActionSection(
                 ) {
                     Column(Modifier.padding(16.dp)) {
                         if (deliveryType == DeliveryType.INTERCITY) {
-                            Text("Товар готов? Отправьте его и укажите трек-номер.", fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.seller_ship_hint), fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(12.dp))
                             OutlinedTextField(
                                 value = shipComment,
                                 onValueChange = onShipCommentChange,
-                                label = { Text("Комментарий или трек-номер") },
+                                label = { Text(stringResource(R.string.comment_or_tracking)) },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)
                             )
@@ -317,15 +319,15 @@ private fun ActionSection(
                                 modifier = Modifier.fillMaxWidth().height(56.dp),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = orangeColor)
-                            ) { Text("Я отправил товар", fontWeight = FontWeight.Bold) }
+                            ) { Text(stringResource(R.string.i_shipped_product), fontWeight = FontWeight.Bold) }
                         } else {
-                            Text("Выдайте товар покупателю и попросите его назвать 4-значный код подтверждения.", fontWeight = FontWeight.Bold)
+                            Text(stringResource(R.string.seller_pickup_code_hint), fontWeight = FontWeight.Bold)
                             Spacer(Modifier.height(16.dp))
 
                             OutlinedTextField(
                                 value = code,
                                 onValueChange = { onCodeChange(it.filter { ch -> ch.isDigit() }.take(4)) },
-                                label = { Text("Код (4 цифры)") },
+                                label = { Text(stringResource(R.string.code_4_digits)) },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp),
                                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center, fontSize = 24.sp, fontWeight = FontWeight.Bold),
@@ -338,7 +340,7 @@ private fun ActionSection(
                                 shape = RoundedCornerShape(16.dp),
                                 colors = ButtonDefaults.buttonColors(containerColor = orangeColor),
                                 enabled = code.length == 4
-                            ) { Text("Подтвердить выдачу", fontWeight = FontWeight.Bold) }
+                            ) { Text(stringResource(R.string.confirm_handover), fontWeight = FontWeight.Bold) }
                         }
                     }
                 }
@@ -354,7 +356,7 @@ private fun ActionSection(
                         Icon(Icons.Default.Info, null, tint = Color(0xFF2E7D32))
                         Spacer(Modifier.width(12.dp))
                         Text(
-                            "Ожидаем подтверждения получения от покупателя.",
+                            stringResource(R.string.waiting_buyer_confirmation),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color(0xFF2E7D32),
                             fontWeight = FontWeight.Medium

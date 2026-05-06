@@ -46,17 +46,19 @@ import com.example.ozmade.main.userHome.seller.reviews.SellerReviewsRoute
 import com.example.ozmade.main.user.orderflow.ui.DeliveryChooseRoute2
 import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import com.example.ozmade.R
 
 private sealed class BottomItem(
     val route: String,
-    val label: String,
+    val labelRes: Int,
     val selectedIcon: ImageVector,
     val unselectedIcon: ImageVector
 ) {
-    object Home : BottomItem("home", "Главная", Icons.Filled.Home, Icons.Outlined.Home)
-    object Favorites : BottomItem("favorites", "Избранное", Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder)
-    object Chat : BottomItem("chat", "Чаты", Icons.Filled.Email, Icons.Outlined.Email)
-    object Profile : BottomItem("profile", "Профиль", Icons.Filled.Person, Icons.Outlined.Person)
+    object Home : BottomItem("home", R.string.nav_home, Icons.Filled.Home, Icons.Outlined.Home)
+    object Favorites : BottomItem("favorites", R.string.nav_favorites, Icons.Filled.Favorite, Icons.Outlined.FavoriteBorder)
+    object Chat : BottomItem("chat", R.string.nav_chats, Icons.Filled.Email, Icons.Outlined.Email)
+    object Profile : BottomItem("profile", R.string.nav_profile, Icons.Filled.Person, Icons.Outlined.Person)
 }
 
 @Composable
@@ -66,8 +68,8 @@ fun MainScreen(
     pushChatId: Int = 0,
     pushSellerId: Int = 0,
     pushProductId: Int = 0,
-    pushSellerName: String = "Продавец",
-    pushProductTitle: String = "Товар",
+    pushSellerName: String = "",
+    pushProductTitle: String = "",
     pushPrice: Int = 0,
     deepLinkProductId: Int = 0,
     openOrderHistoryFromPush: Boolean = false,
@@ -101,8 +103,8 @@ fun MainScreen(
 
     LaunchedEffect(openChatFromPush, pushChatId) {
         if (openChatFromPush && pushChatId != 0) {
-            val encSellerName = Uri.encode(pushSellerName)
-            val encProductTitle = Uri.encode(pushProductTitle)
+            val encSellerName = Uri.encode(pushSellerName.ifBlank { context.getString(R.string.seller_default) })
+            val encProductTitle = Uri.encode(pushProductTitle.ifBlank { context.getString(R.string.product_default) })
 
             navController.navigate(
                 "chat/$pushChatId/$pushSellerId/$pushProductId?sellerName=$encSellerName&productTitle=$encProductTitle&price=$pushPrice"
@@ -163,14 +165,15 @@ fun MainScreen(
                         )
                         items.forEach { item ->
                             val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
+                            val label = stringResource(item.labelRes)
                             NavigationBarItem(
                                 icon = {
                                     Icon(
                                         if (selected) item.selectedIcon else item.unselectedIcon,
-                                        contentDescription = item.label
+                                        contentDescription = label
                                     )
                                 },
-                                label = { Text(item.label, fontSize = 10.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
+                                label = { Text(label, fontSize = 10.sp, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal) },
                                 selected = selected,
                                 onClick = {
                                     if (selected) {
@@ -311,11 +314,13 @@ fun MainScreen(
                     )
                 }
                 composable("support") {
+                    val supportServiceName = stringResource(R.string.profile_support_service)
+                    val supportProductTitle = stringResource(R.string.support_title)
                     SupportScreen(
                         onClose = { navController.popBackStack() },
                         onOpenSupportChat = {
-                            val encSName = Uri.encode("Служба поддержки")
-                            val encPTitle = Uri.encode("Поддержка")
+                            val encSName = Uri.encode(supportServiceName)
+                            val encPTitle = Uri.encode(supportProductTitle)
                             navController.navigate("chat/0/3/24?sellerName=$encSName&productTitle=$encPTitle&price=0")
                         }
                     )

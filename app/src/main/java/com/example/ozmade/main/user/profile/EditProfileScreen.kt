@@ -303,8 +303,8 @@ private fun ProfileAddressMapSection(
                     val marker = LatLng(state.addressLat, state.addressLng)
                     Marker(
                         state = MarkerState(position = marker),
-                        title = "Ваш адрес",
-                        snippet = state.address.ifBlank { "Сохранённый адрес" }
+                        title = context.getString(R.string.edit_profile_address_label),
+                        snippet = state.address.ifBlank { context.getString(R.string.saved_address) }
                     )
                 }
             }
@@ -441,8 +441,8 @@ private fun FullScreenProfileAddressMapDialog(
                 if (selectedLat != null && selectedLng != null) {
                     Marker(
                         state = MarkerState(position = LatLng(selectedLat, selectedLng)),
-                        title = "Ваш адрес",
-                        snippet = selectedAddress.ifBlank { "Сохранённый адрес" }
+                        title = context.getString(R.string.edit_profile_address_label),
+                        snippet = selectedAddress.ifBlank { context.getString(R.string.saved_address) }
                     )
                 }
             }

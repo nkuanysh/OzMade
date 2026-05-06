@@ -30,14 +30,18 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
+
+private data class CategoryOption(val value: String, val labelRes: Int)
 
 private val categoryOptions = listOf(
-    "Еда",
-    "Одежда",
-    "Искусство",
-    "Ремесло",
-    "Подарки",
-    "Для дома"
+    CategoryOption("Еда", R.string.category_food),
+    CategoryOption("Одежда", R.string.category_clothes),
+    CategoryOption("Искусство", R.string.category_art),
+    CategoryOption("Ремесло", R.string.category_crafts),
+    CategoryOption("Подарки", R.string.category_gifts),
+    CategoryOption("Для дома", R.string.category_home)
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -88,10 +92,10 @@ fun SellerRegistrationScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Стать продавцом", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.seller_registration_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_desc))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
@@ -107,14 +111,14 @@ fun SellerRegistrationScreen(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = "Заполните данные — это поможет покупателям доверять вам.",
+                    text = stringResource(R.string.seller_registration_intro),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray,
                     modifier = Modifier.padding(bottom = 20.dp)
                 )
 
                 // ---- Блок 1: Личные данные
-                SectionCard(title = "Профиль продавца") {
+                SectionCard(title = stringResource(R.string.seller_profile_section)) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(bottom = 16.dp)
@@ -146,14 +150,14 @@ fun SellerRegistrationScreen(
                         ) {
                             Icon(Icons.Default.AddAPhoto, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(8.dp))
-                            Text(if (selectedUri == null) "Фото магазина" else "Изменить фото")
+                            Text(if (selectedUri == null) stringResource(R.string.store_photo) else stringResource(R.string.change_photo))
                         }
                     }
 
                     CustomTextField(
                         value = firstName,
                         onValueChange = { firstName = it },
-                        label = "Имя *",
+                        label = stringResource(R.string.first_name_required),
                         icon = Icons.Default.Badge,
                         colors = textFieldColors
                     )
@@ -161,7 +165,7 @@ fun SellerRegistrationScreen(
                     CustomTextField(
                         value = lastName,
                         onValueChange = { lastName = it },
-                        label = "Фамилия *",
+                        label = stringResource(R.string.last_name_required),
                         icon = Icons.Default.Badge,
                         colors = textFieldColors
                     )
@@ -169,8 +173,8 @@ fun SellerRegistrationScreen(
                     CustomTextField(
                         value = displayName,
                         onValueChange = { displayName = it },
-                        label = "Название магазина *",
-                        placeholder = "Напр: Мастерская уютных вещей",
+                        label = stringResource(R.string.store_name_required),
+                        placeholder = stringResource(R.string.store_name_example),
                         icon = Icons.Default.Storefront,
                         colors = textFieldColors
                     )
@@ -179,11 +183,11 @@ fun SellerRegistrationScreen(
                 Spacer(Modifier.height(16.dp))
 
                 // ---- Блок 2: Локация
-                SectionCard(title = "Местоположение") {
+                SectionCard(title = stringResource(R.string.location_section)) {
                     CustomTextField(
                         value = city,
                         onValueChange = { city = it },
-                        label = "Город *",
+                        label = stringResource(R.string.city_required),
                         icon = Icons.Default.LocationCity,
                         colors = textFieldColors
                     )
@@ -191,7 +195,7 @@ fun SellerRegistrationScreen(
                     CustomTextField(
                         value = address,
                         onValueChange = { address = it },
-                        label = "Адрес *",
+                        label = stringResource(R.string.address_required),
                         icon = Icons.Default.Place,
                         colors = textFieldColors
                     )
@@ -200,9 +204,9 @@ fun SellerRegistrationScreen(
                 Spacer(Modifier.height(16.dp))
 
                 // ---- Блок 3: Категории и описание
-                SectionCard(title = "О товарах") {
+                SectionCard(title = stringResource(R.string.about_products)) {
                     Text(
-                        "Выберите категории товаров:",
+                        stringResource(R.string.choose_product_categories),
                         style = MaterialTheme.typography.labelLarge,
                         color = Color.Gray,
                         modifier = Modifier.padding(bottom = 8.dp)
@@ -213,13 +217,13 @@ fun SellerRegistrationScreen(
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         categoryOptions.forEach { cat ->
-                            val selected = selectedCategories.contains(cat)
+                            val selected = selectedCategories.contains(cat.value)
                             FilterChip(
                                 selected = selected,
                                 onClick = {
-                                    selectedCategories = if (selected) selectedCategories - cat else selectedCategories + cat
+                                    selectedCategories = if (selected) selectedCategories - cat.value else selectedCategories + cat.value
                                 },
-                                label = { Text(cat) },
+                                label = { Text(stringResource(cat.labelRes)) },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = orangeColor.copy(alpha = 0.1f),
                                     selectedLabelColor = orangeColor,
@@ -241,8 +245,8 @@ fun SellerRegistrationScreen(
                         value = about,
                         onValueChange = { about = it },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Описание деятельности") },
-                        placeholder = { Text("Расскажите коротко о ваших товарах...") },
+                        label = { Text(stringResource(R.string.activity_description)) },
+                        placeholder = { Text(stringResource(R.string.activity_description_hint)) },
                         minLines = 3,
                         shape = RoundedCornerShape(12.dp),
                         colors = textFieldColors
@@ -265,7 +269,7 @@ fun SellerRegistrationScreen(
                             colors = CheckboxDefaults.colors(checkedColor = orangeColor)
                         )
                         Text(
-                            text = "Принимаю условия продавца",
+                            text = stringResource(R.string.accept_seller_terms),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -303,7 +307,7 @@ fun SellerRegistrationScreen(
                         CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(20.dp), color = Color.White)
                         Spacer(Modifier.width(12.dp))
                     }
-                    Text("Создать магазин", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.create_store), fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
 
                 Spacer(Modifier.height(32.dp))
@@ -312,15 +316,15 @@ fun SellerRegistrationScreen(
             if (showInstruction) {
                 AlertDialog(
                     onDismissRequest = { showInstruction = false },
-                    title = { Text("Добро пожаловать!") },
-                    text = { Text("Чтобы начать продавать эффективно, ознакомьтесь с нашей краткой инструкцией.") },
+                    title = { Text(stringResource(R.string.welcome_dialog_title)) },
+                    text = { Text(stringResource(R.string.welcome_dialog_text)) },
                     confirmButton = {
                         Button(
                             onClick = { showInstruction = false },
                             colors = ButtonDefaults.buttonColors(containerColor = orangeColor),
                             shape = RoundedCornerShape(12.dp)
                         ) {
-                            Text("Понятно")
+                            Text(stringResource(R.string.understood))
                         }
                     },
                     shape = RoundedCornerShape(24.dp),
@@ -379,19 +383,19 @@ private fun CustomTextField(
 private fun TermsLinks(onTerms: () -> Unit, onPrivacy: () -> Unit, accentColor: Color) {
     val annotatedString = buildAnnotatedString {
         withStyle(style = SpanStyle(color = Color.Gray)) {
-            append("Нажимая кнопку, вы соглашаетесь с ")
+            append(stringResource(R.string.seller_terms_prefix))
         }
         pushStringAnnotation(tag = "terms", annotation = "terms")
         withStyle(style = SpanStyle(color = accentColor, fontWeight = FontWeight.Bold)) {
-            append("Условиями")
+            append(stringResource(R.string.login_footer_terms))
         }
         pop()
         withStyle(style = SpanStyle(color = Color.Gray)) {
-            append(" и ")
+            append(stringResource(R.string.and_word))
         }
         pushStringAnnotation(tag = "privacy", annotation = "privacy")
         withStyle(style = SpanStyle(color = accentColor, fontWeight = FontWeight.Bold)) {
-            append("Политикой конфиденциальности")
+            append(stringResource(R.string.privacy_policy))
         }
         pop()
     }

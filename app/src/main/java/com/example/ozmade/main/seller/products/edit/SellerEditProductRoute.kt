@@ -1,7 +1,9 @@
 package com.example.ozmade.main.seller.products.edit
 
+import com.example.ozmade.R
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 
@@ -15,13 +17,14 @@ fun SellerEditProductRoute(
     val state by vm.state.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(productId) { vm.load(productId) }
 
     LaunchedEffect(state.success) {
         if (state.success) {
-            scope.launch { snackbarHostState.showSnackbar("Изменения сохранены") }
+            scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.changes_saved)) }
             onSaved()
             vm.consumeSuccess()
         }

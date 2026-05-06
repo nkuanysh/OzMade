@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller.products
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -50,7 +52,7 @@ fun SellerProductsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Мои товары",
+                        stringResource(R.string.seller_products_title),
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold)
                     )
                 },
@@ -70,7 +72,7 @@ fun SellerProductsScreen(
             ) {
                 Icon(Icons.Default.Add, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Добавить товар", fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.add_product), fontWeight = FontWeight.Bold)
             }
         }
     ) { padding ->
@@ -94,7 +96,7 @@ fun SellerProductsScreen(
                     value = state.query,
                     onValueChange = onQueryChange,
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Поиск по названию...", color = Color.Gray) },
+                    placeholder = { Text(stringResource(R.string.search_by_name), color = Color.Gray) },
                     leadingIcon = { Icon(Icons.Default.Search, null, tint = Color.Gray) },
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
@@ -119,7 +121,7 @@ fun SellerProductsScreen(
                     FilterChip(
                         selected = isSelected,
                         onClick = { onFilterChange(f) },
-                        label = { Text(f.title) },
+                        label = { Text(stringResource(f.titleRes)) },
                         shape = RoundedCornerShape(12.dp),
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
@@ -160,8 +162,8 @@ fun SellerProductsScreen(
                                     Button(
                                         onClick = onRetry,
                                         shape = RoundedCornerShape(12.dp)
-                                    ) { Text("Повторить") }
-                                    TextButton(onClick = onDismissError) { Text("Ок") }
+                                    ) { Text(stringResource(R.string.retry_btn)) }
+                                    TextButton(onClick = onDismissError) { Text(stringResource(R.string.ok)) }
                                 }
                             }
                         }
@@ -175,12 +177,12 @@ fun SellerProductsScreen(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            "Товаров пока нет",
+                            stringResource(R.string.no_seller_products),
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             color = Color.Gray
                         )
                         Text(
-                            "Добавьте свой первый товар, чтобы начать продажи",
+                            stringResource(R.string.no_seller_products_desc),
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.Gray,
                             modifier = Modifier.padding(top = 8.dp)
@@ -213,8 +215,8 @@ fun SellerProductsScreen(
             AlertDialog(
                 onDismissRequest = { deleteDialogFor = null },
                 shape = RoundedCornerShape(28.dp),
-                title = { Text("Удалить товар?", fontWeight = FontWeight.Bold) },
-                text = { Text("Товар “${delP.title}” будет удалён без возможности восстановления.") },
+                title = { Text(stringResource(R.string.delete_product_title), fontWeight = FontWeight.Bold) },
+                text = { Text(stringResource(R.string.delete_product_body, delP.title)) },
                 confirmButton = {
                     Button(
                         onClick = {
@@ -223,10 +225,10 @@ fun SellerProductsScreen(
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                         shape = RoundedCornerShape(12.dp)
-                    ) { Text("Удалить") }
+                    ) { Text(stringResource(R.string.delete)) }
                 },
                 dismissButton = {
-                    TextButton(onClick = { deleteDialogFor = null }) { Text("Отмена") }
+                    TextButton(onClick = { deleteDialogFor = null }) { Text(stringResource(R.string.cancel)) }
                 }
             )
         }
@@ -290,7 +292,7 @@ private fun SellerProductCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${product.price} AUD",
+                    text = "${product.price} ₸",
                     style = MaterialTheme.typography.bodyLarge.copy(
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.SemiBold
@@ -310,7 +312,7 @@ private fun SellerProductCard(
                     )
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        text = if (isOnSale) "В продаже" else "Снят с продажи",
+                        text = if (isOnSale) stringResource(R.string.on_sale) else stringResource(R.string.off_sale),
                         style = MaterialTheme.typography.labelMedium,
                         color = Color.Gray
                     )
@@ -327,7 +329,7 @@ private fun SellerProductCard(
                     onDismissRequest = { expanded = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text(if (isOnSale) "Снять с продажи" else "Вернуть в продажу") },
+                        text = { Text(if (isOnSale) stringResource(R.string.remove_from_sale) else stringResource(R.string.return_to_sale)) },
                         onClick = {
                             expanded = false
                             onToggleSale()
@@ -335,7 +337,7 @@ private fun SellerProductCard(
                     )
                     HorizontalDivider()
                     DropdownMenuItem(
-                        text = { Text("Удалить", color = MaterialTheme.colorScheme.error) },
+                        text = { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) },
                         onClick = {
                             expanded = false
                             onDelete()

@@ -99,7 +99,7 @@ fun NotificationsScreen(
 fun NotificationCard(item: NotificationItem) {
     // Backend returns "2024-05-20T12:00:00Z"
     val sdf = remember { SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).apply { timeZone = TimeZone.getTimeZone("UTC") } }
-    val outSdf = remember { SimpleDateFormat("HH:mm, dd MMM", Locale("ru")) }
+    val outSdf = remember { SimpleDateFormat("HH:mm, dd MMM", Locale.getDefault()) }
     
     val dateStr = try {
         val date = sdf.parse(item.createdAt)
@@ -112,6 +112,22 @@ fun NotificationCard(item: NotificationItem) {
         "ORDER" -> Color(0xFF4CAF50) // Green for orders
         "CHAT" -> Color(0xFF2196F3) // Blue for chats
         else -> Color(0xFFFF9800) // Orange for others
+    }
+
+    // Localization mapping
+    val displayedTitle = when (item.title) {
+        "Order created" -> stringResource(R.string.notification_order_created_title)
+        "Order completed" -> stringResource(R.string.notification_order_completed_title)
+        "New message" -> stringResource(R.string.notification_chat_title)
+        else -> item.title
+    }
+
+    val displayedBody = when {
+        item.body.contains("Your order has been created", ignoreCase = true) ->
+            stringResource(R.string.notification_order_created_body)
+        item.body.contains("Your order has been completed", ignoreCase = true) ->
+            stringResource(R.string.notification_order_completed_body)
+        else -> item.body
     }
 
     Card(
@@ -146,7 +162,7 @@ fun NotificationCard(item: NotificationItem) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = item.title,
+                        text = displayedTitle,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
@@ -155,7 +171,7 @@ fun NotificationCard(item: NotificationItem) {
                 }
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = item.body,
+                    text = displayedBody,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = Color.DarkGray,
                         lineHeight = 20.sp

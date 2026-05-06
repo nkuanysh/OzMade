@@ -1,7 +1,9 @@
 package com.example.ozmade.main.seller.products.add
 
+import com.example.ozmade.R
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 
@@ -14,6 +16,7 @@ fun SellerAddProductRoute(
     val state by vm.state.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
     // ✅ если успешно — показываем snackbar и уходим назад
@@ -21,7 +24,7 @@ fun SellerAddProductRoute(
         if (state.success) {
             // snackbar показываем на текущем экране, потом уходим назад
             scope.launch {
-                snackbarHostState.showSnackbar("Товар успешно добавлен")
+                snackbarHostState.showSnackbar(context.getString(R.string.product_added))
             }
             onCreated()
             vm.consumeSuccess() // ✅ чтобы success не срабатывал снова при пересоздании

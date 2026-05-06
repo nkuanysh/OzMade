@@ -1,5 +1,7 @@
 package com.example.ozmade.main.user.profile.support
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
@@ -38,16 +40,16 @@ fun SupportScreen(
 ) {
     val context = LocalContext.current
     val phoneNumber = "+77077077072"
-    val faqSections = remember { buildFaq() }
+    val faqSections = buildFaq()
     val orangeAccent = Color(0xFFFF9800)
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Помощь", fontWeight = FontWeight.ExtraBold) },
+                title = { Text(stringResource(R.string.support_title), fontWeight = FontWeight.ExtraBold) },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back_desc))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -86,14 +88,14 @@ fun SupportScreen(
                     }
                     Spacer(Modifier.height(20.dp))
                     Text(
-                        text = "Как мы можем помочь?",
+                        text = stringResource(R.string.support_question),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.ExtraBold,
                         color = Color(0xFF1A1A1A)
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "Отвечаем ежедневно с 8:00 до 22:00",
+                        text = stringResource(R.string.support_hours),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Gray
                     )
@@ -104,8 +106,8 @@ fun SupportScreen(
             item {
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     SupportActionCard(
-                        title = "Позвонить",
-                        subtitle = "Быстрый ответ",
+                        title = stringResource(R.string.call),
+                        subtitle = stringResource(R.string.fast_answer),
                         icon = Icons.Outlined.PhoneInTalk,
                         modifier = Modifier.weight(1f),
                         containerColor = orangeAccent,
@@ -116,8 +118,8 @@ fun SupportScreen(
                         }
                     )
                     SupportActionCard(
-                        title = "Чат",
-                        subtitle = "Написать нам",
+                        title = stringResource(R.string.chat_label),
+                        subtitle = stringResource(R.string.write_us),
                         icon = Icons.Outlined.ChatBubbleOutline,
                         modifier = Modifier.weight(1f),
                         containerColor = Color.White,
@@ -129,7 +131,7 @@ fun SupportScreen(
 
             item {
                 Text(
-                    text = "Частые вопросы",
+                    text = stringResource(R.string.faq),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color(0xFF1A1A1A),
@@ -259,19 +261,20 @@ private fun FaqQuestionRow(item: FaqItem) {
 private data class FaqSection(val title: String, val items: List<FaqItem>)
 private data class FaqItem(val question: String, val answer: String)
 
+@Composable
 private fun buildFaq(): List<FaqSection> {
     return listOf(
         FaqSection(
-            title = "Заказы",
+            title = stringResource(R.string.faq_orders),
             items = listOf(
-                FaqItem("Как оформить заказ?", "Нажмите «Заказать» или «Чат» на странице товара. Оплата происходит напрямую продавцу."),
-                FaqItem("Что если продавец молчит?", "Попробуйте написать еще раз. Если ответа нет более 24 часов — выберите другой товар.")
+                FaqItem(stringResource(R.string.faq_how_order_q), stringResource(R.string.faq_how_order_a)),
+                FaqItem(stringResource(R.string.faq_seller_silent_q), stringResource(R.string.faq_seller_silent_a))
             )
         ),
         FaqSection(
-            title = "Безопасность",
+            title = stringResource(R.string.faq_security),
             items = listOf(
-                FaqItem("Как не попасться мошенникам?", "Не переводите деньги без подтверждения наличия товара и проверяйте рейтинг продавца.")
+                FaqItem(stringResource(R.string.faq_safety_q), stringResource(R.string.faq_safety_a))
             )
         )
     )

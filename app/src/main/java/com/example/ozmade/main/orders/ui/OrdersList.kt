@@ -17,6 +17,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import androidx.compose.ui.res.stringResource
+import com.example.ozmade.R
 import com.example.ozmade.main.orders.data.OrderStatus
 import com.example.ozmade.main.orders.data.OrderUi
 import com.example.ozmade.main.orders.data.deliveryTitle
@@ -117,7 +119,7 @@ private fun OrderCard(
                     Spacer(Modifier.height(4.dp))
                     
                     Text(
-                        text = "Продавец: ${order.sellerName ?: "Мастер"}",
+                        text = stringResource(R.string.seller_label_value, order.sellerName ?: stringResource(R.string.master_default)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -126,7 +128,7 @@ private fun OrderCard(
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = "${order.quantity} шт.",
+                            text = stringResource(R.string.pieces_count, order.quantity),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Medium
                         )
@@ -157,7 +159,7 @@ private fun OrderCard(
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = "Код подтверждения: ",
+                            text = stringResource(R.string.confirmation_code_label),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
@@ -185,7 +187,7 @@ private fun OrderCard(
             ) {
                 Column {
                     Text(
-                        text = "Доставка",
+                        text = stringResource(R.string.delivery_title),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

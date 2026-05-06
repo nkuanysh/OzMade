@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller.delivery
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -86,7 +88,7 @@ fun SellerDeliveryRoute(
             TopAppBar(
                 title = {
                     Text(
-                        "Настройки доставки",
+                        stringResource(R.string.seller_delivery_settings),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold)
                     )
                 },
@@ -127,7 +129,7 @@ fun SellerDeliveryRoute(
                         Icon(Icons.Default.Save, contentDescription = null)
                         Spacer(Modifier.width(12.dp))
                         Text(
-                            "Сохранить изменения",
+                            stringResource(R.string.save_changes),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                         )
                     }
@@ -171,12 +173,12 @@ fun SellerDeliveryRoute(
                         verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
                         InfoCard(
-                            text = "Настройте способы, которыми вы готовы передавать товары покупателям. Активные способы будут отображаться в ваших товарах."
+                            text = stringResource(R.string.seller_delivery_intro)
                         )
 
                         DeliveryCard(
-                            title = "Самовывоз",
-                            description = "Покупатель сам забирает товар по вашему адресу",
+                            title = stringResource(R.string.pickup_method_title),
+                            description = stringResource(R.string.pickup_method_desc),
                             icon = Icons.Default.Storefront,
                             enabled = s.pickupEnabled,
                             onToggle = { on -> viewModel.updateLocal { it.copy(pickupEnabled = on) } }
@@ -184,23 +186,23 @@ fun SellerDeliveryRoute(
                             ModernTextField(
                                 value = s.pickupAddress,
                                 onValueChange = { v -> viewModel.updateLocal { it.copy(pickupAddress = v) } },
-                                label = "Адрес пункта выдачи",
+                                label = stringResource(R.string.pickup_point_address),
                                 icon = Icons.Outlined.LocationOn,
-                                placeholder = "г. Алматы, ул. Абая 10, оф. 5"
+                                placeholder = stringResource(R.string.pickup_point_example)
                             )
                             Spacer(Modifier.height(16.dp))
                             ModernTextField(
                                 value = s.pickupTime,
                                 onValueChange = { v -> viewModel.updateLocal { it.copy(pickupTime = v) } },
-                                label = "График работы",
+                                label = stringResource(R.string.work_schedule),
                                 icon = Icons.Outlined.Schedule,
-                                placeholder = "Пн-Пт: 10:00 - 19:00"
+                                placeholder = stringResource(R.string.work_schedule_example)
                             )
                         }
 
                         DeliveryCard(
-                            title = "Моя курьерская доставка",
-                            description = "Доставка вашими силами в определенном радиусе",
+                            title = stringResource(R.string.own_courier_delivery),
+                            description = stringResource(R.string.own_courier_desc),
                             icon = Icons.Default.LocalShipping,
                             enabled = s.myDeliveryEnabled,
                             onToggle = { on -> viewModel.updateLocal { it.copy(myDeliveryEnabled = on) } }
@@ -217,8 +219,8 @@ fun SellerDeliveryRoute(
                         }
 
                         DeliveryCard(
-                            title = "Межгород (ТК)",
-                            description = "Доставка через сторонние транспортные компании",
+                            title = stringResource(R.string.intercity_tk),
+                            description = stringResource(R.string.intercity_tk_desc),
                             icon = Icons.Default.Public,
                             enabled = s.intercityEnabled,
                             onToggle = { on -> viewModel.updateLocal { it.copy(intercityEnabled = on) } }
@@ -239,7 +241,7 @@ fun SellerDeliveryRoute(
                                     )
                                     Spacer(Modifier.width(12.dp))
                                     Text(
-                                        "Покупатели из других регионов увидят возможность доставки ТК. Вы сможете обсудить детали отправки в чате.",
+                                        stringResource(R.string.intercity_tk_hint),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         lineHeight = 20.sp
@@ -266,12 +268,12 @@ private fun MyDeliveryMapSection(
 
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(
-            text = "Выберите центр зоны доставки на карте",
+            text = stringResource(R.string.choose_delivery_center_on_map),
             style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
         )
 
         Text(
-            text = "Нажмите на карту, чтобы выбрать точку. Адрес определится автоматически, а круг покажет зону доставки.",
+            text = stringResource(R.string.choose_point_map_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             lineHeight = 20.sp
@@ -292,16 +294,16 @@ private fun MyDeliveryMapSection(
             ) {
                 Icon(Icons.Default.OpenInFull, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Открыть карту на весь экран")
+                Text(stringResource(R.string.edit_profile_full_screen_map))
             }
         }
 
         ModernTextField(
             value = ui.centerAddress,
             onValueChange = { v -> onUiChange(ui.copy(centerAddress = v)) },
-            label = "Адрес центра доставки",
+            label = stringResource(R.string.delivery_center_address),
             icon = Icons.Outlined.LocationOn,
-            placeholder = "Определится после выбора точки на карте"
+            placeholder = stringResource(R.string.auto_after_map_pick)
         )
 
         Column(
@@ -317,12 +319,12 @@ private fun MyDeliveryMapSection(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Радиус покрытия",
+                    text = stringResource(R.string.coverage_radius),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "${ui.radiusKm} км",
+                    text = stringResource(R.string.km_value, ui.radiusKm.toString()),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -342,7 +344,7 @@ private fun MyDeliveryMapSection(
             )
 
             Text(
-                "Круг на карте обновляется сразу. Эти значения сохранятся в существующие поля centerLat, centerLng, radiusKm и centerAddress.",
+                stringResource(R.string.delivery_values_saved_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 16.sp
@@ -360,7 +362,7 @@ private fun MyDeliveryMapSection(
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     Text(
-                        text = "Координаты центра",
+                        text = stringResource(R.string.center_coordinates),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -442,7 +444,7 @@ private fun DeliveryMiniMap(
                         )
                     )
                     if (resolvedAddress.isBlank()) {
-                        onMessage("Точка выбрана, но адрес определить не удалось")
+                        onMessage(context.getString(R.string.point_selected_no_address))
                     }
                 }
             }
@@ -457,7 +459,7 @@ private fun DeliveryMiniMap(
                 .padding(12.dp)
                 .size(44.dp)
         ) {
-            Icon(Icons.Default.OpenInFull, contentDescription = "Открыть карту")
+            Icon(Icons.Default.OpenInFull, contentDescription = stringResource(R.string.open_map_desc))
         }
 
         Surface(
@@ -480,7 +482,7 @@ private fun DeliveryMiniMap(
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    "Тап по карте",
+                    stringResource(R.string.tap_on_map),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -505,7 +507,7 @@ private fun FullScreenDeliveryMapDialog(
     ) { result ->
         val granted = result[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
                 result[Manifest.permission.ACCESS_COARSE_LOCATION] == true
-        if (!granted) onMessage("Разрешение на геолокацию не выдано")
+        if (!granted) onMessage(context.getString(R.string.location_permission_denied))
     }
 
     val initialLat = ui.centerLat.toDoubleOrNull()
@@ -559,7 +561,7 @@ private fun FullScreenDeliveryMapDialog(
                             )
                         )
                         if (resolvedAddress.isBlank()) {
-                            onMessage("Точка выбрана, но адрес определить не удалось")
+                            onMessage(context.getString(R.string.point_selected_no_address))
                         }
                     }
                 }
@@ -574,7 +576,7 @@ private fun FullScreenDeliveryMapDialog(
                     .padding(16.dp)
                     .size(48.dp)
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back_desc))
             }
 
             FilledTonalIconButton(
@@ -592,7 +594,7 @@ private fun FullScreenDeliveryMapDialog(
 
                         val myLatLng = getCurrentLocationLatLng(context)
                         if (myLatLng == null) {
-                            onMessage("Не удалось определить текущее местоположение")
+                            onMessage(context.getString(R.string.location_unavailable))
                             return@launch
                         }
 
@@ -607,7 +609,7 @@ private fun FullScreenDeliveryMapDialog(
                     .padding(16.dp)
                     .size(48.dp)
             ) {
-                Icon(Icons.Default.MyLocation, contentDescription = "Моё местоположение")
+                Icon(Icons.Default.MyLocation, contentDescription = stringResource(R.string.current_location_desc))
             }
 
             Surface(
@@ -630,7 +632,7 @@ private fun FullScreenDeliveryMapDialog(
                     )
 
                     Text(
-                        text = ui.centerAddress.ifBlank { "Нажмите на карту, чтобы выбрать точку" },
+                        text = ui.centerAddress.ifBlank { stringResource(R.string.tap_map_choose_point) },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -648,14 +650,14 @@ private fun FullScreenDeliveryMapDialog(
                                         centerAddress = ""
                                     )
                                 )
-                                onMessage("Точка доставки очищена")
+                                onMessage(context.getString(R.string.delivery_point_cleared))
                             },
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(14.dp)
                         ) {
                             Icon(Icons.Default.DeleteOutline, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Очистить")
+                            Text(stringResource(R.string.clear))
                         }
 
                         Button(
@@ -665,7 +667,7 @@ private fun FullScreenDeliveryMapDialog(
                         ) {
                             Icon(Icons.Default.Check, contentDescription = null)
                             Spacer(Modifier.width(8.dp))
-                            Text("Готово")
+                            Text(stringResource(R.string.done))
                         }
                     }
                 }
@@ -676,6 +678,7 @@ private fun FullScreenDeliveryMapDialog(
 
 @Composable
 private fun DeliveryMapContent(ui: SellerDeliveryUi) {
+    val context = LocalContext.current
     val currentLat = ui.centerLat.toDoubleOrNull()
     val currentLng = ui.centerLng.toDoubleOrNull()
 
@@ -684,8 +687,8 @@ private fun DeliveryMapContent(ui: SellerDeliveryUi) {
 
         Marker(
             state = MarkerState(position = center),
-            title = "Центр доставки",
-            snippet = ui.centerAddress.ifBlank { "Выбранная точка" }
+            title = context.getString(R.string.delivery_center_marker),
+            snippet = ui.centerAddress.ifBlank { context.getString(R.string.selected_point) }
         )
 
         Circle(
@@ -921,7 +924,7 @@ private fun ErrorContent(message: String, onRetry: () -> Unit) {
         }
         Spacer(Modifier.height(24.dp))
         Text(
-            "Произошла ошибка",
+            stringResource(R.string.generic_error),
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
         )
         Spacer(Modifier.height(8.dp))
@@ -939,7 +942,7 @@ private fun ErrorContent(message: String, onRetry: () -> Unit) {
                 .height(56.dp),
             shape = RoundedCornerShape(16.dp)
         ) {
-            Text("Попробовать снова")
+            Text(stringResource(R.string.try_again_btn))
         }
     }
 }

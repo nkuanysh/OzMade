@@ -1,6 +1,7 @@
 package com.example.ozmade.main.seller.products.add
 
 import android.net.Uri
+import com.example.ozmade.R
 
 private const val MAX_PHOTOS = 10
 
@@ -44,12 +45,13 @@ data class AddProductState(
 
 enum class SellerCategory(
     val title: String,
+    val titleRes: Int,
     val backendValue: String
 ) {
-    FOOD("Еда", "food"),
-    CLOTHES("Одежда", "clothes"),
-    ART("Искусство", "art"),
-    CRAFTS("Ремесло", "crafts"),
-    GIFTS("Подарки", "gifts"),
-    HOME("Для Дома", "home")
+    FOOD("Еда", R.string.category_food, "food"),
+    CLOTHES("Одежда", R.string.category_clothes, "clothes"),
+    ART("Искусство", R.string.category_art, "art"),
+    CRAFTS("Ремесло", R.string.category_crafts, "crafts"),
+    GIFTS("Подарки", R.string.category_gifts, "gifts"),
+    HOME("Для Дома", R.string.category_home, "home")
 }

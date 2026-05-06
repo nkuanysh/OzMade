@@ -1,5 +1,7 @@
 package com.example.ozmade.main.user.orderflow.ui
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
@@ -77,7 +79,7 @@ fun DeliveryChooseRoute2(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Способ доставки") },
+                title = { Text(stringResource(R.string.choose_delivery_method)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, null)
@@ -106,7 +108,7 @@ fun DeliveryChooseRoute2(
                         onClick = { viewModel.load(productId) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Повторить")
+                        Text(stringResource(R.string.retry_btn))
                     }
                 }
             }
@@ -218,7 +220,7 @@ private fun DeliveryChooseContent(
         Text(product.title, style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(4.dp))
         Text(
-            "Сумма к оплате: $total ₸",
+            stringResource(R.string.amount_to_pay, total),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.primary
         )
@@ -227,8 +229,8 @@ private fun DeliveryChooseContent(
 
         if (d.pickupEnabled) {
             DeliveryOption(
-                title = "Самовывоз",
-                subtitle = "Адрес: ${d.pickupAddress ?: "—"}\nВремя: ${d.pickupTime ?: "—"}",
+                title = stringResource(R.string.delivery_type_pickup),
+                subtitle = stringResource(R.string.address) + ": ${d.pickupAddress ?: stringResource(R.string.dash)}\n" + stringResource(R.string.working_hours) + ": ${d.pickupTime ?: stringResource(R.string.dash)}",
                 selected = selected == DeliveryType.PICKUP,
                 onClick = { selected = DeliveryType.PICKUP }
             )
@@ -237,10 +239,10 @@ private fun DeliveryChooseContent(
 
         if (d.freeDeliveryEnabled) {
             DeliveryOption(
-                title = "Доставка продавца",
+                title = stringResource(R.string.delivery_method_seller),
                 subtitle = buildString {
-                    append("Адрес продавца: ${sellerZoneAddress.ifBlank { "Адрес не указан" }}")
-                    if (d.radiusKm != null) append("\nРадиус: ${formatKm(d.radiusKm)} км")
+                    append(stringResource(R.string.seller_address_value, sellerZoneAddress.ifBlank { stringResource(R.string.no_address) }))
+                    if (d.radiusKm != null) append("\n" + stringResource(R.string.radius_value, formatKm(d.radiusKm)))
                 },
                 selected = selected == DeliveryType.MY_DELIVERY,
                 onClick = {
@@ -263,7 +265,7 @@ private fun DeliveryChooseContent(
             AnimatedVisibility(visible = selected == DeliveryType.MY_DELIVERY) {
                 Column(Modifier.padding(top = 8.dp)) {
                     Text(
-                        "Выберите ваш адрес на карте. Покупатель видит зону доставки продавца.",
+                        stringResource(R.string.choose_buyer_address_map),
                         style = MaterialTheme.typography.bodySmall
                     )
 
@@ -297,12 +299,12 @@ private fun DeliveryChooseContent(
                     ) {
                         Icon(Icons.Default.OpenInFull, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Открыть карту на весь экран")
+                        Text(stringResource(R.string.edit_profile_full_screen_map))
                     }
                     Spacer(Modifier.height(12.dp))
 
                     InfoSurface(
-                        text = "Адрес зоны продавца: ${sellerZoneAddress.ifBlank { "Адрес не указан" }}",
+                        text = stringResource(R.string.seller_zone_address_value, sellerZoneAddress.ifBlank { stringResource(R.string.no_address) }),
                         isWarning = false
                     )
 
@@ -311,9 +313,9 @@ private fun DeliveryChooseContent(
                     if (distanceKm != null) {
                         InfoSurface(
                             text = if (isOutsideSellerZone) {
-                                "Этот адрес находится вне зоны продавца. Радиус продавца: ${formatKm(zoneRadiusKm)} км, расстояние до адреса: ${formatKm(distanceKm)} км. Возможно, потребуется доплата за доставку."
+                                stringResource(R.string.outside_seller_zone_warning, formatKm(zoneRadiusKm), formatKm(distanceKm))
                             } else {
-                                "Адрес находится внутри зоны доставки продавца. Расстояние до центра: ${formatKm(distanceKm)} км."
+                                stringResource(R.string.inside_seller_zone_info, formatKm(distanceKm))
                             },
                             isWarning = isOutsideSellerZone
                         )
@@ -323,7 +325,7 @@ private fun DeliveryChooseContent(
                     OutlinedTextField(
                         value = shippingAddressText,
                         onValueChange = { shippingAddressText = it },
-                        label = { Text("Точный адрес") },
+                        label = { Text(stringResource(R.string.exact_address)) },
                         modifier = Modifier.fillMaxWidth(),
                         minLines = 2
                     )
@@ -333,7 +335,7 @@ private fun DeliveryChooseContent(
                     OutlinedTextField(
                         value = shippingComment,
                         onValueChange = { shippingComment = it },
-                        label = { Text("Комментарий для курьера") },
+                        label = { Text(stringResource(R.string.courier_comment)) },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -344,8 +346,8 @@ private fun DeliveryChooseContent(
 
         if (d.intercityEnabled) {
             DeliveryOption(
-                title = "Межгород",
-                subtitle = "Доставка транспортными компаниями",
+                title = stringResource(R.string.delivery_type_intercity),
+                subtitle = stringResource(R.string.delivery_transport_companies),
                 selected = selected == DeliveryType.INTERCITY,
                 onClick = { selected = DeliveryType.INTERCITY }
             )
@@ -356,7 +358,7 @@ private fun DeliveryChooseContent(
                         value = shippingAddressText,
                         onValueChange = { shippingAddressText = it },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Полный адрес (Город, улица, дом)") },
+                        label = { Text(stringResource(R.string.full_address_hint)) },
                         minLines = 2
                     )
                 }
@@ -404,13 +406,13 @@ private fun DeliveryChooseContent(
 
                 if (type == DeliveryType.MY_DELIVERY) {
                     if (shippingLat == null || shippingLng == null || shippingAddressText.isBlank()) {
-                        localValidationError = "Выберите адрес доставки на карте"
+                        localValidationError = context.getString(R.string.choose_address_validation)
                         return@Button
                     }
 
                     if (isOutsideSellerZone) {
                         localValidationError =
-                            "Продавец не доставляет по этому адресу. Выберите адрес внутри зоны доставки."
+                            context.getString(R.string.seller_no_delivery_address)
                         return@Button
                     }
                 }
@@ -445,7 +447,7 @@ private fun DeliveryChooseContent(
                     color = Color.White
                 )
             } else {
-                Text("Подтвердить заказ", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.confirm_order), style = MaterialTheme.typography.titleMedium)
             }
         }
 
@@ -520,7 +522,7 @@ private fun BuyerMiniMap(
                 .padding(12.dp)
                 .size(44.dp)
         ) {
-            Icon(Icons.Default.OpenInFull, contentDescription = "Открыть карту")
+            Icon(Icons.Default.OpenInFull, contentDescription = stringResource(R.string.open_map_desc))
         }
 
         Surface(
@@ -541,7 +543,7 @@ private fun BuyerMiniMap(
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(Modifier.width(8.dp))
-                Text("Тап по карте")
+                Text(stringResource(R.string.tap_on_map))
             }
         }
     }
@@ -613,7 +615,7 @@ private fun BuyerFullScreenMapDialog(
                     .padding(16.dp)
                     .size(48.dp)
             ) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back_desc))
             }
 
             FilledTonalIconButton(
@@ -643,7 +645,7 @@ private fun BuyerFullScreenMapDialog(
                     .padding(16.dp)
                     .size(48.dp)
             ) {
-                Icon(Icons.Default.MyLocation, contentDescription = "Моё местоположение")
+                Icon(Icons.Default.MyLocation, contentDescription = stringResource(R.string.current_location_desc))
             }
 
             Surface(
@@ -663,12 +665,12 @@ private fun BuyerFullScreenMapDialog(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            "Выберите ваш адрес",
+                            stringResource(R.string.choose_your_address),
                             style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                         )
                         Spacer(Modifier.height(4.dp))
                         Text(
-                            "Адрес продавца: ${sellerZoneAddress.ifBlank { "Адрес не указан" }}",
+                            stringResource(R.string.seller_address_value, sellerZoneAddress.ifBlank { stringResource(R.string.no_address) }),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -682,7 +684,7 @@ private fun BuyerFullScreenMapDialog(
                     ) {
                         Icon(Icons.Default.Check, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
-                        Text("Готово")
+                        Text(stringResource(R.string.done))
                     }
                 }
             }
@@ -697,10 +699,11 @@ private fun SellerZoneAndBuyerMarker(
     sellerZoneAddress: String,
     buyerLatLng: LatLng?
 ){
+    val context = LocalContext.current
     Marker(
         state = MarkerState(position = zoneCenter),
-        title = "Зона продавца",
-        snippet = sellerZoneAddress.ifBlank { "Адрес продавца не указан" }
+        title = context.getString(R.string.seller_zone_marker),
+        snippet = sellerZoneAddress.ifBlank { context.getString(R.string.seller_address_missing) }
     )
 
     if (zoneRadiusKm > 0) {
@@ -716,7 +719,7 @@ private fun SellerZoneAndBuyerMarker(
     if (buyerLatLng != null) {
         Marker(
             state = MarkerState(position = buyerLatLng),
-            title = "Ваш адрес"
+            title = context.getString(R.string.your_address)
         )
     }
 }
@@ -782,10 +785,11 @@ private fun InfoSurface(
     }
 }
 
+@Composable
 private fun mapDeliveryError(error: String): String {
     return when {
         error.contains("Delivery is not available for this address", ignoreCase = true) ->
-            "Доставка по этому адресу недоступна. Выберите адрес внутри зоны продавца или другой способ доставки."
+            stringResource(R.string.delivery_unavailable_address)
         else -> error
     }
 }

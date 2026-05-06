@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller.products.edit
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -70,7 +72,7 @@ fun SellerEditProductScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Редактирование", fontWeight = FontWeight.ExtraBold) },
+                title = { Text(stringResource(R.string.edit_product_title), fontWeight = FontWeight.ExtraBold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
@@ -122,8 +124,8 @@ fun SellerEditProductScreen(
             }
 
             // Photo section
-            Text("Фотографии товара", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-            Text("Добавьте от 1 до 10 качественных фото", color = Color.Gray, fontSize = 13.sp)
+            Text(stringResource(R.string.product_photos), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.product_photos_hint), color = Color.Gray, fontSize = 13.sp)
             Spacer(Modifier.height(16.dp))
 
             LazyRow(
@@ -152,7 +154,7 @@ fun SellerEditProductScreen(
                             )
                             Spacer(Modifier.height(4.dp))
                             Text(
-                                if (state.canAddMorePhotos) "Добавить" else "Лимит",
+                                if (state.canAddMorePhotos) stringResource(R.string.add) else stringResource(R.string.limit),
                                 fontSize = 12.sp,
                                 color = if (state.canAddMorePhotos) orangeAccent else Color.LightGray
                             )
@@ -177,19 +179,19 @@ fun SellerEditProductScreen(
                 colors = ButtonDefaults.textButtonColors(contentColor = orangeAccent),
                 modifier = Modifier.padding(top = 8.dp)
             ) {
-                Text("Требования к фотографиям", style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(R.string.photo_requirements), style = MaterialTheme.typography.bodySmall)
             }
 
             Spacer(Modifier.height(24.dp))
 
             // Main Info
-            SectionHeader("Основная информация")
+            SectionHeader(stringResource(R.string.main_info))
             
             CustomEditField(
                 value = state.title,
                 onValueChange = onTitle,
-                label = "Название товара",
-                placeholder = "Напр: Глиняная ваза ручной работы",
+                label = stringResource(R.string.product_name),
+                placeholder = stringResource(R.string.product_name_example),
                 orangeAccent = orangeAccent
             )
 
@@ -198,14 +200,14 @@ fun SellerEditProductScreen(
             CustomEditField(
                 value = state.priceText,
                 onValueChange = { v -> onPrice(v.filter { it.isDigit() || it == '.' || it == ',' }) },
-                label = "Цена (₸)",
+                label = stringResource(R.string.price_tenge),
                 keyboardType = KeyboardType.Number,
                 orangeAccent = orangeAccent
             )
 
             Spacer(Modifier.height(20.dp))
 
-            Text("Категории", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(R.string.categories), fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
             Spacer(Modifier.height(8.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -217,7 +219,7 @@ fun SellerEditProductScreen(
                     FilterChip(
                         selected = selected,
                         onClick = { onToggleCategory(cat) },
-                        label = { Text(cat.title) },
+                        label = { Text(stringResource(cat.titleRes)) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = orangeAccent.copy(0.1f),
                             selectedLabelColor = orangeAccent,
@@ -236,12 +238,12 @@ fun SellerEditProductScreen(
             Spacer(Modifier.height(24.dp))
 
             // Specs
-            SectionHeader("Характеристики")
+            SectionHeader(stringResource(R.string.specs))
             
             CustomEditField(
                 value = state.weightText,
                 onValueChange = onWeight,
-                label = "Вес (напр: 500г или 1.2кг)",
+                label = stringResource(R.string.weight_label),
                 orangeAccent = orangeAccent
             )
 
@@ -252,7 +254,7 @@ fun SellerEditProductScreen(
                     CustomEditField(
                         value = state.heightText,
                         onValueChange = { onHeight(it.filter { c -> c.isDigit() || c == '.' || c == ',' }) },
-                        label = "Высота (см)",
+                        label = stringResource(R.string.height_cm),
                         keyboardType = KeyboardType.Number,
                         orangeAccent = orangeAccent
                     )
@@ -261,7 +263,7 @@ fun SellerEditProductScreen(
                     CustomEditField(
                         value = state.widthText,
                         onValueChange = { onWidth(it.filter { c -> c.isDigit() || c == '.' || c == ',' }) },
-                        label = "Ширина (см)",
+                        label = stringResource(R.string.width_cm),
                         keyboardType = KeyboardType.Number,
                         orangeAccent = orangeAccent
                     )
@@ -270,7 +272,7 @@ fun SellerEditProductScreen(
                     CustomEditField(
                         value = state.depthText,
                         onValueChange = { onDepth(it.filter { c -> c.isDigit() || c == '.' || c == ',' }) },
-                        label = "Глубина (см)",
+                        label = stringResource(R.string.depth_cm),
                         keyboardType = KeyboardType.Number,
                         orangeAccent = orangeAccent
                     )
@@ -282,19 +284,19 @@ fun SellerEditProductScreen(
             CustomEditField(
                 value = state.composition,
                 onValueChange = onComposition,
-                label = "Состав / Материалы",
-                placeholder = "Напр: 100% хлопок, натуральная кожа",
+                label = stringResource(R.string.composition_materials),
+                placeholder = stringResource(R.string.composition_example),
                 orangeAccent = orangeAccent
             )
 
             Spacer(Modifier.height(24.dp))
 
             // Description
-            SectionHeader("Описание")
+            SectionHeader(stringResource(R.string.product_description))
             OutlinedTextField(
                 value = state.description,
                 onValueChange = onDescription,
-                label = { Text("Подробное описание товара") },
+                label = { Text(stringResource(R.string.detailed_description)) },
                 modifier = Modifier.fillMaxWidth().heightIn(min = 150.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -311,7 +313,7 @@ fun SellerEditProductScreen(
             CustomEditField(
                 value = state.youtubeUrl,
                 onValueChange = onYoutube,
-                label = "Ссылка на видео YouTube (необязательно)",
+                label = stringResource(R.string.youtube_optional),
                 placeholder = "https://www.youtube.com/watch?v=...",
                 orangeAccent = orangeAccent,
                 keyboardType = KeyboardType.Uri
@@ -331,7 +333,7 @@ fun SellerEditProductScreen(
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Gray),
                     enabled = !state.loading
                 ) {
-                    Text("Отмена", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.cancel), fontWeight = FontWeight.Bold)
                 }
 
                 Button(
@@ -344,7 +346,7 @@ fun SellerEditProductScreen(
                     if (state.loading) {
                         CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
                     } else {
-                        Text("Сохранить", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.save), fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -354,18 +356,18 @@ fun SellerEditProductScreen(
     if (showRequirements) {
         AlertDialog(
             onDismissRequest = { showRequirements = false },
-            title = { Text("Требования к фото", fontWeight = FontWeight.Bold) },
+            title = { Text(stringResource(R.string.photo_requirements_title), fontWeight = FontWeight.Bold) },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    RequirementItem("1–10 фотографий высокого качества")
-                    RequirementItem("Хорошее освещение, без сильных теней")
-                    RequirementItem("Товар в центре кадра на чистом фоне")
-                    RequirementItem("Без водяных знаков и чужих логотипов")
+                    RequirementItem(stringResource(R.string.photo_req_count))
+                    RequirementItem(stringResource(R.string.photo_req_light))
+                    RequirementItem(stringResource(R.string.photo_req_center))
+                    RequirementItem(stringResource(R.string.photo_req_no_watermarks))
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showRequirements = false }, colors = ButtonDefaults.textButtonColors(contentColor = orangeAccent)) {
-                    Text("Понятно", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.understood), fontWeight = FontWeight.Bold)
                 }
             },
             shape = RoundedCornerShape(24.dp),

@@ -1,5 +1,7 @@
 package com.example.ozmade.main.user.orderflow.ui
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,7 +48,7 @@ fun OrderBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Заказ",
+                    text = stringResource(R.string.order_title),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         fontSize = 22.sp
@@ -54,7 +56,7 @@ fun OrderBottomSheet(
                     modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = onClose) {
-                    Icon(Icons.Default.Close, contentDescription = "Закрыть")
+                    Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close_desc))
                 }
             }
 
@@ -76,7 +78,7 @@ fun OrderBottomSheet(
                     )
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = "Цена: ${formatPrice(price)} ₸",
+                        text = stringResource(R.string.price_value, formatPrice(price)),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -118,7 +120,7 @@ fun OrderBottomSheet(
                         // Total
                         Column(horizontalAlignment = Alignment.End) {
                             Text(
-                                text = "Итого:",
+                                text = stringResource(R.string.total_label),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -150,7 +152,7 @@ fun OrderBottomSheet(
                 elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
             ) {
                 Text(
-                    text = "Способы доставки",
+                    text = stringResource(R.string.delivery_methods),
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
             }

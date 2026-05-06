@@ -29,8 +29,8 @@ fun AppNavHost(
     pushChatId: Int = 0,
     pushSellerId: Int = 0,
     pushProductId: Int = 0,
-    pushSellerName: String = "Продавец",
-    pushProductTitle: String = "Товар",
+    pushSellerName: String = "",
+    pushProductTitle: String = "",
     pushPrice: Int = 0,
     deepLinkProductId: Int = 0,
     openOrderHistory: Boolean = false

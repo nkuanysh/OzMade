@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller.chat
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -116,13 +118,13 @@ private fun SellerChatThreadScreen(
 
                         Column {
                             Text(
-                                text = data?.buyerName ?: "Чат",
+                                text = data?.buyerName ?: stringResource(R.string.chat_label),
                                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = "Покупатель • В сети",
+                                text = stringResource(R.string.buyer_online),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.primary
                             )
@@ -138,13 +140,13 @@ private fun SellerChatThreadScreen(
                     }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                         DropdownMenuItem(
-                            text = { Text("Очистить историю") },
+                            text = { Text(stringResource(R.string.clear_history)) },
                             onClick = {
                                 menuExpanded = false
                                 onDelete()
                             }
                         )
-                        DropdownMenuItem(text = { Text("Пожаловаться") }, onClick = { menuExpanded = false })
+                        DropdownMenuItem(text = { Text(stringResource(R.string.report)) }, onClick = { menuExpanded = false })
                     }
                 }
             )
@@ -174,7 +176,7 @@ private fun SellerChatThreadScreen(
                         modifier = Modifier
                             .weight(1f)
                             .padding(horizontal = 4.dp),
-                        placeholder = { Text("Сообщение…") },
+                        placeholder = { Text(stringResource(R.string.message_placeholder)) },
                         maxLines = 5,
                         shape = RoundedCornerShape(24.dp),
                         colors = TextFieldDefaults.colors(
@@ -288,7 +290,7 @@ private fun ProductContextBar(
                     style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold)
                 )
                 Text(
-                    text = "Товар в продаже",
+                    text = stringResource(R.string.product_on_sale),
                     style = MaterialTheme.typography.bodySmall,
                     color = accentColor
                 )

@@ -1,5 +1,9 @@
 package com.example.ozmade.main.orders.data
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import com.example.ozmade.R
+
 data class OrderUi(
     val id: Int,
     val status: String,
@@ -47,20 +51,22 @@ object DeliveryType {
     const val INTERCITY = "INTERCITY"
 }
 
+@Composable
 fun statusTitle(s: String): String = when (s) {
-    OrderStatus.PENDING_SELLER -> "Ожидает подтверждения"
-    OrderStatus.CONFIRMED -> "Подтверждён"
-    OrderStatus.READY_OR_SHIPPED -> "Готов / Отправлен"
-    OrderStatus.COMPLETED -> "Завершён"
-    OrderStatus.CANCELLED_BY_BUYER -> "Отменён покупателем"
-    OrderStatus.CANCELLED_BY_SELLER -> "Отменён продавцом"
-    OrderStatus.EXPIRED -> "Истёк"
+    OrderStatus.PENDING_SELLER -> stringResource(R.string.order_status_pending_seller)
+    OrderStatus.CONFIRMED -> stringResource(R.string.order_status_confirmed)
+    OrderStatus.READY_OR_SHIPPED -> stringResource(R.string.order_status_ready_or_shipped)
+    OrderStatus.COMPLETED -> stringResource(R.string.order_status_completed)
+    OrderStatus.CANCELLED_BY_BUYER -> stringResource(R.string.order_status_cancelled_by_buyer)
+    OrderStatus.CANCELLED_BY_SELLER -> stringResource(R.string.order_status_cancelled_by_seller)
+    OrderStatus.EXPIRED -> stringResource(R.string.order_status_expired)
     else -> s
 }
 
+@Composable
 fun deliveryTitle(type: String): String = when (type) {
-    DeliveryType.PICKUP -> "Самовывоз"
-    DeliveryType.MY_DELIVERY -> "Моя доставка"
-    DeliveryType.INTERCITY -> "Межгород"
+    DeliveryType.PICKUP -> stringResource(R.string.delivery_type_pickup)
+    DeliveryType.MY_DELIVERY -> stringResource(R.string.delivery_type_my_delivery)
+    DeliveryType.INTERCITY -> stringResource(R.string.delivery_type_intercity)
     else -> type
 }

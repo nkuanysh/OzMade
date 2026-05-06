@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -62,13 +64,13 @@ fun SellerProfileScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(20.dp)) {
                         Icon(Icons.Default.ErrorOutline, null, modifier = Modifier.size(48.dp), tint = Color.LightGray)
                         Spacer(Modifier.height(16.dp))
-                        Text("Ошибка: ${state.message}", textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                        Text(stringResource(R.string.seller_profile_error, state.message), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                         Spacer(Modifier.height(24.dp))
                         Button(
                             onClick = { viewModel.load() },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
                         ) {
-                            Text("Повторить")
+                            Text(stringResource(R.string.retry_btn))
                         }
                     }
                 }
@@ -147,13 +149,13 @@ private fun SellerProfileContent(
 
             Column {
                 Text(
-                    text = profile.name.ifBlank { "Мой магазин" },
+                    text = profile.name.ifBlank { stringResource(R.string.my_store) },
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    text = profile.levelTitle?.ifBlank { "Мастер" } ?: "" ,
+                    text = profile.levelTitle?.ifBlank { stringResource(R.string.master_default) } ?: "" ,
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray
                 )
@@ -163,7 +165,7 @@ private fun SellerProfileContent(
         Spacer(Modifier.height(32.dp))
 
         Text(
-            text = "МОЯ СТАТИСТИКА",
+            text = stringResource(R.string.my_stats),
             style = MaterialTheme.typography.labelLarge,
             color = Color.Gray,
             modifier = Modifier.padding(start = 8.dp, bottom = 12.dp)
@@ -177,7 +179,7 @@ private fun SellerProfileContent(
         Spacer(Modifier.height(32.dp))
 
         Text(
-            text = "УПРАВЛЕНИЕ",
+            text = stringResource(R.string.management),
             style = MaterialTheme.typography.labelLarge,
             color = Color.Gray,
             modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
@@ -186,24 +188,24 @@ private fun SellerProfileContent(
         ProfileSectionCard {
             SellerMenuItem(
                 icon = Icons.Outlined.Settings,
-                title = "Настройки магазина",
-                subtitle = "Название, описание, логотип",
+                title = stringResource(R.string.store_settings),
+                subtitle = stringResource(R.string.store_settings_subtitle),
                 iconColor = Color(0xFF5C6BC0),
                 onClick = onOpenStoreSettings
             )
             MenuDivider()
             SellerMenuItem(
                 icon = Icons.Outlined.LocalShipping,
-                title = "Доставка",
-                subtitle = "Самовывоз, курьер, почта",
+                title = stringResource(R.string.delivery_title),
+                subtitle = stringResource(R.string.delivery_settings_subtitle),
                 iconColor = Color(0xFF66BB6A),
                 onClick = onOpenDelivery
             )
             MenuDivider()
             SellerMenuItem(
                 icon = Icons.Outlined.Analytics,
-                title = "Аналитика продаж",
-                subtitle = "Статистика за месяц",
+                title = stringResource(R.string.sales_analytics),
+                subtitle = stringResource(R.string.sales_analytics_subtitle),
                 iconColor = Color(0xFF26A69A),
                 onClick = onOpenAnalytics
             )
@@ -222,7 +224,7 @@ private fun SellerProfileContent(
         ) {
             Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(20.dp))
             Spacer(Modifier.width(8.dp))
-            Text("Выйти из системы", fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.logout_system), fontWeight = FontWeight.Bold)
         }
 
         Spacer(Modifier.height(16.dp))
@@ -267,7 +269,7 @@ private fun SellerStatsRow(
                     color = Color(0xFF2D2D2D)
                 )
                 Text(
-                    text = "Рейтинг",
+                    text = stringResource(R.string.rating),
                     fontSize = 12.sp,
                     color = Color.Gray,
                     fontWeight = FontWeight.Medium
@@ -295,14 +297,14 @@ private fun SellerStatsRow(
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = profile.levelTitle?.ifBlank { "Мастер" } ?: "",
+                    text = profile.levelTitle?.ifBlank { stringResource(R.string.master_default) } ?: "",
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 20.sp,
                     color = Color(0xFF2D2D2D),
                     maxLines = 1
                 )
                 Text(
-                    text = "Уровень",
+                    text = stringResource(R.string.level),
                     fontSize = 12.sp,
                     color = Color.Gray,
                     fontWeight = FontWeight.Medium
@@ -393,13 +395,13 @@ private fun ReturnToBuyerCard(onClick: () -> Unit) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    "Вернуться в покупки",
+                    stringResource(R.string.return_to_shopping),
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
                 Text(
-                    "Перейти в профиль покупателя",
+                    stringResource(R.string.go_buyer_profile),
                     color = Color.White.copy(0.8f),
                     fontSize = 13.sp
                 )

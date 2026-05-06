@@ -1,5 +1,6 @@
 package com.example.ozmade.main.userHome.details
 
+import com.example.ozmade.R
 import android.content.Intent
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
@@ -46,10 +47,10 @@ fun ProductDetailsRoute(
                     val shareLink = "https://ozmade-applink.vercel.app/products/${p.id}"
                     val shareIntent = Intent().apply {
                         action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TEXT, "Посмотрите этот товар на OzMade: $shareLink")
+                        putExtra(Intent.EXTRA_TEXT, context.getString(R.string.share_product_text, shareLink))
                         type = "text/plain"
                     }
-                    context.startActivity(Intent.createChooser(shareIntent, "Поделиться товаром"))
+                    context.startActivity(Intent.createChooser(shareIntent, context.getString(R.string.share_product_chooser)))
                 },
                 onChat = {
                     onChat(

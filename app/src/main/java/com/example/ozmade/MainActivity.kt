@@ -36,8 +36,8 @@ class MainActivity : ComponentActivity() {
     private val chatId = mutableStateOf(0)
     private val sellerId = mutableStateOf(0)
     private val productId = mutableStateOf(0)
-    private val sellerName = mutableStateOf("Продавец")
-    private val productTitle = mutableStateOf("Товар")
+    private val sellerName = mutableStateOf("")
+    private val productTitle = mutableStateOf("")
     private val price = mutableStateOf(0)
     private val deepLinkProductId = mutableStateOf(0)
     private val deepLinkChatId = mutableStateOf(0)
@@ -100,8 +100,8 @@ class MainActivity : ComponentActivity() {
         productId.value = intent?.getIntExtra("productId", 0) ?: 0 // Fixed casing just in case
         if (productId.value == 0) productId.value = intent?.getIntExtra("product_id", 0) ?: 0
         
-        sellerName.value = intent?.getStringExtra("seller_name") ?: "Продавец"
-        productTitle.value = intent?.getStringExtra("product_title") ?: "Товар"
+        sellerName.value = intent?.getStringExtra("seller_name").orEmpty()
+        productTitle.value = intent?.getStringExtra("product_title").orEmpty()
         price.value = intent?.getIntExtra("price", 0) ?: 0
 
         openOrderHistory.value = intent?.getBooleanExtra("open_order_history", false) ?: false

@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -24,13 +26,13 @@ import com.example.ozmade.main.seller.analytics.SellerAnalyticsScreen
 
 private sealed class SellerBottomItem(
     val route: String,
-    val label: String,
+    val labelRes: Int,
     val icon: @Composable () -> Unit
 ) {
-    object Products : SellerBottomItem("seller_products_tab", "Товары", { Icon(Icons.Default.CheckCircle, null) })
-    object Orders : SellerBottomItem("seller_orders_tab", "Заказы", { Icon(Icons.Default.ShoppingCart, null) })
-    object Chat : SellerBottomItem("seller_chat_tab", "Чат", { Icon(Icons.Default.Email, null) })
-    object Profile : SellerBottomItem("seller_profile_tab", "Профиль", { Icon(Icons.Default.Person, null) })
+    object Products : SellerBottomItem("seller_products_tab", R.string.seller_nav_products, { Icon(Icons.Default.CheckCircle, null) })
+    object Orders : SellerBottomItem("seller_orders_tab", R.string.seller_nav_orders, { Icon(Icons.Default.ShoppingCart, null) })
+    object Chat : SellerBottomItem("seller_chat_tab", R.string.seller_nav_chat, { Icon(Icons.Default.Email, null) })
+    object Profile : SellerBottomItem("seller_profile_tab", R.string.seller_nav_profile, { Icon(Icons.Default.Person, null) })
 }
 
 private object SellerRoutes {
@@ -94,7 +96,7 @@ fun SellerMainScreen(
                                 }
                             },
                             icon = item.icon,
-                            label = { Text(item.label) }
+                            label = { Text(stringResource(item.labelRes)) }
                         )
                     }
                 }
@@ -146,7 +148,7 @@ fun SellerMainScreen(
             }
             composable("${SellerRoutes.CHAT_THREAD}/{chatId}/{buyerName}?buyerPhotoUrl={buyerPhotoUrl}") { backStack ->
                 val chatId = backStack.arguments?.getString("chatId")?.toIntOrNull() ?: return@composable
-                val buyerName = backStack.arguments?.getString("buyerName") ?: "Покупатель"
+                val buyerName = backStack.arguments?.getString("buyerName") ?: stringResource(R.string.buyer_default)
                 val buyerPhotoUrl = backStack.arguments?.getString("buyerPhotoUrl")
 
                 com.example.ozmade.main.seller.chat.SellerChatThreadRoute(

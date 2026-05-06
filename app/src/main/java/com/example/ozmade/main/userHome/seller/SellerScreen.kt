@@ -1,5 +1,7 @@
 package com.example.ozmade.main.userHome.seller
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,7 +45,7 @@ fun SellerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Продавец", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
+                title = { Text(stringResource(R.string.seller_title), style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = null)
@@ -74,7 +76,7 @@ fun SellerScreen(
                     Text(uiState.message, color = MaterialTheme.colorScheme.error, textAlign = TextAlign.Center)
                     Spacer(Modifier.height(16.dp))
                     Button(onClick = onRetry, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp)) {
-                        Text("Повторить")
+                        Text(stringResource(R.string.retry_btn))
                     }
                 }
             }
@@ -122,7 +124,7 @@ fun SellerScreen(
                                 onSearchChanged(it)
                             },
                             modifier = Modifier.fillMaxWidth(),
-                            placeholder = { Text("Поиск в магазине") },
+                            placeholder = { Text(stringResource(R.string.seller_search_store)) },
                             singleLine = true,
                             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null, tint = Color(0xFFFF9800)) },
                             shape = RoundedCornerShape(16.dp),
@@ -213,7 +215,7 @@ private fun SellerHeaderBlock(
             // Если отображаем название магазина, можно показать имя мастера ниже
             if (displayName != seller.name && seller.name.isNotBlank()) {
                 Text(
-                    text = "Мастер: ${seller.name}",
+                    text = stringResource(R.string.seller_master_value, seller.name),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -223,9 +225,9 @@ private fun SellerHeaderBlock(
 
             // Статус
             val (levelTitle, statusColor) = when (seller.levelTitle?.lowercase()) {
-                "pending" -> "Проверяется" to Color(0xFFFF9800)
-                "active" -> "Активен" to Color(0xFF4CAF50)
-                else -> (if (seller.levelTitle?.isBlank() ?: true) "Новый мастер" else seller.levelTitle) to Color(0xFF607D8B)
+                "pending" -> stringResource(R.string.seller_status_pending) to Color(0xFFFF9800)
+                "active" -> stringResource(R.string.seller_status_active) to Color(0xFF4CAF50)
+                else -> (if (seller.levelTitle?.isBlank() ?: true) stringResource(R.string.level_new_master) else seller.levelTitle) to Color(0xFF607D8B)
             }
 
             Surface(
@@ -247,20 +249,20 @@ private fun SellerHeaderBlock(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                StatItem(value = "${seller.ordersCount}", label = "заказов", modifier = Modifier.weight(1f))
+                StatItem(value = "${seller.ordersCount}", label = stringResource(R.string.orders_label), modifier = Modifier.weight(1f))
                 
                 Box(Modifier.width(1.dp).height(30.dp).background(Color.LightGray.copy(0.5f)))
                 
                 StatItem(
                     value = formatRating(seller.rating),
-                    label = "рейтинг",
+                    label = stringResource(R.string.rating_label),
                     modifier = Modifier.weight(1f).clickable { onOpenReviews() },
                     isHighlight = true
                 )
 
                 Box(Modifier.width(1.dp).height(30.dp).background(Color.LightGray.copy(0.5f)))
 
-                StatItem(value = "${seller.daysWithOzMade}", label = "дней", modifier = Modifier.weight(1f))
+                StatItem(value = "${seller.daysWithOzMade}", label = stringResource(R.string.days_count_label), modifier = Modifier.weight(1f))
             }
 
             if (!seller.city.isNullOrBlank()) {
@@ -345,7 +347,7 @@ private fun SellerProductCard(
                     if (product.ordersCount > 0) {
                         Spacer(Modifier.weight(1f))
                         Text(
-                            text = "${product.ordersCount} зак.",
+                            text = stringResource(R.string.orders_short, product.ordersCount),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.Gray
                         )

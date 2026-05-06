@@ -1,5 +1,7 @@
 package com.example.ozmade.main.seller.chat
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -42,7 +44,7 @@ fun SellerChatScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        "Сообщения", 
+                        stringResource(R.string.seller_chat_messages), 
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.ExtraBold)
                     ) 
                 },
@@ -72,7 +74,7 @@ fun SellerChatScreen(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Поиск покупателя...", color = Color.Gray) },
+                    placeholder = { Text(stringResource(R.string.search_buyer), color = Color.Gray) },
                     leadingIcon = { Icon(Icons.Default.Search, null, tint = Color.Gray) },
                     singleLine = true,
                     colors = TextFieldDefaults.colors(
@@ -104,7 +106,7 @@ fun SellerChatScreen(
                         Button(
                             onClick = { viewModel.load() },
                             shape = RoundedCornerShape(12.dp)
-                        ) { Text("Повторить") }
+                        ) { Text(stringResource(R.string.retry_btn)) }
                     }
                 }
                 is SellerChatListUiState.Data -> {
@@ -265,14 +267,14 @@ private fun EmptyChatsPlaceholder(isSearching: Boolean) {
         }
         Spacer(Modifier.height(24.dp))
         Text(
-            text = if (isSearching) "Ничего не найдено" else "У вас пока нет активных чатов",
+            text = if (isSearching) stringResource(R.string.nothing_found) else stringResource(R.string.seller_chat_empty),
             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = if (isSearching) "Попробуйте изменить поисковый запрос" else "Все сообщения от покупателей будут отображаться здесь",
+            text = if (isSearching) stringResource(R.string.search_change_query) else stringResource(R.string.seller_chat_empty_desc),
             style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray,
             textAlign = TextAlign.Center

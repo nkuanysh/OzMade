@@ -1,5 +1,6 @@
 package com.example.ozmade.main.user.profile.about
 
+import androidx.compose.ui.res.stringResource
 import android.view.ViewGroup
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -40,7 +41,7 @@ fun AboutAppScreen(
     onBack: () -> Unit
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Инфо", "FAQ", "Документация")
+    val tabs = listOf(stringResource(R.string.about_tab_info), stringResource(R.string.about_tab_faq), stringResource(R.string.about_tab_docs))
     val orangeColor = Color(0xFFFF9800)
 
     Scaffold(
@@ -48,13 +49,13 @@ fun AboutAppScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "О приложении",
+                        stringResource(R.string.about_title),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_desc))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -144,7 +145,7 @@ private fun InfoTab() {
         )
 
         Text(
-            text = "Версия 1.0.0",
+            text = stringResource(R.string.app_version),
             style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray)
         )
 
@@ -157,7 +158,7 @@ private fun InfoTab() {
             elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
             Text(
-                text = "OZmade — это современный маркетплейс, объединяющий локальных производителей и покупателей. Наша миссия — поддерживать уникальное творчество и делать качественные товары доступными для каждого.",
+                text = stringResource(R.string.about_app_desc),
                 style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(20.dp)
@@ -176,10 +177,10 @@ private fun InfoTab() {
 @Composable
 private fun FaqTab() {
     val faqs = listOf(
-        "Как работает доставка?" to "Доставка осуществляется курьерскими службами или самовывозом по согласованию с продавцом.",
-        "Безопасна ли оплата?" to "Мы используем современные протоколы шифрования. Ваши данные под надежной защитой.",
-        "Как вернуть товар?" to "Условия возврата зависят от конкретного продавца, ознакомиться с ними можно в профиле магазина.",
-        "Как стать продавцом?" to "Перейдите в профиль и нажмите кнопку «Стать продавцом», заполните анкету и дождитесь модерации."
+        stringResource(R.string.about_delivery_q) to stringResource(R.string.about_delivery_a),
+        stringResource(R.string.about_payment_q) to stringResource(R.string.about_payment_a),
+        stringResource(R.string.about_return_q) to stringResource(R.string.about_return_a),
+        stringResource(R.string.about_seller_q) to stringResource(R.string.about_seller_a)
     )
 
     LazyColumn(

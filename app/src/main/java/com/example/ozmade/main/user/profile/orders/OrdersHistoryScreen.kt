@@ -1,5 +1,7 @@
 package com.example.ozmade.main.user.profile.orders
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,13 +35,13 @@ fun OrdersHistoryScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "История заказов",
+                        stringResource(R.string.profile_order_history),
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_desc))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -67,7 +69,7 @@ fun OrdersHistoryScreen(
                         onClick = { viewModel.load() },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF9800))
                     ) {
-                        Text("Повторить")
+                        Text(stringResource(R.string.retry_btn))
                     }
                 }
             }
@@ -106,7 +108,7 @@ private fun EmptyOrdersView(padding: PaddingValues) {
             )
             Spacer(Modifier.height(16.dp))
             Text(
-                text = "Заказов пока нет",
+                text = stringResource(R.string.order_history_empty_title),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = Color.Gray,
                     fontWeight = FontWeight.Medium
@@ -114,7 +116,7 @@ private fun EmptyOrdersView(padding: PaddingValues) {
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "Ваши покупки будут отображаться здесь",
+                text = stringResource(R.string.order_history_empty_desc),
                 style = MaterialTheme.typography.bodySmall.copy(color = Color.LightGray),
                 modifier = Modifier.padding(horizontal = 32.dp)
             )

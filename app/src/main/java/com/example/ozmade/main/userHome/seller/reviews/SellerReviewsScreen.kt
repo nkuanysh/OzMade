@@ -1,5 +1,7 @@
 package com.example.ozmade.main.userHome.seller.reviews
 
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,8 +36,8 @@ fun SellerReviewsScreen(
             TopAppBar(
                 title = {
                     val title = when (uiState) {
-                        is SellerReviewsUiState.Data -> "Отзывы о продавце (${uiState.header.reviewsCount})"
-                        else -> "Отзывы о продавце"
+                        is SellerReviewsUiState.Data -> stringResource(R.string.seller_reviews_count_title, uiState.header.reviewsCount)
+                        else -> stringResource(R.string.seller_reviews_title)
                     }
                     Text(
                         text = title,
@@ -88,7 +90,7 @@ fun SellerReviewsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text("Повторить")
+                        Text(stringResource(R.string.retry_btn))
                     }
                 }
             }
@@ -159,7 +161,7 @@ private fun SellerReviewsHeader(header: SellerReviewsHeaderUi) {
                 StarsRow(rating = header.averageRating, size = 18.dp)
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "${header.ratingsCount} оценок",
+                    text = stringResource(R.string.ratings_count_label, header.ratingsCount),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -259,7 +261,7 @@ private fun SellerReviewCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Товар: ",
+                    text = stringResource(R.string.product_label_prefix),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

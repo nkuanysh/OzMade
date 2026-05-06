@@ -28,14 +28,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.ozmade.R
+import androidx.compose.ui.res.stringResource
 
 private val categoryOptions = listOf(
-    "Еда",
-    "Одежда",
-    "Искусство",
-    "Ремесло",
-    "Подарки",
-    "Для дома"
+    R.string.category_food,
+    R.string.category_clothes,
+    R.string.category_art,
+    R.string.category_crafts,
+    R.string.category_gifts,
+    R.string.category_home
 )
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -64,10 +66,10 @@ fun SellerStoreSettingsScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Настройки магазина", fontWeight = FontWeight.ExtraBold) },
+                title = { Text(stringResource(R.string.seller_settings_title), fontWeight = FontWeight.ExtraBold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back_desc))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.White)
@@ -122,14 +124,14 @@ fun SellerStoreSettingsScreen(
                 if (imageSource != null) {
                     AsyncImage(
                         model = imageSource,
-                        contentDescription = "Photo",
+                        contentDescription = stringResource(R.string.store_photo_title),
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
                     )
                 } else {
                     Icon(
                         Icons.Default.AddAPhoto,
-                        contentDescription = "Add Photo",
+                        contentDescription = stringResource(R.string.store_photo_title),
                         tint = orangeAccent,
                         modifier = Modifier.size(32.dp)
                     )
@@ -150,7 +152,7 @@ fun SellerStoreSettingsScreen(
             }
             
             Text(
-                "Фото магазина",
+                stringResource(R.string.store_photo_title),
                 modifier = Modifier.padding(top = 12.dp),
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray
@@ -159,12 +161,12 @@ fun SellerStoreSettingsScreen(
             Spacer(Modifier.height(32.dp))
 
             // --- Блок 1: Личные данные ---
-            SettingsSection(title = "Личные данные") {
+            SettingsSection(title = stringResource(R.string.personal_data)) {
                 SettingsTextField(
                     value = uiState.firstName,
                     onValueChange = viewModel::onFirstNameChange,
-                    label = "Имя",
-                    placeholder = "Введите имя",
+                    label = stringResource(R.string.first_name),
+                    placeholder = stringResource(R.string.enter_first_name),
                     orangeAccent = orangeAccent,
                     readOnly = true
                 )
@@ -172,8 +174,8 @@ fun SellerStoreSettingsScreen(
                 SettingsTextField(
                     value = uiState.lastName,
                     onValueChange = viewModel::onLastNameChange,
-                    label = "Фамилия",
-                    placeholder = "Введите фамилию",
+                    label = stringResource(R.string.last_name),
+                    placeholder = stringResource(R.string.enter_last_name),
                     orangeAccent = orangeAccent,
                     readOnly = true
                 )
@@ -182,20 +184,20 @@ fun SellerStoreSettingsScreen(
             Spacer(Modifier.height(24.dp))
 
             // --- Блок 2: О магазине ---
-            SettingsSection(title = "Информация о магазине") {
+            SettingsSection(title = stringResource(R.string.store_info)) {
                 SettingsTextField(
                     value = uiState.storeName,
                     onValueChange = viewModel::onStoreNameChange,
-                    label = "Название магазина",
-                    placeholder = "Введите название",
+                    label = stringResource(R.string.store_name),
+                    placeholder = stringResource(R.string.enter_store_name),
                     orangeAccent = orangeAccent
                 )
                 Spacer(Modifier.height(16.dp))
                 SettingsTextField(
                     value = uiState.about,
                     onValueChange = viewModel::onAboutChange,
-                    label = "Описание магазина",
-                    placeholder = "Расскажите о своих товарах",
+                    label = stringResource(R.string.store_description),
+                    placeholder = stringResource(R.string.store_description_hint),
                     orangeAccent = orangeAccent,
                     singleLine = false,
                     minLines = 3
@@ -205,20 +207,20 @@ fun SellerStoreSettingsScreen(
             Spacer(Modifier.height(24.dp))
 
             // --- Блок 3: Локация ---
-            SettingsSection(title = "Местоположение") {
+            SettingsSection(title = stringResource(R.string.location_section)) {
                 SettingsTextField(
                     value = uiState.city,
                     onValueChange = viewModel::onCityChange,
-                    label = "Город",
-                    placeholder = "Напр: Алматы",
+                    label = stringResource(R.string.city),
+                    placeholder = stringResource(R.string.city_example),
                     orangeAccent = orangeAccent
                 )
                 Spacer(Modifier.height(16.dp))
                 SettingsTextField(
                     value = uiState.address,
                     onValueChange = viewModel::onAddressChange,
-                    label = "Адрес",
-                    placeholder = "Улица, дом, офис",
+                    label = stringResource(R.string.address),
+                    placeholder = stringResource(R.string.address_example),
                     orangeAccent = orangeAccent
                 )
             }
@@ -238,7 +240,7 @@ fun SellerStoreSettingsScreen(
                 if (uiState.isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White, strokeWidth = 2.dp)
                 } else {
-                    Text("Сохранить изменения", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                    Text(stringResource(R.string.save_changes), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 }
             }
             
