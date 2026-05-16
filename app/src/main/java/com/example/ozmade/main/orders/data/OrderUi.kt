@@ -30,9 +30,35 @@ data class OrderUi(
     val shippingLat: Double? = null,
     val shippingLng: Double? = null,
     val shippingComment: String? = null,
+    val intercityDelivery: IntercityDeliveryOrderUi? = null,
 
     val confirmCode: String?,
     val isReviewed: Boolean = false
+)
+
+data class IntercityDeliveryOrderUi(
+    val provider: String,
+    val price: Int,
+    val currency: String,
+    val minDays: Int,
+    val maxDays: Int,
+    val estimatedDateFrom: String,
+    val estimatedDateTo: String,
+    val fromCity: String,
+    val fromAddress: String,
+    val fromLat: Double? = null,
+    val fromLng: Double? = null,
+    val toCity: String,
+    val toAddress: String,
+    val toLat: Double? = null,
+    val toLng: Double? = null,
+    val receiverName: String,
+    val receiverPhone: String,
+    val weightGrams: Int,
+    val heightCm: Int,
+    val widthCm: Int,
+    val depthCm: Int,
+    val comment: String? = null
 )
 
 object OrderStatus {

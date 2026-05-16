@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.example.ozmade.R
+import com.example.ozmade.main.delivery.formatDeliveryDateRange
+import com.example.ozmade.main.delivery.formatDeliveryPrice
 import com.example.ozmade.utils.formatRating
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
@@ -58,6 +60,7 @@ private enum class DetailsTab { DESCRIPTION, SPECS }
 fun ProductDetailsScreen(
     product: ProductDetailsUi,
     liked: Boolean,
+    intercityEstimate: ProductIntercityEstimateUiState,
     onToggleLike: () -> Unit,
     onShare: () -> Unit,
     onChat: () -> Unit,
@@ -304,7 +307,7 @@ fun ProductDetailsScreen(
                     HorizontalDivider(Modifier.padding(vertical = 8.dp), thickness = 0.5.dp)
 
                     InfoSection(title = stringResource(R.string.delivery_title), icon = Icons.Outlined.LocalShipping) {
-                        DeliveryBlock(product.delivery)
+                        DeliveryBlock(product.delivery, intercityEstimate)
                     }
 
                     InfoSection(title = stringResource(R.string.seller_title), icon = Icons.Default.Store, iconColor = Color(0xFFFF9800)) {
@@ -548,7 +551,10 @@ private fun SpecsBlock(specs: List<Pair<String, String>>) {
 }
 
 @Composable
-private fun DeliveryBlock(delivery: DeliveryInfoUi) {
+private fun DeliveryBlock(
+    delivery: DeliveryInfoUi,
+    intercityEstimate: ProductIntercityEstimateUiState
+) {
     OutlinedCard(
         colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
@@ -590,12 +596,116 @@ private fun DeliveryBlock(delivery: DeliveryInfoUi) {
             }
 
             if (delivery.intercityEnabled) {
-                DeliveryRow(
-                    icon = Icons.Default.Public,
-                    label = stringResource(R.string.intercity_label),
-                    value = stringResource(R.string.available_label),
-                    isFree = false
+                IntercityDeliveryEstimateBlock(intercityEstimate)
+            }
+        }
+    }
+}
+
+@Composable
+private fun IntercityDeliveryEstimateBlock(state: ProductIntercityEstimateUiState) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Surface(
+                modifier = Modifier.size(38.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+            ) {
+                Icon(
+                    Icons.Default.LocalShipping,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(8.dp)
                 )
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = stringResource(R.string.intercity_label),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold
+                )
+
+                when (state) {
+                    ProductIntercityEstimateUiState.Disabled -> Unit
+                    ProductIntercityEstimateUiState.Loading -> {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = stringResource(R.string.intercity_calculating),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                    }
+                    ProductIntercityEstimateUiState.MissingBuyerAddress -> {
+                        Text(
+                            text = stringResource(R.string.intercity_need_buyer_address),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    ProductIntercityEstimateUiState.MissingSellerAddress -> {
+                        Text(
+                            text = stringResource(R.string.intercity_seller_address_missing_hint),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    ProductIntercityEstimateUiState.SameCity -> {
+                        Text(
+                            text = stringResource(R.string.intercity_same_city_hint),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    is ProductIntercityEstimateUiState.Success -> {
+                        Text(
+                            text = stringResource(
+                                R.string.intercity_estimate_date,
+                                formatDeliveryDateRange(
+                                    state.estimate.estimatedDateFrom,
+                                    state.estimate.estimatedDateTo
+                                )
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = stringResource(
+                                R.string.intercity_estimate_price_from,
+                                formatDeliveryPrice(state.estimate.price, state.estimate.currency)
+                            ),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = stringResource(R.string.intercity_provider_line),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = stringResource(R.string.intercity_checkout_exact_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    is ProductIntercityEstimateUiState.Error -> {
+                        Text(
+                            text = stringResource(R.string.intercity_available_checkout_calc),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
         }
     }

@@ -42,6 +42,7 @@ fun ProductDetailsRoute(
             ProductDetailsScreen(
                 product = p,
                 liked = state.liked,
+                intercityEstimate = state.intercityEstimate,
                 onToggleLike = { viewModel.toggleLike() },
                 onShare = {
                     val shareLink = "https://ozmade-applink.vercel.app/products/${p.id}"

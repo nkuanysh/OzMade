@@ -1,6 +1,12 @@
 package com.example.ozmade.main.userHome.details
 
 import android.util.Log
+import com.example.ozmade.main.delivery.DEFAULT_HEIGHT_CM
+import com.example.ozmade.main.delivery.DEFAULT_LENGTH_CM
+import com.example.ozmade.main.delivery.DEFAULT_WIDTH_CM
+import com.example.ozmade.main.delivery.extractCity
+import com.example.ozmade.main.delivery.parseDimensionCm
+import com.example.ozmade.main.delivery.parseWeightGrams
 import com.example.ozmade.main.user.favorites.FavoriteProductUi
 import com.example.ozmade.main.user.profile.data.ProfileRepository
 import com.example.ozmade.network.api.OzMadeApi
@@ -45,6 +51,12 @@ class RealProductRepository @Inject constructor(
         val profile = profileRepo.getMyProfile()
         val buyerLat = profile.addressLat
         val buyerLng = profile.addressLng
+        val productPackage = ProductPackageUi(
+            weightGrams = parseWeightGrams(dto.weight),
+            heightCm = parseDimensionCm(dto.heightCm, DEFAULT_HEIGHT_CM),
+            widthCm = parseDimensionCm(dto.widthCm, DEFAULT_WIDTH_CM),
+            depthCm = parseDimensionCm(dto.depthCm, DEFAULT_LENGTH_CM)
+        )
 
         val sellerIdFromDto = dto.sellerId ?: dto.seller?.id ?: 0
         val syncResp = runCatching { api.syncUser() }.getOrNull()
@@ -86,9 +98,12 @@ class RealProductRepository @Inject constructor(
             youtubeUrl = dto.youtubeUrl,
             description = dto.description,
             specs = specs,
+            packageInfo = productPackage,
             delivery = DeliveryInfoUi(
                 pickupEnabled = dto.delivery?.pickupEnabled ?: false,
                 pickupTime = dto.delivery?.pickupTime,
+                pickupLat = dto.delivery?.pickupLat,
+                pickupLng = dto.delivery?.pickupLng,
                 freeDeliveryEnabled = dto.delivery?.freeDeliveryEnabled ?: false,
                 freeDeliveryText = dto.delivery?.freeDeliveryText,
                 intercityEnabled = dto.delivery?.intercityEnabled ?: false,
@@ -100,6 +115,8 @@ class RealProductRepository @Inject constructor(
                 buyerSavedAddress = profile.address,
                 buyerSavedAddressLat = buyerLat,
                 buyerSavedAddressLng = buyerLng,
+                buyerSavedCity = extractCity(profile.address),
+                sellerPickupCity = extractCity(dto.delivery?.pickupAddress ?: dto.seller?.address ?: dto.address),
                 isBuyerInsideDeliveryZone = isInsideDeliveryZone(
                     buyerLat = buyerLat,
                     buyerLng = buyerLng,

@@ -321,6 +321,8 @@ data class DeliveryInfoDto(
     @SerializedName(value = "pickup_enabled", alternate = ["pickupEnabled"]) val pickupEnabled: Boolean,
     @SerializedName(value = "pickup_time", alternate = ["pickupTime"]) val pickupTime: String?,
     @SerializedName(value = "pickup_address", alternate = ["pickupAddress"]) val pickupAddress: String?,
+    @SerializedName(value = "pickup_lat", alternate = ["pickupLat", "pickup_address_lat"]) val pickupLat: Double? = null,
+    @SerializedName(value = "pickup_lng", alternate = ["pickupLng", "pickup_address_lng"]) val pickupLng: Double? = null,
     @SerializedName(value = "free_delivery_enabled", alternate = ["freeDeliveryEnabled"]) val freeDeliveryEnabled: Boolean,
     @SerializedName(value = "free_delivery_text", alternate = ["freeDeliveryText"]) val freeDeliveryText: String?,
     @SerializedName(value = "intercity_enabled", alternate = ["intercityEnabled"]) val intercityEnabled: Boolean,
@@ -391,8 +393,40 @@ data class OrderDto(
     @SerializedName(value = "ShippingLat", alternate = ["shipping_lat", "shippingLat"]) val shippingLat: Double? = null,
     @SerializedName(value = "ShippingLng", alternate = ["shipping_lng", "shippingLng"]) val shippingLng: Double? = null,
     @SerializedName(value = "ShippingComment", alternate = ["shipping_comment", "shippingComment"]) val shippingComment: String? = null,
+    @SerializedName(value = "IntercityDelivery", alternate = ["intercity_delivery", "intercityDelivery"]) val intercityDelivery: IntercityDeliveryOrderDto? = null,
     @SerializedName(value = "ConfirmCode", alternate = ["confirm_code", "confirmCode"]) val confirmCode: String? = null,
     @SerializedName(value = "IsReviewed", alternate = ["is_reviewed", "isReviewed"]) val isReviewed: Boolean = false
+)
+
+data class IntercityDeliveryOrderDto(
+    @SerializedName(value = "Provider", alternate = ["provider"]) val provider: String? = null,
+    @SerializedName(value = "Price", alternate = ["price"]) val price: Int? = null,
+    @SerializedName(value = "Currency", alternate = ["currency"]) val currency: String? = null,
+    @SerializedName(value = "MinDays", alternate = ["minDays", "min_days"]) val minDays: Int? = null,
+    @SerializedName(value = "MaxDays", alternate = ["maxDays", "max_days"]) val maxDays: Int? = null,
+    @SerializedName(value = "EstimatedDateFrom", alternate = ["estimatedDateFrom", "estimated_date_from"]) val estimatedDateFrom: String? = null,
+    @SerializedName(value = "EstimatedDateTo", alternate = ["estimatedDateTo", "estimated_date_to"]) val estimatedDateTo: String? = null,
+    @SerializedName(value = "FromAddress", alternate = ["fromAddress", "from_address"]) val fromAddress: DeliveryAddressDto? = null,
+    @SerializedName(value = "ToAddress", alternate = ["toAddress", "to_address"]) val toAddress: DeliveryAddressDto? = null,
+    @SerializedName(value = "Package", alternate = ["package", "packageInfo", "package_info"]) val packageInfo: DeliveryPackageDto? = null,
+    @SerializedName(value = "ReceiverName", alternate = ["receiverName", "receiver_name"]) val receiverName: String? = null,
+    @SerializedName(value = "ReceiverPhone", alternate = ["receiverPhone", "receiver_phone"]) val receiverPhone: String? = null,
+    @SerializedName(value = "ReceiverAddress", alternate = ["receiverAddress", "receiver_address"]) val receiverAddress: String? = null,
+    @SerializedName(value = "Comment", alternate = ["comment"]) val comment: String? = null
+)
+
+data class DeliveryAddressDto(
+    @SerializedName(value = "City", alternate = ["city"]) val city: String? = null,
+    @SerializedName(value = "FullAddress", alternate = ["fullAddress", "full_address"]) val fullAddress: String? = null,
+    @SerializedName(value = "Latitude", alternate = ["latitude", "lat"]) val latitude: Double? = null,
+    @SerializedName(value = "Longitude", alternate = ["longitude", "lng"]) val longitude: Double? = null
+)
+
+data class DeliveryPackageDto(
+    @SerializedName(value = "WeightGrams", alternate = ["weightGrams", "weight_grams"]) val weightGrams: Int? = null,
+    @SerializedName(value = "HeightCm", alternate = ["heightCm", "height_cm"]) val heightCm: Int? = null,
+    @SerializedName(value = "WidthCm", alternate = ["widthCm", "width_cm"]) val widthCm: Int? = null,
+    @SerializedName(value = "DepthCm", alternate = ["depthCm", "depth_cm", "lengthCm", "length_cm"]) val depthCm: Int? = null
 )
 
 data class NotificationDto(

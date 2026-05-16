@@ -62,7 +62,45 @@ data class CreateOrderRequest(
     @SerializedName("shipping_address_text") val shippingAddressText: String? = null,
     @SerializedName("shipping_lat") val shippingLat: Double? = null,
     @SerializedName("shipping_lng") val shippingLng: Double? = null,
-    @SerializedName("shipping_comment") val shippingComment: String? = null
+    @SerializedName("shipping_comment") val shippingComment: String? = null,
+    @SerializedName("intercity_delivery") val intercityDelivery: IntercityDeliveryOrderRequest? = null
+)
+
+data class DeliveryAddressRequest(
+    @SerializedName("city") val city: String,
+    @SerializedName("fullAddress") val fullAddress: String,
+    @SerializedName("latitude") val latitude: Double? = null,
+    @SerializedName("longitude") val longitude: Double? = null
+)
+
+data class DeliveryPackageRequest(
+    @SerializedName("weightGrams") val weightGrams: Int,
+    @SerializedName("heightCm") val heightCm: Int,
+    @SerializedName("widthCm") val widthCm: Int,
+    @SerializedName("depthCm") val depthCm: Int
+)
+
+data class IntercityDeliveryEstimateRequest(
+    @SerializedName("fromAddress") val fromAddress: DeliveryAddressRequest,
+    @SerializedName("toAddress") val toAddress: DeliveryAddressRequest,
+    @SerializedName("package") val packageInfo: DeliveryPackageRequest
+)
+
+data class IntercityDeliveryOrderRequest(
+    @SerializedName("provider") val provider: String,
+    @SerializedName("price") val price: Int,
+    @SerializedName("currency") val currency: String,
+    @SerializedName("minDays") val minDays: Int,
+    @SerializedName("maxDays") val maxDays: Int,
+    @SerializedName("estimatedDateFrom") val estimatedDateFrom: String,
+    @SerializedName("estimatedDateTo") val estimatedDateTo: String,
+    @SerializedName("fromAddress") val fromAddress: DeliveryAddressRequest,
+    @SerializedName("toAddress") val toAddress: DeliveryAddressRequest,
+    @SerializedName("package") val packageInfo: DeliveryPackageRequest,
+    @SerializedName("receiverName") val receiverName: String,
+    @SerializedName("receiverPhone") val receiverPhone: String,
+    @SerializedName("receiverAddress") val receiverAddress: String,
+    @SerializedName("comment") val comment: String? = null
 )
 
 data class CompleteOrderRequest(

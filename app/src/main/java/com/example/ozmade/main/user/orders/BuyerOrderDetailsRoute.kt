@@ -37,6 +37,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
+import com.example.ozmade.main.delivery.formatDeliveryDateRange
+import com.example.ozmade.main.delivery.formatDeliveryPrice
 import com.example.ozmade.main.orders.data.DeliveryType
 import com.example.ozmade.main.orders.data.OrderStatus
 import com.example.ozmade.main.orders.data.deliveryTitle
@@ -206,7 +208,25 @@ fun BuyerOrderDetailsRoute(
                             InfoRow(stringResource(R.string.shipping_address), order.shippingAddressText ?: stringResource(R.string.dash))
                         }
                         DeliveryType.INTERCITY -> {
-                            InfoRow(stringResource(R.string.intercity_address), order.shippingAddressText ?: stringResource(R.string.dash))
+                            val intercity = order.intercityDelivery
+                            if (intercity != null) {
+                                InfoRow("Служба", intercity.provider)
+                                InfoRow("Маршрут", stringResource(R.string.intercity_route, intercity.fromCity, intercity.toCity))
+                                InfoRow(
+                                    stringResource(R.string.intercity_address),
+                                    intercity.toAddress.ifBlank { order.shippingAddressText ?: stringResource(R.string.dash) }
+                                )
+                                InfoRow("Примерная стоимость", formatDeliveryPrice(intercity.price, intercity.currency))
+                                InfoRow("Срок", "${intercity.minDays}–${intercity.maxDays} дня")
+                                if (intercity.estimatedDateFrom.isNotBlank() && intercity.estimatedDateTo.isNotBlank()) {
+                                    InfoRow(
+                                        "Ожидаемая дата",
+                                        formatDeliveryDateRange(intercity.estimatedDateFrom, intercity.estimatedDateTo)
+                                    )
+                                }
+                            } else {
+                                InfoRow(stringResource(R.string.intercity_address), order.shippingAddressText ?: stringResource(R.string.dash))
+                            }
                         }
                     }
                 }

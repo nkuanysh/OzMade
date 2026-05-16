@@ -1,6 +1,7 @@
 package com.example.ozmade.main.user.orders.data
 
 import com.example.ozmade.main.orders.data.OrderUi
+import com.example.ozmade.main.orders.data.toOrderUi
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.utils.ImageUtils
 import kotlinx.coroutines.Dispatchers
@@ -45,6 +46,7 @@ class RealBuyerOrdersRepository @Inject constructor(
                 shippingLat = dto.shippingLat,
                 shippingLng = dto.shippingLng,
                 shippingComment = dto.shippingComment,
+                intercityDelivery = dto.intercityDelivery.toOrderUi(),
 
                 confirmCode = dto.confirmCode,
                 isReviewed = dto.isReviewed

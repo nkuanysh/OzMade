@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.ozmade.main.delivery.formatDeliveryDateRange
+import com.example.ozmade.main.delivery.formatDeliveryPrice
 import com.example.ozmade.main.orders.data.DeliveryType
 import com.example.ozmade.main.orders.data.OrderStatus
 import com.example.ozmade.main.orders.data.deliveryTitle
@@ -168,7 +170,39 @@ fun SellerOrderDetailsRoute(
                         order.shippingAddressText?.let { InfoRow(stringResource(R.string.shipping_address), it) }
                     }
                     DeliveryType.INTERCITY -> {
-                        order.shippingAddressText?.let { InfoRow(stringResource(R.string.intercity_address), it) }
+                        val intercity = order.intercityDelivery
+                        if (intercity != null) {
+                            InfoRow("Служба", intercity.provider)
+                            InfoRow("Откуда", "${intercity.fromCity}, ${intercity.fromAddress}".trim().trim(','))
+                            InfoRow("Куда", "${intercity.toCity}, ${intercity.toAddress}".trim().trim(','))
+                            InfoRow("Получатель", intercity.receiverName.ifBlank { stringResource(R.string.dash) })
+                            InfoRow("Телефон", intercity.receiverPhone.ifBlank { stringResource(R.string.dash) })
+                            InfoRow(
+                                "Вес",
+                                stringResource(R.string.package_weight_value, formatWeightKg(intercity.weightGrams))
+                            )
+                            InfoRow(
+                                "Размеры",
+                                stringResource(
+                                    R.string.package_dimensions_value,
+                                    intercity.heightCm,
+                                    intercity.widthCm,
+                                    intercity.depthCm
+                                )
+                            )
+                            InfoRow("Примерная стоимость", formatDeliveryPrice(intercity.price, intercity.currency))
+                            InfoRow("Срок", "${intercity.minDays}–${intercity.maxDays} дня")
+                            if (intercity.estimatedDateFrom.isNotBlank() && intercity.estimatedDateTo.isNotBlank()) {
+                                InfoRow(
+                                    "Ожидаемая дата",
+                                    formatDeliveryDateRange(intercity.estimatedDateFrom, intercity.estimatedDateTo)
+                                )
+                            }
+                            InfoNote(stringResource(R.string.real_delivery_outside_platform_note))
+                        } else {
+                            order.shippingAddressText?.let { InfoRow(stringResource(R.string.intercity_address), it) }
+                            InfoNote(stringResource(R.string.real_delivery_outside_platform_note))
+                        }
                     }
                 }
             }
@@ -252,6 +286,29 @@ private fun InfoRow(label: String, value: String) {
         Text(label, style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
         Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, textAlign = TextAlign.End, modifier = Modifier.weight(1f).padding(start = 16.dp))
     }
+}
+
+@Composable
+private fun InfoNote(text: String) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 10.dp),
+        shape = RoundedCornerShape(12.dp),
+        color = Color(0xFFFFF3E0)
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(12.dp),
+            style = MaterialTheme.typography.bodySmall,
+            color = Color(0xFF8D5A00)
+        )
+    }
+}
+
+private fun formatWeightKg(weightGrams: Int): String {
+    val kg = weightGrams / 1000.0
+    return if (kg % 1.0 == 0.0) kg.toInt().toString() else String.format(java.util.Locale.US, "%.1f", kg)
 }
 
 @Composable

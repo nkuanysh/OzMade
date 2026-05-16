@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material.icons.filled.TouchApp
@@ -37,9 +38,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ozmade.main.delivery.extractCity
+import com.example.ozmade.main.delivery.formatDeliveryDateRange
+import com.example.ozmade.main.delivery.formatDeliveryPrice
 import com.example.ozmade.main.orders.data.DeliveryType
 import com.example.ozmade.main.user.orderflow.data.DeliveryChooseViewModel2
 import com.example.ozmade.main.userHome.details.ProductDetailsUi
+import com.example.ozmade.network.model.DeliveryAddressRequest
+import com.example.ozmade.network.model.DeliveryPackageRequest
+import com.example.ozmade.network.model.IntercityDeliveryOrderRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -118,9 +125,13 @@ fun DeliveryChooseRoute2(
                     modifier = Modifier.padding(padding),
                     product = st.product,
                     quantity = quantity,
+                    buyerName = st.buyerName,
+                    buyerPhone = st.buyerPhone,
                     saving = st.saving,
                     error = st.actionError,
-                    onCreate = { deliveryType, address, lat, lng, comment ->
+                    intercityEstimate = st.intercityEstimate,
+                    onEstimateIntercity = viewModel::estimateIntercityDelivery,
+                    onCreate = { deliveryType, address, lat, lng, comment, intercityDelivery ->
                         viewModel.createOrder(
                             productId = productId,
                             quantity = quantity,
@@ -129,6 +140,7 @@ fun DeliveryChooseRoute2(
                             shippingLat = lat,
                             shippingLng = lng,
                             shippingComment = comment,
+                            intercityDelivery = intercityDelivery,
                             onSuccess = onCreated
                         )
                     }
@@ -143,9 +155,13 @@ private fun DeliveryChooseContent(
     modifier: Modifier = Modifier,
     product: ProductDetailsUi,
     quantity: Int,
+    buyerName: String,
+    buyerPhone: String,
     saving: Boolean,
     error: String?,
-    onCreate: (String, String?, Double?, Double?, String?) -> Unit
+    intercityEstimate: DeliveryChooseViewModel2.IntercityEstimateState,
+    onEstimateIntercity: (String?) -> Unit,
+    onCreate: (String, String?, Double?, Double?, String?, IntercityDeliveryOrderRequest?) -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -155,13 +171,15 @@ private fun DeliveryChooseContent(
     var shippingLat by remember { mutableStateOf<Double?>(null) }
     var shippingLng by remember { mutableStateOf<Double?>(null) }
     var shippingComment by remember { mutableStateOf("") }
+    var receiverName by remember(buyerName) { mutableStateOf(buyerName) }
+    var receiverPhone by remember(buyerPhone) { mutableStateOf(buyerPhone) }
     var isFullScreenMapOpen by remember { mutableStateOf(false) }
     var localValidationError by remember { mutableStateOf<String?>(null) }
     val total = product.price * quantity
     val d = product.delivery
     LaunchedEffect(d.buyerSavedAddress, d.buyerSavedAddressLat, d.buyerSavedAddressLng, selected) {
         if (
-            selected == DeliveryType.MY_DELIVERY &&
+            (selected == DeliveryType.MY_DELIVERY || selected == DeliveryType.INTERCITY) &&
             shippingAddressText.isBlank() &&
             shippingLat == null &&
             shippingLng == null &&
@@ -172,6 +190,12 @@ private fun DeliveryChooseContent(
             shippingAddressText = d.buyerSavedAddress
             shippingLat = d.buyerSavedAddressLat
             shippingLng = d.buyerSavedAddressLng
+        }
+    }
+
+    LaunchedEffect(selected, shippingAddressText) {
+        if (selected == DeliveryType.INTERCITY) {
+            onEstimateIntercity(shippingAddressText)
         }
     }
     val sellerZoneAddress = d.centerAddress?.trim().orEmpty()
@@ -349,18 +373,111 @@ private fun DeliveryChooseContent(
                 title = stringResource(R.string.delivery_type_intercity),
                 subtitle = stringResource(R.string.delivery_transport_companies),
                 selected = selected == DeliveryType.INTERCITY,
-                onClick = { selected = DeliveryType.INTERCITY }
+                onClick = {
+                    selected = DeliveryType.INTERCITY
+                    if (
+                        shippingAddressText.isBlank() &&
+                        shippingLat == null &&
+                        shippingLng == null &&
+                        !d.buyerSavedAddress.isNullOrBlank()
+                    ) {
+                        shippingAddressText = d.buyerSavedAddress
+                        shippingLat = d.buyerSavedAddressLat
+                        shippingLng = d.buyerSavedAddressLng
+                    }
+                }
             )
 
             AnimatedVisibility(visible = selected == DeliveryType.INTERCITY) {
-                Column(Modifier.padding(top = 8.dp)) {
+                Column(
+                    modifier = Modifier.padding(top = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    InfoSurface(
+                        text = stringResource(
+                            R.string.ship_from_city,
+                            d.sellerPickupCity ?: product.seller.address.ifBlank { stringResource(R.string.no_address) }
+                        ),
+                        isWarning = d.sellerPickupCity.isNullOrBlank()
+                    )
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(14.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                        color = MaterialTheme.colorScheme.surface
+                    ) {
+                        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(
+                                stringResource(R.string.delivery_address_title),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                extractCity(shippingAddressText) ?: stringResource(R.string.no_address),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                shippingAddressText.ifBlank { stringResource(R.string.intercity_no_buyer_address) },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            OutlinedButton(
+                                onClick = { isFullScreenMapOpen = true },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(14.dp)
+                            ) {
+                                Icon(Icons.Default.OpenInFull, contentDescription = null)
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    if (shippingAddressText.isBlank()) {
+                                        stringResource(R.string.choose_address_on_map)
+                                    } else {
+                                        stringResource(R.string.change_address)
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                     OutlinedTextField(
                         value = shippingAddressText,
-                        onValueChange = { shippingAddressText = it },
+                        onValueChange = {
+                            shippingAddressText = it
+                            shippingLat = null
+                            shippingLng = null
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text(stringResource(R.string.full_address_hint)) },
                         minLines = 2
                     )
+
+                    OutlinedTextField(
+                        value = receiverName,
+                        onValueChange = { receiverName = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(R.string.receiver_name)) },
+                        singleLine = true
+                    )
+
+                    OutlinedTextField(
+                        value = receiverPhone,
+                        onValueChange = { receiverPhone = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(R.string.receiver_phone)) },
+                        singleLine = true
+                    )
+
+                    OutlinedTextField(
+                        value = shippingComment,
+                        onValueChange = { shippingComment = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text(stringResource(R.string.courier_comment)) },
+                        minLines = 2
+                    )
+
+                    IntercityEstimateCard(intercityEstimate)
                 }
             }
 
@@ -417,14 +534,47 @@ private fun DeliveryChooseContent(
                     }
                 }
 
+                if (type == DeliveryType.INTERCITY) {
+                    if (shippingAddressText.isBlank()) {
+                        localValidationError = context.getString(R.string.intercity_no_buyer_address)
+                        return@Button
+                    }
+                    if (intercityEstimate is DeliveryChooseViewModel2.IntercityEstimateState.SameCity) {
+                        localValidationError = context.getString(R.string.intercity_same_city_hint)
+                        return@Button
+                    }
+                    if (receiverName.isBlank() || receiverPhone.isBlank()) {
+                        localValidationError = context.getString(R.string.receiver_name) + " / " + context.getString(R.string.receiver_phone)
+                        return@Button
+                    }
+                }
+
                 localValidationError = null
+                val intercityDeliveryRequest = if (
+                    type == DeliveryType.INTERCITY &&
+                    intercityEstimate is DeliveryChooseViewModel2.IntercityEstimateState.Success
+                ) {
+                    buildIntercityDeliveryOrderRequest(
+                        product = product,
+                        estimateState = intercityEstimate,
+                        toAddressText = shippingAddressText.trim(),
+                        toLat = shippingLat,
+                        toLng = shippingLng,
+                        receiverName = receiverName.trim(),
+                        receiverPhone = receiverPhone.trim(),
+                        comment = shippingComment.trim().ifBlank { null }
+                    )
+                } else {
+                    null
+                }
 
                 onCreate(
                     type,
                     shippingAddressText.trim().ifBlank { null },
                     shippingLat,
                     shippingLng,
-                    shippingComment.trim().ifBlank { null }
+                    shippingComment.trim().ifBlank { null },
+                    intercityDeliveryRequest
                 )
             },
             enabled = !saving && selected != null && (
@@ -434,7 +584,13 @@ private fun DeliveryChooseContent(
                                     shippingAddressText.isNotBlank()
                             )
                     ) && (
-                    selected != DeliveryType.INTERCITY || shippingAddressText.isNotBlank()
+                    selected != DeliveryType.INTERCITY || (
+                            shippingAddressText.isNotBlank() &&
+                                    receiverName.isNotBlank() &&
+                                    receiverPhone.isNotBlank() &&
+                                    intercityEstimate !is DeliveryChooseViewModel2.IntercityEstimateState.Loading &&
+                                    intercityEstimate !is DeliveryChooseViewModel2.IntercityEstimateState.SameCity
+                            )
                     ),
             modifier = Modifier
                 .fillMaxWidth()
@@ -454,7 +610,7 @@ private fun DeliveryChooseContent(
         Spacer(Modifier.height(32.dp))
     }
 
-    if (isFullScreenMapOpen && selected == DeliveryType.MY_DELIVERY) {
+    if (isFullScreenMapOpen && (selected == DeliveryType.MY_DELIVERY || selected == DeliveryType.INTERCITY)) {
         BuyerFullScreenMapDialog(
             zoneCenter = zoneCenter,
             zoneRadiusKm = zoneRadiusKm,
@@ -474,6 +630,131 @@ private fun DeliveryChooseContent(
             }
         )
     }
+}
+
+@Composable
+private fun IntercityEstimateCard(
+    state: DeliveryChooseViewModel2.IntercityEstimateState
+) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f)
+    ) {
+        Column(
+            Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.LocalShipping, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    text = when (state) {
+                        is DeliveryChooseViewModel2.IntercityEstimateState.Success ->
+                            stringResource(R.string.intercity_via_provider, state.estimate.provider)
+                        else -> stringResource(R.string.delivery_type_intercity)
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            when (state) {
+                DeliveryChooseViewModel2.IntercityEstimateState.Idle,
+                DeliveryChooseViewModel2.IntercityEstimateState.Loading -> {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                        Spacer(Modifier.width(8.dp))
+                        Text(stringResource(R.string.intercity_calculating))
+                    }
+                }
+                DeliveryChooseViewModel2.IntercityEstimateState.MissingBuyerAddress -> {
+                    Text(stringResource(R.string.intercity_no_buyer_address))
+                }
+                DeliveryChooseViewModel2.IntercityEstimateState.MissingSellerAddress -> {
+                    Text(stringResource(R.string.intercity_no_seller_address))
+                }
+                DeliveryChooseViewModel2.IntercityEstimateState.SameCity -> {
+                    Text(stringResource(R.string.intercity_same_city_hint))
+                }
+                is DeliveryChooseViewModel2.IntercityEstimateState.Error -> {
+                    Text(
+                        stringResource(R.string.intercity_estimate_error),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                is DeliveryChooseViewModel2.IntercityEstimateState.Success -> {
+                    Text(
+                        stringResource(R.string.intercity_route, state.fromCity, state.toCity),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(stringResource(R.string.delivery_cost_value, formatDeliveryPrice(state.estimate.price, state.estimate.currency)))
+                    Text(stringResource(R.string.delivery_period_value, state.estimate.minDays, state.estimate.maxDays))
+                    Text(
+                        stringResource(
+                            R.string.delivery_estimated_receipt,
+                            formatDeliveryDateRange(
+                                state.estimate.estimatedDateFrom,
+                                state.estimate.estimatedDateTo
+                            )
+                        )
+                    )
+                    Text(
+                        stringResource(R.string.intercity_preliminary_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun buildIntercityDeliveryOrderRequest(
+    product: ProductDetailsUi,
+    estimateState: DeliveryChooseViewModel2.IntercityEstimateState.Success,
+    toAddressText: String,
+    toLat: Double?,
+    toLng: Double?,
+    receiverName: String,
+    receiverPhone: String,
+    comment: String?
+): IntercityDeliveryOrderRequest {
+    val fromAddressText = product.delivery.pickupAddress?.takeIf { it.isNotBlank() }
+        ?: product.seller.address
+    val packageInfo = product.packageInfo
+    return IntercityDeliveryOrderRequest(
+        provider = estimateState.estimate.provider,
+        price = estimateState.estimate.price,
+        currency = estimateState.estimate.currency,
+        minDays = estimateState.estimate.minDays,
+        maxDays = estimateState.estimate.maxDays,
+        estimatedDateFrom = estimateState.estimate.estimatedDateFrom,
+        estimatedDateTo = estimateState.estimate.estimatedDateTo,
+        fromAddress = DeliveryAddressRequest(
+            city = estimateState.fromCity,
+            fullAddress = fromAddressText,
+            latitude = product.delivery.pickupLat,
+            longitude = product.delivery.pickupLng
+        ),
+        toAddress = DeliveryAddressRequest(
+            city = estimateState.toCity,
+            fullAddress = toAddressText,
+            latitude = toLat,
+            longitude = toLng
+        ),
+        packageInfo = DeliveryPackageRequest(
+            weightGrams = packageInfo.weightGrams,
+            heightCm = packageInfo.heightCm,
+            widthCm = packageInfo.widthCm,
+            depthCm = packageInfo.depthCm
+        ),
+        receiverName = receiverName,
+        receiverPhone = receiverPhone,
+        receiverAddress = toAddressText,
+        comment = comment
+    )
 }
 
 @Composable
