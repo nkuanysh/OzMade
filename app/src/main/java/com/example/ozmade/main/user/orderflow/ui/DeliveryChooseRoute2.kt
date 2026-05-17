@@ -41,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ozmade.main.delivery.extractCity
 import com.example.ozmade.main.delivery.formatDeliveryDateRange
 import com.example.ozmade.main.delivery.formatDeliveryPrice
+import com.example.ozmade.main.delivery.resolveCityFromCoordinates
 import com.example.ozmade.main.orders.data.DeliveryType
 import com.example.ozmade.main.user.orderflow.data.DeliveryChooseViewModel2
 import com.example.ozmade.main.userHome.details.ProductDetailsUi
@@ -160,23 +161,24 @@ private fun DeliveryChooseContent(
     saving: Boolean,
     error: String?,
     intercityEstimate: DeliveryChooseViewModel2.IntercityEstimateState,
-    onEstimateIntercity: (String?) -> Unit,
+    onEstimateIntercity: (String?, Double?, Double?, String?) -> Unit,
     onCreate: (String, String?, Double?, Double?, String?, IntercityDeliveryOrderRequest?) -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val d = product.delivery
 
     var selected by remember { mutableStateOf<String?>(null) }
     var shippingAddressText by remember { mutableStateOf("") }
     var shippingLat by remember { mutableStateOf<Double?>(null) }
     var shippingLng by remember { mutableStateOf<Double?>(null) }
+    var shippingCity by remember { mutableStateOf<String?>(d.buyerSavedCity) }
     var shippingComment by remember { mutableStateOf("") }
     var receiverName by remember(buyerName) { mutableStateOf(buyerName) }
     var receiverPhone by remember(buyerPhone) { mutableStateOf(buyerPhone) }
     var isFullScreenMapOpen by remember { mutableStateOf(false) }
     var localValidationError by remember { mutableStateOf<String?>(null) }
     val total = product.price * quantity
-    val d = product.delivery
     LaunchedEffect(d.buyerSavedAddress, d.buyerSavedAddressLat, d.buyerSavedAddressLng, selected) {
         if (
             (selected == DeliveryType.MY_DELIVERY || selected == DeliveryType.INTERCITY) &&
@@ -190,12 +192,25 @@ private fun DeliveryChooseContent(
             shippingAddressText = d.buyerSavedAddress
             shippingLat = d.buyerSavedAddressLat
             shippingLng = d.buyerSavedAddressLng
+            shippingCity = d.buyerSavedCity
         }
     }
 
-    LaunchedEffect(selected, shippingAddressText) {
+    LaunchedEffect(selected, shippingLat, shippingLng) {
+        if (
+            selected == DeliveryType.INTERCITY &&
+            shippingLat != null &&
+            shippingLng != null
+        ) {
+            resolveCityFromCoordinates(context, shippingLat, shippingLng)?.let { resolvedCity ->
+                shippingCity = resolvedCity
+            }
+        }
+    }
+
+    LaunchedEffect(selected, shippingAddressText, shippingLat, shippingLng, shippingCity) {
         if (selected == DeliveryType.INTERCITY) {
-            onEstimateIntercity(shippingAddressText)
+            onEstimateIntercity(shippingAddressText, shippingLat, shippingLng, shippingCity)
         }
     }
     val sellerZoneAddress = d.centerAddress?.trim().orEmpty()
@@ -309,6 +324,10 @@ private fun DeliveryChooseContent(
                                 val address = reverseGeocode(context, latLng)
                                 if (address.isNotBlank()) {
                                     shippingAddressText = address
+                                    if (selected == DeliveryType.INTERCITY) {
+                                        shippingCity = resolveCityFromCoordinates(context, latLng.latitude, latLng.longitude)
+                                            ?: extractCity(address)
+                                    }
                                 }
                             }
                         }
@@ -384,6 +403,7 @@ private fun DeliveryChooseContent(
                         shippingAddressText = d.buyerSavedAddress
                         shippingLat = d.buyerSavedAddressLat
                         shippingLng = d.buyerSavedAddressLng
+                        shippingCity = d.buyerSavedCity
                     }
                 }
             )
@@ -414,7 +434,7 @@ private fun DeliveryChooseContent(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                extractCity(shippingAddressText) ?: stringResource(R.string.no_address),
+                                shippingCity ?: extractCity(shippingAddressText) ?: stringResource(R.string.no_address),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold
                             )
@@ -447,6 +467,7 @@ private fun DeliveryChooseContent(
                             shippingAddressText = it
                             shippingLat = null
                             shippingLng = null
+                            shippingCity = extractCity(it)
                         },
                         modifier = Modifier.fillMaxWidth(),
                         label = { Text(stringResource(R.string.full_address_hint)) },
@@ -539,8 +560,18 @@ private fun DeliveryChooseContent(
                         localValidationError = context.getString(R.string.intercity_no_buyer_address)
                         return@Button
                     }
-                    if (intercityEstimate is DeliveryChooseViewModel2.IntercityEstimateState.SameCity) {
-                        localValidationError = context.getString(R.string.intercity_same_city_hint)
+                    if (intercityEstimate !is DeliveryChooseViewModel2.IntercityEstimateState.Success) {
+                        localValidationError = when (intercityEstimate) {
+                            DeliveryChooseViewModel2.IntercityEstimateState.SameCity ->
+                                context.getString(R.string.intercity_same_city_hint)
+                            DeliveryChooseViewModel2.IntercityEstimateState.MissingSellerAddress ->
+                                context.getString(R.string.intercity_no_seller_address)
+                            DeliveryChooseViewModel2.IntercityEstimateState.MissingBuyerAddress ->
+                                context.getString(R.string.intercity_no_buyer_address)
+                            DeliveryChooseViewModel2.IntercityEstimateState.Loading ->
+                                context.getString(R.string.intercity_calculating)
+                            else -> context.getString(R.string.intercity_estimate_error)
+                        }
                         return@Button
                     }
                     if (receiverName.isBlank() || receiverPhone.isBlank()) {
@@ -588,8 +619,7 @@ private fun DeliveryChooseContent(
                             shippingAddressText.isNotBlank() &&
                                     receiverName.isNotBlank() &&
                                     receiverPhone.isNotBlank() &&
-                                    intercityEstimate !is DeliveryChooseViewModel2.IntercityEstimateState.Loading &&
-                                    intercityEstimate !is DeliveryChooseViewModel2.IntercityEstimateState.SameCity
+                                    intercityEstimate is DeliveryChooseViewModel2.IntercityEstimateState.Success
                             )
                     ),
             modifier = Modifier
@@ -625,6 +655,10 @@ private fun DeliveryChooseContent(
                     val address = reverseGeocode(context, latLng)
                     if (address.isNotBlank()) {
                         shippingAddressText = address
+                        if (selected == DeliveryType.INTERCITY) {
+                            shippingCity = resolveCityFromCoordinates(context, latLng.latitude, latLng.longitude)
+                                ?: extractCity(address)
+                        }
                     }
                 }
             }
@@ -721,8 +755,7 @@ private fun buildIntercityDeliveryOrderRequest(
     receiverPhone: String,
     comment: String?
 ): IntercityDeliveryOrderRequest {
-    val fromAddressText = product.delivery.pickupAddress?.takeIf { it.isNotBlank() }
-        ?: product.seller.address
+    val fromAddressText = product.delivery.pickupAddress.orEmpty()
     val packageInfo = product.packageInfo
     return IntercityDeliveryOrderRequest(
         provider = estimateState.estimate.provider,

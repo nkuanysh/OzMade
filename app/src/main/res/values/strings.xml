@@ -130,7 +130,7 @@
     <string name="available_label">Доступно</string>
     <string name="intercity_calculating">Рассчитываем срок и стоимость...</string>
     <string name="intercity_need_buyer_address">Укажите адрес при оформлении заказа, чтобы рассчитать стоимость и срок доставки.</string>
-    <string name="intercity_seller_address_missing_hint">Межгород доступен. Продавец уточнит адрес отправления.</string>
+    <string name="intercity_seller_address_missing_hint">Продавец не указал адрес отправления.</string>
     <string name="intercity_same_city_hint">Для этого города лучше выбрать самовывоз или мою доставку.</string>
     <string name="intercity_estimate_date">Доставка примерно %1$s</string>
     <string name="intercity_estimate_price_from">от %1$s</string>

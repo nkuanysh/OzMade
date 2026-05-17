@@ -11,8 +11,8 @@ fun IntercityDeliveryOrderDto?.toOrderUi(): IntercityDeliveryOrderUi? {
     val dto = this ?: return null
     return IntercityDeliveryOrderUi(
         provider = dto.provider ?: "CDEK",
-        price = dto.price ?: 0,
-        currency = dto.currency ?: "₸",
+        price = dto.price ?: 0.0,
+        currency = dto.currency?.ifBlank { "₸" } ?: "₸",
         minDays = dto.minDays ?: 0,
         maxDays = dto.maxDays ?: 0,
         estimatedDateFrom = dto.estimatedDateFrom.orEmpty(),

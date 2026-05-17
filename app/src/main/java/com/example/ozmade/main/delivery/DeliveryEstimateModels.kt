@@ -16,7 +16,7 @@ data class DeliveryPackageInfo(
 
 data class IntercityDeliveryEstimate(
     val provider: String,
-    val price: Int,
+    val price: Double,
     val minDays: Int,
     val maxDays: Int,
     val estimatedDateFrom: String,
@@ -26,12 +26,9 @@ data class IntercityDeliveryEstimate(
 
 interface DeliveryEstimateRepository {
     suspend fun estimateIntercityDelivery(
-        fromCity: String,
-        toCity: String,
-        weightGrams: Int?,
-        lengthCm: Int?,
-        widthCm: Int?,
-        heightCm: Int?
+        fromAddress: DeliveryAddress,
+        toAddress: DeliveryAddress,
+        packageInfo: DeliveryPackageInfo
     ): Result<IntercityDeliveryEstimate>
 }
 

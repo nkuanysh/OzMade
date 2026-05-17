@@ -2,7 +2,9 @@ package com.example.ozmade.main.user.orderflow.data
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ozmade.main.delivery.DeliveryAddress
 import com.example.ozmade.main.delivery.DeliveryEstimateRepository
+import com.example.ozmade.main.delivery.DeliveryPackageInfo
 import com.example.ozmade.main.delivery.IntercityDeliveryEstimate
 import com.example.ozmade.main.delivery.extractCity
 import com.example.ozmade.main.user.profile.data.ProfileRepository
@@ -73,16 +75,22 @@ class DeliveryChooseViewModel2 @Inject constructor(
         }
     }
 
-    fun estimateIntercityDelivery(toAddressText: String?) {
+    fun estimateIntercityDelivery(
+        toAddressText: String?,
+        toLat: Double?,
+        toLng: Double?,
+        toCityOverride: String?
+    ) {
         val current = _state.value as? UiState.Data ?: return
         val product = current.product
         val fromAddress = product.delivery.pickupAddress?.takeIf { it.isNotBlank() }
-            ?: product.seller.address.takeIf { it.isNotBlank() }
         val fromCity = product.delivery.sellerPickupCity ?: extractCity(fromAddress)
-        val toCity = extractCity(toAddressText) ?: product.delivery.buyerSavedCity
+        val toCity = toCityOverride?.takeIf { it.isNotBlank() }
+            ?: extractCity(toAddressText)
+            ?: product.delivery.buyerSavedCity
 
         val nextState = when {
-            fromCity.isNullOrBlank() -> IntercityEstimateState.MissingSellerAddress
+            fromCity.isNullOrBlank() || fromAddress.isNullOrBlank() -> IntercityEstimateState.MissingSellerAddress
             toCity.isNullOrBlank() || toAddressText.isNullOrBlank() -> IntercityEstimateState.MissingBuyerAddress
             fromCity.equals(toCity, ignoreCase = true) -> IntercityEstimateState.SameCity
             else -> null
@@ -93,15 +101,29 @@ class DeliveryChooseViewModel2 @Inject constructor(
             return
         }
 
+        val checkedToAddress = toAddressText.orEmpty()
+
         viewModelScope.launch {
             _state.value = current.copy(intercityEstimate = IntercityEstimateState.Loading)
             deliveryEstimateRepository.estimateIntercityDelivery(
-                fromCity = fromCity!!,
-                toCity = toCity!!,
-                weightGrams = product.packageInfo.weightGrams,
-                lengthCm = product.packageInfo.depthCm,
-                widthCm = product.packageInfo.widthCm,
-                heightCm = product.packageInfo.heightCm
+                fromAddress = DeliveryAddress(
+                    city = fromCity!!,
+                    fullAddress = fromAddress!!,
+                    latitude = product.delivery.pickupLat,
+                    longitude = product.delivery.pickupLng
+                ),
+                toAddress = DeliveryAddress(
+                    city = toCity!!,
+                    fullAddress = checkedToAddress,
+                    latitude = toLat,
+                    longitude = toLng
+                ),
+                packageInfo = DeliveryPackageInfo(
+                    weightGrams = product.packageInfo.weightGrams,
+                    heightCm = product.packageInfo.heightCm,
+                    widthCm = product.packageInfo.widthCm,
+                    depthCm = product.packageInfo.depthCm
+                )
             ).onSuccess { estimate ->
                 val cur = _state.value
                 if (cur is UiState.Data) {

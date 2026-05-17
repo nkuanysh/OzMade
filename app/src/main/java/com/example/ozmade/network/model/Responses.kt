@@ -400,7 +400,7 @@ data class OrderDto(
 
 data class IntercityDeliveryOrderDto(
     @SerializedName(value = "Provider", alternate = ["provider"]) val provider: String? = null,
-    @SerializedName(value = "Price", alternate = ["price"]) val price: Int? = null,
+    @SerializedName(value = "Price", alternate = ["price"]) val price: Double? = null,
     @SerializedName(value = "Currency", alternate = ["currency"]) val currency: String? = null,
     @SerializedName(value = "MinDays", alternate = ["minDays", "min_days"]) val minDays: Int? = null,
     @SerializedName(value = "MaxDays", alternate = ["maxDays", "max_days"]) val maxDays: Int? = null,
@@ -427,6 +427,16 @@ data class DeliveryPackageDto(
     @SerializedName(value = "HeightCm", alternate = ["heightCm", "height_cm"]) val heightCm: Int? = null,
     @SerializedName(value = "WidthCm", alternate = ["widthCm", "width_cm"]) val widthCm: Int? = null,
     @SerializedName(value = "DepthCm", alternate = ["depthCm", "depth_cm", "lengthCm", "length_cm"]) val depthCm: Int? = null
+)
+
+data class IntercityEstimateResponse(
+    @SerializedName("provider") val provider: String,
+    @SerializedName("price") val price: Double,
+    @SerializedName("currency") val currency: String,
+    @SerializedName("minDays") val minDays: Int,
+    @SerializedName("maxDays") val maxDays: Int,
+    @SerializedName("estimatedDateFrom") val estimatedDateFrom: String,
+    @SerializedName("estimatedDateTo") val estimatedDateTo: String
 )
 
 data class NotificationDto(

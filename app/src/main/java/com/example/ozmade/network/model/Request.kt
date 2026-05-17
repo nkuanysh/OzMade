@@ -80,15 +80,17 @@ data class DeliveryPackageRequest(
     @SerializedName("depthCm") val depthCm: Int
 )
 
-data class IntercityDeliveryEstimateRequest(
+data class IntercityEstimateRequest(
     @SerializedName("fromAddress") val fromAddress: DeliveryAddressRequest,
     @SerializedName("toAddress") val toAddress: DeliveryAddressRequest,
-    @SerializedName("package") val packageInfo: DeliveryPackageRequest
+    @SerializedName("package") val packageInfo: DeliveryPackageRequest,
+    @SerializedName("tariffCodes") val tariffCodes: List<Int>? = null,
+    @SerializedName("deliveryMode") val deliveryMode: String? = null
 )
 
 data class IntercityDeliveryOrderRequest(
     @SerializedName("provider") val provider: String,
-    @SerializedName("price") val price: Int,
+    @SerializedName("price") val price: Double,
     @SerializedName("currency") val currency: String,
     @SerializedName("minDays") val minDays: Int,
     @SerializedName("maxDays") val maxDays: Int,

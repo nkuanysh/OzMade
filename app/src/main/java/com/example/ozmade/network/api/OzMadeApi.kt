@@ -161,6 +161,11 @@ interface OzMadeApi {
     ): Response<List<ProductDto>>
 
     // buyer
+    @POST("delivery/intercity/estimate")
+    suspend fun estimateIntercityDelivery(
+        @Body request: IntercityEstimateRequest
+    ): Response<IntercityEstimateResponse>
+
     @POST("orders")
     suspend fun createOrder(@Body request: CreateOrderRequest): Response<OrderDto>
 

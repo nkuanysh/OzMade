@@ -38,7 +38,7 @@ data class OrderUi(
 
 data class IntercityDeliveryOrderUi(
     val provider: String,
-    val price: Int,
+    val price: Double,
     val currency: String,
     val minDays: Int,
     val maxDays: Int,

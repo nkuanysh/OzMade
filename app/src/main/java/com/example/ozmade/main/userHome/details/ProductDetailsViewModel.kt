@@ -2,7 +2,9 @@ package com.example.ozmade.main.userHome.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ozmade.main.delivery.DeliveryAddress
 import com.example.ozmade.main.delivery.DeliveryEstimateRepository
+import com.example.ozmade.main.delivery.DeliveryPackageInfo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,6 +41,8 @@ class ProductDetailsViewModel @Inject constructor(
     }
 
     private suspend fun estimateIntercityIfPossible(product: ProductDetailsUi, liked: Boolean) {
+        val fromAddressText = product.delivery.pickupAddress?.takeIf { it.isNotBlank() } ?: return
+        val toAddressText = product.delivery.buyerSavedAddress?.takeIf { it.isNotBlank() } ?: return
         val fromCity = product.delivery.sellerPickupCity?.takeIf { it.isNotBlank() } ?: return
         val toCity = product.delivery.buyerSavedCity?.takeIf { it.isNotBlank() } ?: return
         if (!product.delivery.intercityEnabled || fromCity.equals(toCity, ignoreCase = true)) return
@@ -50,12 +54,24 @@ class ProductDetailsViewModel @Inject constructor(
         )
 
         deliveryEstimateRepository.estimateIntercityDelivery(
-            fromCity = fromCity,
-            toCity = toCity,
-            weightGrams = product.packageInfo.weightGrams,
-            lengthCm = product.packageInfo.depthCm,
-            widthCm = product.packageInfo.widthCm,
-            heightCm = product.packageInfo.heightCm
+            fromAddress = DeliveryAddress(
+                city = fromCity,
+                fullAddress = fromAddressText,
+                latitude = product.delivery.pickupLat,
+                longitude = product.delivery.pickupLng
+            ),
+            toAddress = DeliveryAddress(
+                city = toCity,
+                fullAddress = toAddressText,
+                latitude = product.delivery.buyerSavedAddressLat,
+                longitude = product.delivery.buyerSavedAddressLng
+            ),
+            packageInfo = DeliveryPackageInfo(
+                weightGrams = product.packageInfo.weightGrams,
+                heightCm = product.packageInfo.heightCm,
+                widthCm = product.packageInfo.widthCm,
+                depthCm = product.packageInfo.depthCm
+            )
         ).onSuccess { estimate ->
             _uiState.value = ProductDetailsUiState.Data(
                 product = product,
@@ -82,8 +98,10 @@ class ProductDetailsViewModel @Inject constructor(
         val fromCity = product.delivery.sellerPickupCity
         val toCity = product.delivery.buyerSavedCity
         return when {
-            fromCity.isNullOrBlank() -> ProductIntercityEstimateUiState.MissingSellerAddress
-            toCity.isNullOrBlank() -> ProductIntercityEstimateUiState.MissingBuyerAddress
+            fromCity.isNullOrBlank() || product.delivery.pickupAddress.isNullOrBlank() ->
+                ProductIntercityEstimateUiState.MissingSellerAddress
+            toCity.isNullOrBlank() || product.delivery.buyerSavedAddress.isNullOrBlank() ->
+                ProductIntercityEstimateUiState.MissingBuyerAddress
             fromCity.equals(toCity, ignoreCase = true) -> ProductIntercityEstimateUiState.SameCity
             else -> ProductIntercityEstimateUiState.Loading
         }

@@ -1,5 +1,6 @@
 package com.example.ozmade.main.userHome.details
 
+import android.content.Context
 import android.util.Log
 import com.example.ozmade.main.delivery.DEFAULT_HEIGHT_CM
 import com.example.ozmade.main.delivery.DEFAULT_LENGTH_CM
@@ -7,17 +8,20 @@ import com.example.ozmade.main.delivery.DEFAULT_WIDTH_CM
 import com.example.ozmade.main.delivery.extractCity
 import com.example.ozmade.main.delivery.parseDimensionCm
 import com.example.ozmade.main.delivery.parseWeightGrams
+import com.example.ozmade.main.delivery.resolveCityFromCoordinates
 import com.example.ozmade.main.user.favorites.FavoriteProductUi
 import com.example.ozmade.main.user.profile.data.ProfileRepository
 import com.example.ozmade.network.api.OzMadeApi
 import com.example.ozmade.utils.ImageUtils
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class RealProductRepository @Inject constructor(
     private val api: OzMadeApi,
-    private val profileRepo: ProfileRepository
+    private val profileRepo: ProfileRepository,
+    @ApplicationContext private val context: Context
 ) : ProductRepository {
 
     private val TAG = "RealProductRepository"
@@ -51,6 +55,10 @@ class RealProductRepository @Inject constructor(
         val profile = profileRepo.getMyProfile()
         val buyerLat = profile.addressLat
         val buyerLng = profile.addressLng
+        val buyerCity = extractCity(profile.address)
+            ?: resolveCityFromCoordinates(context, buyerLat, buyerLng)
+        val sellerPickupCity = extractCity(dto.delivery?.pickupAddress)
+            ?: resolveCityFromCoordinates(context, dto.delivery?.pickupLat, dto.delivery?.pickupLng)
         val productPackage = ProductPackageUi(
             weightGrams = parseWeightGrams(dto.weight),
             heightCm = parseDimensionCm(dto.heightCm, DEFAULT_HEIGHT_CM),
@@ -115,8 +123,8 @@ class RealProductRepository @Inject constructor(
                 buyerSavedAddress = profile.address,
                 buyerSavedAddressLat = buyerLat,
                 buyerSavedAddressLng = buyerLng,
-                buyerSavedCity = extractCity(profile.address),
-                sellerPickupCity = extractCity(dto.delivery?.pickupAddress ?: dto.seller?.address ?: dto.address),
+                buyerSavedCity = buyerCity,
+                sellerPickupCity = sellerPickupCity,
                 isBuyerInsideDeliveryZone = isInsideDeliveryZone(
                     buyerLat = buyerLat,
                     buyerLng = buyerLng,

@@ -11,16 +11,13 @@ import javax.inject.Singleton
 class MockDeliveryEstimateRepository @Inject constructor() : DeliveryEstimateRepository {
 
     override suspend fun estimateIntercityDelivery(
-        fromCity: String,
-        toCity: String,
-        weightGrams: Int?,
-        lengthCm: Int?,
-        widthCm: Int?,
-        heightCm: Int?
+        fromAddress: DeliveryAddress,
+        toAddress: DeliveryAddress,
+        packageInfo: DeliveryPackageInfo
     ): Result<IntercityDeliveryEstimate> = withContext(Dispatchers.Default) {
         runCatching {
-            val normalizedFrom = fromCity.normalizeCity()
-            val normalizedTo = toCity.normalizeCity()
+            val normalizedFrom = fromAddress.city.normalizeCity()
+            val normalizedTo = toAddress.city.normalizeCity()
 
             require(normalizedFrom.isNotBlank()) { "Укажите город отправления" }
             require(normalizedTo.isNotBlank()) { "Укажите город получения" }
@@ -38,10 +35,10 @@ class MockDeliveryEstimateRepository @Inject constructor() : DeliveryEstimateRep
                 else -> Triple(4250, 3, 6)
             }
 
-            val safeWeight = weightGrams ?: DEFAULT_WEIGHT_GRAMS
-            val safeLength = lengthCm ?: DEFAULT_LENGTH_CM
-            val safeWidth = widthCm ?: DEFAULT_WIDTH_CM
-            val safeHeight = heightCm ?: DEFAULT_HEIGHT_CM
+            val safeWeight = packageInfo.weightGrams
+            val safeLength = packageInfo.depthCm
+            val safeWidth = packageInfo.widthCm
+            val safeHeight = packageInfo.heightCm
             val volumeWeight = (safeLength * safeWidth * safeHeight) / 5000.0
             val realWeight = safeWeight / 1000.0
             val packageMultiplier = maxOf(realWeight, volumeWeight).coerceAtLeast(1.0)
@@ -50,7 +47,7 @@ class MockDeliveryEstimateRepository @Inject constructor() : DeliveryEstimateRep
             val today = LocalDate.now()
             IntercityDeliveryEstimate(
                 provider = "CDEK",
-                price = basePrice + packageSurcharge,
+                price = (basePrice + packageSurcharge).toDouble(),
                 minDays = minDays,
                 maxDays = maxDays,
                 estimatedDateFrom = today.plusDays(minDays.toLong()).toString(),
